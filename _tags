@@ -1,0 +1,2 @@
+# Instruct ocamlbuild to ignore these files when it's building
+"printbig.o": not_hygienic
