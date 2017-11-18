@@ -29,6 +29,7 @@ let translate (globals, functions) =
       A.Int -> i32_t
     | A.Float -> i32_t
     | A.Bool -> i1_t
+    | A.Float -> i32_t
     | A.Void -> void_t in
 
 
