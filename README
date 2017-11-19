@@ -1,3 +1,41 @@
+Genesis: An Pain-Free Game Development Language
+COMS 4115: Programming Languages and Translators
+Columbia University Fall 2017
+
+Sam Cohen      ( slc2206 )
+Jason Zhao     ( jsz2107 )
+Leon Stilwell  ( ls3223  )
+Michael Wang   ( mlw2167 )
+Saahil Jain    ( sj2675  )
+
+
+------------------------------
+Usage Notes
+
+Dependencies
+ - SDL: graphics library, available at:
+
+Building
+ - Type "make"
+
+Sanity Tests
+ - Type "make rtest" to run MicroC-specific tests
+ - Type "make test" to run Genesis-specific tests
+ - Type "make testall" to run all available tests
+
+Usage
+ - Please refer to our Language reference manual for documentation, 
+   available here:
+
+     http://www.cs.columbia.edu/~sedwards/classes/2017/4115-fall/lrms/Genesis.pdf
+
+ - All other files can be found on the course class page, available
+   here:
+
+     http://www.cs.columbia.edu/~sedwards/classes/2016/4115-fall/index.html
+
+
+------------------------------
 The MicroC compiler
 
 Coded in OCaml, this takes a highly stripped-down subset of C (ints,
