@@ -62,9 +62,14 @@ let translate (globals, functions) =
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
     List.fold_left function_decl StringMap.empty functions in
 
-  (* Cast to float *)
-  let make_float var = 
-    if L.type_of var = flt_t then var else (L.const_sitofp var flt_t) in
+  (* Cast int to float *)
+  let make_float var builder = 
+    if L.type_of var = flt_t then var else (L.build_sitofp var flt_t "tmp" builder) in
+
+  (* Cast float to int, don't modify bools *)
+  let make_int var builder =
+    if L.type_of var = i32_t || L.type_of var = i1_t then var 
+    else (L.build_fptosi var i32_t "tmp" builder) in
   
   (* Fill in the body of the given function *)
   let build_function_body fdecl =
@@ -134,7 +139,7 @@ let translate (globals, functions) =
         | A.Greater -> L.build_fcmp L.Fcmp.Ogt
         | A.Geq     -> L.build_fcmp L.Fcmp.Oge
         | _         -> raise (Failure ("incompatible operator-operand for number")) (* Should never be reached *)
-      ) (make_float e1') (make_float e2') "tmp" builder
+      ) (make_float e1' builder) (make_float e2' builder) "tmp" builder
     else 
       (match op with
           A.And     -> L.build_and
@@ -148,13 +153,21 @@ let translate (globals, functions) =
     (match op with
         A.Neg     -> L.build_neg
       | A.Not     -> L.build_not) e' "tmp" builder
+
       | A.Assign (s, e) -> let e' = expr builder e in
-          ignore (L.build_store e' (lookup s) builder); e'
+        if L.type_of (lookup s) = (L.pointer_type i32_t) then
+          ignore (L.build_store (make_int e' builder) (lookup s) builder) (* Handle float to int downcast *)
+        else if L.type_of (lookup s) = (L.pointer_type flt_t) then
+          ignore (L.build_store (make_float e' builder) (lookup s) builder) (* Handle int to float upcast *)
+        else
+          ignore (L.build_store e' (lookup s) builder) (* Normal assignment for everything else *)
+        ; e' (* Fixes bug in test-func2 *)
+
       | A.Call ("printfl", [e]) -> 
-          L.build_call printf_func [| float_format_str ; (expr builder e) |]
+          L.build_call printf_func [| float_format_str ; make_float (expr builder e) builder |]
           "printf" builder 
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
-          L.build_call printf_func [| int_format_str ; (expr builder e) |]
+          L.build_call printf_func [| int_format_str ; make_int (expr builder e) builder |]
           "printf" builder
       | A.Call ("printbig", [e]) ->
           L.build_call printbig_func [| (expr builder e) |] "printbig" builder
