@@ -17,6 +17,7 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
+
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "MicroC"
@@ -25,13 +26,16 @@ let translate (globals, functions) =
   and i1_t   = L.i1_type   context
   and flt_t =  L.double_type context
   and void_t = L.void_type context in
+  let color_t = L.named_struct type context "color" in
+  L.struct_set_body color_t [|i32_t;i32_t;i32_t|] false; (*need to change here if source file changes*)
 
   let ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
     | A.Bool -> i1_t
-    | A.Void -> void_t in
-
+    | A.Void -> void_t 
+    | A.Color -> color_t
+  in
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
