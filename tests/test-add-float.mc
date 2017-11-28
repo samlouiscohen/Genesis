@@ -6,8 +6,8 @@ int main()
 
   a = 5.1;
   b = 4.7;
-  /* c = a + b; */
+  c = a + b;
 
-  print(1);
+  printfl(c);
   return 0;
 }

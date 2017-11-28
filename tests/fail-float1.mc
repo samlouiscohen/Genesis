@@ -4,7 +4,7 @@ int main()
   float b;
   float c;
 
-  a = 5;
+  a = true;
   
   return 0;
 }

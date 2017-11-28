@@ -1,1 +1,1 @@
-Fatal error: exception Failure("illegal assignment float = int in a = 5")
+Fatal error: exception Failure("illegal assignment float = bool in a = true")
