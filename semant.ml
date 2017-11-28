@@ -20,6 +20,8 @@ let check (globals, functions) =
     in helper (List.sort compare list)
   in
 
+  let isNum varType = if (varType = Int || varType = Float) then true else false in 
+
   (* Raise an exception if a given binding is to a void type *)
   let check_not_void exceptf = function
       (Void, n) -> raise (Failure (exceptf n))
@@ -27,10 +29,16 @@ let check (globals, functions) =
   in
   
   (* Raise an exception of the given rvalue type cannot be assigned to
-     the given lvalue type *)
-  let check_assign lvaluet rvaluet err =
-     if lvaluet == rvaluet then lvaluet else raise err
+     the given lvalue type. (int can be assigned to float and vice versa) *)
+  let check_assign lValueType rValueType err =
+    if (isNum(lValueType) && isNum(rValueType)) then lValueType
+    else if lValueType == rValueType then lValueType else raise err
   in
+
+  (*   let check_assign lvaluet rvaluet err =
+     if lvaluet == rvaluet then lvaluet else raise err
+  in *)
+
    
   (**** Checking Global Variables ****)
 
