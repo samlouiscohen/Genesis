@@ -5,7 +5,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Float | Bool | Void
+type typ = Int | Float | Bool | Void | Color
 
 type bind = typ * string
 
@@ -90,6 +90,7 @@ let string_of_typ = function
   | Bool -> "bool"
   | Void -> "void"
   | Float -> "float"
+  | Color -> "color"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
