@@ -25,9 +25,9 @@ let translate (globals, functions) =
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
   and flt_t =  L.double_type context
-  and void_t = L.void_type context in
-  let color_t = L.named_struct type context "color" in
-  L.struct_set_body color_t [|i32_t;i32_t;i32_t|] false; (*need to change here if source file changes*)
+  and void_t = L.void_type context
+  and color_t = L.named_struct_type context "color" in
+    L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
 
   let ltype_of_typ = function
       A.Int -> i32_t
@@ -121,7 +121,7 @@ let translate (globals, functions) =
         | A.Greater -> L.build_icmp L.Icmp.Sgt
         | A.Geq     -> L.build_icmp L.Icmp.Sge
       ) e1' e2' "tmp" builder
-    else
+    else if (L.type_of e1' = flt_t || L.type_of e2' = flt_t) then
       (match op with
           A.Add     -> L.build_fadd
         | A.Sub     -> L.build_fsub
@@ -133,8 +133,14 @@ let translate (globals, functions) =
         | A.Leq     -> L.build_fcmp L.Fcmp.Ole
         | A.Greater -> L.build_fcmp L.Fcmp.Ogt
         | A.Geq     -> L.build_fcmp L.Fcmp.Oge
-        | _         -> raise (Failure ("incompatible operator-operand"))
+        | _         -> raise (Failure ("incompatible operator-operand for number")) (* Should never be reached *)
       ) (make_float e1') (make_float e2') "tmp" builder
+    else 
+      (match op with
+          A.And     -> L.build_and
+        | A.Or      -> L.build_or
+        | _         -> raise (Failure ("incompatible operator-operand")) (* Should never be reached *)
+      ) e1' e2' "tmp" builder
 
     | A.Unop(op, e) ->
     let e' = expr builder e in

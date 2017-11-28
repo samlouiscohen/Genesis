@@ -48,7 +48,7 @@ parser.ml parser.mli : parser.mly
 printbig : printbig.c
 	cc -o printbig -DBUILD_TEST printbig.c
 
-testall: rtest test
+tests: rtest test
 
 rtest: all
 	@echo "Running regression tests..."
