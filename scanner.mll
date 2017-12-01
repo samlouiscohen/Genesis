@@ -32,6 +32,7 @@ rule token = parse
 | "return" { RETURN }
 | "int"    { INT }
 | "float"  { FLOAT }
+| "string" { STRING }
 | "bool"   { BOOL }
 | "void"   { VOID }
 | "true"   { TRUE }
@@ -39,6 +40,7 @@ rule token = parse
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['0'-'9']+'.'['0'-'9']+ as lxm { FLOATLIT(float_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
+| '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRINGLIT(strlit) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
