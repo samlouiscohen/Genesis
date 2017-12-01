@@ -1,3 +1,5 @@
+/* Ocamlyacc parser for Genesis */
+
 %{
 open Ast
 %}
@@ -5,10 +7,11 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
 %token <int> LITERAL
 %token <string> ID
-%token <float> FLOATLIT 
+%token <float> FLOATLIT
+%token <string> STRINGLIT
 %token EOF
 
 %nonassoc NOELSE
@@ -56,6 +59,7 @@ typ:
   | FLOAT { Float }
   | BOOL { Bool }
   | VOID { Void }
+  | STRING { String }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -85,6 +89,7 @@ expr_opt:
 
 expr:
     LITERAL          { Literal($1) }
+  | STRINGLIT        { StringLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }
