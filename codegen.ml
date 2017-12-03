@@ -52,6 +52,13 @@ let translate (globals, functions) =
   let printbig_t = L.function_type i32_t [| i32_t |] in
   let printbig_func = L.declare_function "printbig" printbig_t the_module in
 
+  (* Declare function for making a new board *)
+(*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
+  let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
+
+  let initScreenT_t = L.function_type i32_t [| i32_t |] in
+  let initScreenT_func = L.declare_function "initScreenT" initScreenT_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -171,6 +178,9 @@ let translate (globals, functions) =
           "printf" builder
       | A.Call ("printbig", [e]) ->
           L.build_call printbig_func [| (expr builder e) |] "printbig" builder
+(*           for testing*)
+      | A.Call ("initScreenT", [e]) ->
+          L.build_call initScreenT_func [| (expr builder e) |] "initScreenT" builder
       | A.Call (f, act) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
           let actuals = List.rev (List.map (expr builder) (List.rev act)) in
