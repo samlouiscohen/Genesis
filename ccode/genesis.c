@@ -19,7 +19,7 @@ int backgroundB = 0xFF;
 
 int initScreen(int width, int height, color c);
 void clearScreen();
-void close();
+void static close();
 void showDisplay();
 int initScreenT(int x);
 
@@ -91,7 +91,7 @@ void showDisplay(){
 }
 
 //Must be called when program finishes
-void close(){
+void static close(){
     SDL_DestroyRenderer(gRenderer);
     SDL_DestroyWindow(gWindow);
     gWindow = NULL;
