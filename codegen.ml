@@ -16,6 +16,7 @@ module L = Llvm
 module A = Ast
 
 module StringMap = Map.Make(String)
+module String = String
 
 
 let translate (globals, functions) =
@@ -25,6 +26,7 @@ let translate (globals, functions) =
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
   and flt_t =  L.double_type context
+  and pointer_t = L.pointer_type
   and void_t = L.void_type context
   and color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
@@ -32,6 +34,7 @@ let translate (globals, functions) =
   let ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
+    | A.String -> pointer_t i8_t
     | A.Bool -> i1_t
     | A.Void -> void_t 
     | A.Color -> color_t
@@ -85,6 +88,7 @@ let translate (globals, functions) =
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
     let float_format_str = L.build_global_stringptr "%lf\n" "fmt" builder in
+    let string_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
     
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
@@ -111,6 +115,7 @@ let translate (globals, functions) =
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
         A.Literal i -> L.const_int i32_t i
+      | A.StringLit s -> L.build_global_stringptr s "tmp" builder
       | A.FloatLit fl -> L.const_float flt_t fl
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
@@ -178,9 +183,11 @@ let translate (globals, functions) =
           "printf" builder
       | A.Call ("printbig", [e]) ->
           L.build_call printbig_func [| (expr builder e) |] "printbig" builder
-(*           for testing*)
+(* external function -- for testing *)
       | A.Call ("initScreenT", [e]) ->
           L.build_call initScreenT_func [| (expr builder e) |] "initScreenT" builder
+      | A.Call ("prints", [e]) ->
+          L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
       | A.Call (f, act) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
           let actuals = List.rev (List.map (expr builder) (List.rev act)) in
