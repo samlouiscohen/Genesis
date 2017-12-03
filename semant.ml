@@ -75,7 +75,7 @@ let check (globals, functions) =
      { typ = Void; fname = "prints"; formals = [(String, "x")];
        locals = []; body = [] }
 
-       (StringMap.add "printbig"
+       (StringMap.singleton "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
        locals = []; body = [] })))))
    in
