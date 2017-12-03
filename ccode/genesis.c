@@ -111,7 +111,8 @@ int initScreenT(int x){
         drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
         showDisplay();
         //wait 4 seconds
-        for(int i = 0; i < 4000; i++){
+		int i;
+        for(i = 0; i < 4000; i++){
             SDL_PumpEvents();
             SDL_Delay(1);
         }
