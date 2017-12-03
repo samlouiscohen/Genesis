@@ -18,6 +18,8 @@ typedef struct position {
 
 }*/
 
+void initScreen(int width, int height, color c);
+
 typedef struct board {
 	const char* name;
 	color color;
