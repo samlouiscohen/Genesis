@@ -98,7 +98,7 @@ Check() {
     if [[ `uname -s` = "Darwin" ]]; then
         Run "$CC" "-o" "${basename}.exe" "${basename}.s" "printbig.o" "ccode/genesis.o" "-I /Library/Frameworks/SDL2.framework/Headers -framework SDL2"
     else
-        Run "$CC" "-o" "${basename}.exe" "${basename}.s" "printbig.o" "ccode/genesis.o" "-I SDL2-2.0.7/include/ -L SDL2-2.0.7/build -l SDL2-2.0"
+        Run "clang" "-o" "${basename}.exe" "${basename}.s" "printbig.o" "ccode/genesis.o" "-I SDL2-2.0.7/include/ -L SDL2-2.0.7/build -l SDL2-2.0"
     fi &&
 
     Run "./${basename}.exe" > "${basename}.out" &&
