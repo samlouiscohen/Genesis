@@ -49,7 +49,7 @@ printbig : printbig.c
 	cc -o printbig -DBUILD_TEST printbig.c
 
 genesis.o: ccode/genesis.c
-	cc -c -o ccode/genesis.o $<
+	cc -c -o ccode/genesis.o $< -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
 
 tests: rtest test vtest
 
