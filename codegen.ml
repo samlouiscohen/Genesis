@@ -21,7 +21,7 @@ module String = String
 
 let translate (globals, functions) =
   let context = L.global_context () in
-  let the_module = L.create_module context "MicroC"
+  let the_module = L.create_module context "Genesis"
   and i32_t  = L.i32_type  context
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
@@ -33,7 +33,7 @@ let translate (globals, functions) =
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
 
   (*Go from a type in MicroC to a type in LLVM*)
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
     | A.String -> pointer_t i8_t
@@ -45,31 +45,34 @@ let translate (globals, functions) =
   in
 
   (* Method to build an array *)
-  let rec build_repeating_array the_array the_llvm_value repeat_count =
+  let rec build_uniform_array the_array the_llvm_value repeat_count =
     (match repeat_count with
-      0 -> the_array
-      |_ -> build_repeating_array (the_llvm_value::the_array) the_llvm_value (repeat_count-1))
+      0 -> the_array (*base case*)
+      |_ -> build_uniform_array (the_llvm_value::the_array) the_llvm_value (repeat_count-1))
     in
 
   (* Declare each global variable; remember its value in a map *)
-  let global_vars =
+(*   let global_vars =
     let global_var m (t, n) =
       let init = L.const_int (ltype_of_typ t) 0
       in StringMap.add n (L.define_global n init the_module) m in
     List.fold_left global_var StringMap.empty globals in
-  
+   *)
   (* Declare each global variable; remember its value in a map *)
   (* Define the starting values of global vars and init them to this, also store vars in the map *)
-  let global_variables (var_typ, name) =
+  let global_variables map (var_typ, name) =
     let global_value = (match var_typ with 
       A.int -> L.define_global name (L.const_int (ltype_of_typ A.int) 0) the_module
     | A.Bool -> L.define_global name (L.const_int (ltype_of_typ A.Bool) 0) the_module
     | A.Float -> 
-    | A.ArrayType(typ, size) -> 
-
-
-    ) 
-
+    | A.ArrayType(typ, size) -> (* array starts full of nulls *)
+      let element_val = L.const_null (ltype_of_typ typ) in
+      let init = L.const_array (ltype_of_typ typ) 
+      (Array.of_list (build_uniform_array [] element_val size)) in 
+      StringMap.add name (L.define_global name init the_module) map in
+    List.fold_left global_var StringMap.empty globals in
+ 
+(*Why not use Hashtbl?*)
 
 
   (* Declare printf(), which the print built-in function will call *)
@@ -111,12 +114,21 @@ let translate (globals, functions) =
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
-    let local_vars =
+(*     let local_vars =
       let add_formal m (t, n) p = L.set_value_name n p;
   let local = L.build_alloca (ltype_of_typ t) n builder in
   ignore (L.build_store p local builder);
-  StringMap.add n local m in
+  StringMap.add n local m in *)
+    let local_vars =
+      let add_formal m (t, n) p = L.set_value_name n p;
+        match t with
+            A.ArrayType(_,_) -> StringMap.add local_vars n p
+          | _ -> let local = L.build_alloca (ltype_of_typ t) n builder in
+          ignore (L.build_store p local builder);
+          StringMap.add n local m
+      in
 
+      (*DIDNT add strings here*)
       let add_local m (t, n) =
   let local_var = L.build_alloca (ltype_of_typ t) n builder
   in StringMap.add n local_var m in

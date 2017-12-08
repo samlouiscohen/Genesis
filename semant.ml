@@ -106,7 +106,11 @@ let check (globals, functions) =
     in
 
     let type_of_identifier s =
-      try StringMap.find s symbols
+      try let id_typ = StringMap.find s symbols in 
+          (match id_typ with
+            ArrayType(t,_) -> t
+            | _ -> id_typ
+          )
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
@@ -117,6 +121,13 @@ let check (globals, functions) =
       | StringLit _ -> String
       | BoolLit _ -> Bool
       | Id s -> type_of_identifier s
+      | ArrayAssign(_, _, e3) -> expr e3
+      | Array
+      | Access(s, _) -> type_of_identifier s
+      | ArrayLit(e) -> expr (List.hd e)
+
+
+
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
     (match op with
         Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int

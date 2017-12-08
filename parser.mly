@@ -60,6 +60,16 @@ typ:
   | BOOL { Bool }
   | VOID { Void }
   | STRING { String }
+  | COLOR { Color }
+  | ID { String }  
+
+
+array_type:
+    typ LBRACE LITERAL RBRACE { ArrayType($1,$3) }  /* int[4] BEFORE HAD %prec NOLARRAY!!??*/
+
+arr_lit:
+  expr   {[$1]} 
+  | arr_lit COMMA expr {$3::$1}
 
 vdecl_list:
     /* nothing */    { [] }
@@ -111,6 +121,20 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+  | ID LBRACE expr RBRACE ASSIGN expr { ArrayAssign($1, $3, $6) }
+  | ID LBRACE expr RBRACE {ArrayAccess($1,$3)} /*%prec NOLARRAY was used in here before???*/
+  | LBRACE arr_lit RBRACE {ArrayLit(List.rev $2)} /*Why reverse??*/
+
+
+sequence:
+    LBRACE sequence COMMA expr RBRACE   { (fst $2, $4 :: (snd $2)) }
+  | LBRACE primitive COMMA expr RBRACE  { ($2, [$4]) }
+  | LBRACE obj_typ COMMA expr RBRACE    { ($2, [$4]) }
+
+sequence_access:
+    LBRACE expr RBRACE  { $2 }
+
+
 
 actuals_opt:
     /* nothing */ { [] }

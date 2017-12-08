@@ -1,12 +1,16 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
-type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or
-
+type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq | And | Or
 type uop = Neg | Not
 
-type typ = Int | Float | String | Bool | Void | Color
-
+type typ = 
+          Int
+        | Float
+        | Bool 
+        | Void 
+        | Color 
+        | Cluster of String
+        | Arraytype of typ
 type bind = typ * string
 
 type expr =
@@ -19,6 +23,9 @@ type expr =
   | Unop of uop * expr
   | Assign of string * expr
   | Call of string * expr list
+  | ArrayLit of expr list
+  | ArrayAssign of string * expr * expr
+  | ArrayAccess of string * expr
   | Noexpr
 
 type stmt =
@@ -37,7 +44,9 @@ type func_decl = {
     body : stmt list;
   }
 
-type program = bind list * func_decl list
+type program = bind list * func_decl list (*Redefine this, and like classes*)
+
+(* Scolkam and another language *)
 
 (* Pretty-printing functions *)
 
@@ -72,6 +81,11 @@ let rec string_of_expr = function
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | ArrayAccess(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
+  | ArrayLiteral(e) -> 
+      "ArrayLiteral[" ^ String.concat "," (List.map string_of_expr e) ^ "]"
+  | ArrayAssign(s, e1, e2) -> 
+      s ^ "[" ^string_of_expr e1 ^"] ="^ string_of_expr e2 
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -87,13 +101,15 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_typ = function
+let rec string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
   | String -> "string"
   | Void -> "void"
   | Float -> "float"
   | Color -> "color"
+  | ArrayType(typ, e) -> string_of_typ typ ^ "[" ^ string_of_int e ^ "]"
+
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
