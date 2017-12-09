@@ -122,25 +122,25 @@ int initScreenT(int x){
     return 0;
 }
 
-// #ifdef BUILD_TEST
-// int main(int argc, char* args[]){
+#ifdef BUILD_TEST
+int main(int argc, char* args[]){
 
-//     struct color col;
-//     col.r = 0xFF;
-//     col.g = 0xFF;
-//     col.b = 0xFF;
-//     //Make new screen
-//     if (initScreen(640, 480, col)){
-//         drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
-//         showDisplay();
-//         //wait 4 seconds
-//         for(int i = 0; i < 4000; i++){
-//             SDL_PumpEvents();
-//             SDL_Delay(1);
-//         }
-//         close();
-//     }
+    struct color col;
+    col.r = 0xFF;
+    col.g = 0xFF;
+    col.b = 0xFF;
+    //Make new screen
+    if (initScreen(640, 480, col)){
+        drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
+        showDisplay();
+        //wait 4 seconds
+        for(int i = 0; i < 4000; i++){
+            SDL_PumpEvents();
+            SDL_Delay(1);
+        }
+        close();
+    }
 
-//     return 0;
-// }
-// #endif
+    return 0;
+}
+#endif
