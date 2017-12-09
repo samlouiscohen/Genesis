@@ -31,13 +31,17 @@ let translate (globals, functions) =
   and color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
 
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
     | A.String -> pointer_t i8_t
     | A.Bool -> i1_t
     | A.Void -> void_t 
     | A.Color -> color_t
+    | A.Array(t) -> L.pointer_type (ltype_of_typ t)
+(*     | _ -> raise(Failure ("invalid left-hand type\n")
+ *)
+
   in
 
   (* Declare each global variable; remember its value in a map *)
@@ -120,6 +124,7 @@ let translate (globals, functions) =
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+      | A.ArrayInit(typ, length) -> init_array typ length 
       | A.Binop (e1, op, e2) ->
     let e1' = expr builder e1
     and e2' = expr builder e2 in
