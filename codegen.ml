@@ -22,6 +22,7 @@ module String = String
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "MicroC" in
+    ignore(L.set_data_layout "e-m:o-i64:64-f80:128-n8:16:32:64-S128" the_module); (* sets data layout to match machine *)
   let i64_t = L.i64_type context in
   let i32_t  = L.i32_type  context in
   let i8_t   = L.i8_type   context in
@@ -122,26 +123,33 @@ let translate (globals, functions) =
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.ColorLit (r, g, b) -> 
         let ctmp = L.build_alloca color_t "color_tmp" builder in
+(*           ignore(L.set_alignment 4 ctmp); *)
         let cptr = L.build_alloca (L.pointer_type color_t) "clr_ptr" builder in
-
+(*           ignore(L.set_alignment 8 cptr); *)
         let e1 = expr builder r 
         and e2 = expr builder g 
         and e3 = expr builder b in
 
-(*         let rtmp = L.build_struct_gep ctmp 0 "r" builder in 
+        let rtmp = L.build_struct_gep ctmp 0 "r" builder in 
           ignore (L.build_store e1 rtmp builder);
         let gtmp = L.build_struct_gep ctmp 1 "g" builder in 
           ignore (L.build_store e2 gtmp builder);
         let btmp = L.build_struct_gep ctmp 2 "b" builder in 
-          ignore (L.build_store e3 btmp builder); *)
-        let rtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0 ; L.const_int i32_t 0|] "r" builder in
-          ignore (L.build_store e1 rtmp builder);
+          ignore (L.build_store e3 btmp builder);
+(*         let rtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0 ; L.const_int i32_t 0|] "r" builder in
+        let rstr = L.build_store e1 rtmp builder in
+(*           ignore(L.set_alignment 4 rstr); *)
         let gtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 1|] "g" builder in
-          ignore (L.build_store e2 rtmp builder);  
+        let gstr = L.build_store e2 rtmp builder in 
+(*           ignore(L.set_alignment 4 gstr); *)
         let btmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 2|] "b" builder in
-          ignore (L.build_store e3 rtmp builder);
-        let _ = L.build_store ctmp cptr builder in
-        L.build_load cptr "" builder
+        let  bstr = L.build_store e3 rtmp builder in
+(*           ignore(L.set_alignment 4 bstr); *) *)
+        let colstr = L.build_store ctmp cptr builder in
+(*           ignore(L.set_alignment 8 colstr); *)
+        let colld = L.build_load cptr "" builder in
+(*           ignore(L.set_alignment 8 colld); *)
+        colld
 
 
       | A.Noexpr -> L.const_int i32_t 0
@@ -214,7 +222,8 @@ let translate (globals, functions) =
           let width = expr builder w 
           and height = expr builder h
           and color = expr builder c in
-(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
+(*             ignore(L.set_alignment 8 color);
+ *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
           ignore(L.build_store color clr_ptr builder) ; *)
           L.build_call initScreen_func [| color; width; height |] "initScreen" builder
       | A.Call ("prints", [e]) ->

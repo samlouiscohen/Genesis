@@ -8,7 +8,9 @@ _main:                                  ## @main
 	subq	$40, %rsp
 Lcfi0:
 	.cfi_def_cfa_offset 48
-	movl	$255, 8(%rsp)
+	movabsq	$1095216660735, %rax    ## imm = 0xFF000000FF
+	movq	%rax, 8(%rsp)
+	movl	$255, 16(%rsp)
 	leaq	8(%rsp), %rdi
 	movq	%rdi, 24(%rsp)
 	movq	%rdi, 32(%rsp)

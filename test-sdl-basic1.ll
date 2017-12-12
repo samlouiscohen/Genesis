@@ -1,4 +1,5 @@
 ; ModuleID = 'MicroC'
+target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 
 %color = type { i32, i32, i32 }
 
@@ -20,9 +21,9 @@ entry:
   %r = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 0
   store i32 255, i32* %r
   %g = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 1
-  store i32 255, i32* %r
+  store i32 255, i32* %g
   %b = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 2
-  store i32 255, i32* %r
+  store i32 255, i32* %b
   store %color* %color_tmp, %color** %clr_ptr
   %0 = load %color*, %color** %clr_ptr
   store %color* %0, %color** %c
