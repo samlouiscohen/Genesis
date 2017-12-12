@@ -1,5 +1,7 @@
 #include <SDL2/SDL.h>
 
+extern void update();
+
 typedef struct color {
     int r;
     int g;
@@ -17,14 +19,14 @@ int backgroundR = 0xFF;
 int backgroundG = 0xFF;
 int backgroundB = 0xFF;
 
-int initScreen(int width, int height, color c);
+int initScreen(struct color *c, int width, int height);
 void clearScreen();
 void static close();
 void showDisplay();
 int initScreenT(int x);
 
 //Create screen
-int initScreen(int width, int height, color c){
+int initScreen(struct color *c, int width, int height){
     //Initialization flag
     int success = 1;
 
@@ -61,11 +63,21 @@ int initScreen(int width, int height, color c){
             else
             {
                 //Set background color
-                backgroundR = c.r;
-                backgroundG = c.g;
-                backgroundB = c.b;
+                backgroundR = c->r;
+                backgroundG = c->g;
+                backgroundB = c->b;
+
+                printf("init background: %i, %i, %i",backgroundR, backgroundG, backgroundB);
+
                 //Clear background
                 clearScreen();
+                showDisplay();
+
+                for(int i = 0; i < 4000; i++){
+                    SDL_PumpEvents();
+                    SDL_Delay(1);
+                }
+                close();
                 //SDL_RenderPresent(gRenderer);
             }
         }
@@ -101,26 +113,16 @@ void static close(){
 }
 
 /* Exported function (visible in Genesis) */
-int initScreenT(int x){
-    struct color col;
-    col.r = 0xFF;
-    col.g = 0xFF;
-    col.b = 0xFF;
-    //Make new screen
-    if (initScreen(640, 480, col)){
-        drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
-        showDisplay();
-        //wait 4 seconds
-		int i;
-        for(i = 0; i < 4000; i++){
-            SDL_PumpEvents();
-            SDL_Delay(1);
-        }
-        close();
-    }
+// int initScreenT(int x){
+//     struct color col;
+//     col.r = 0xFF;
+//     col.g = 0xFF;
+//     col.b = 0xFF;
+//     //Make new screen
 
-    return 0;
-}
+//     struct color *colptr = &col;
+//     initScreen(640, 480, colptr);
+// }
 
 // #ifdef BUILD_TEST
 // int main(int argc, char* args[]){
@@ -130,7 +132,7 @@ int initScreenT(int x){
 //     col.g = 0xFF;
 //     col.b = 0xFF;
 //     //Make new screen
-//     if (initScreen(640, 480, col)){
+//     if (initScreen(640, 480, &col)){
 //         drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
 //         showDisplay();
 //         //wait 4 seconds

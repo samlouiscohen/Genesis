@@ -5,17 +5,18 @@
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"     { comment lexbuf }           (* Comments *)
+| '$'	   { DOLLAR }
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
 | ';'      { SEMI }
-| ','      { COMMA }
 | '+'      { PLUS }
 | '-'      { MINUS }
 | '*'      { TIMES }
 | '/'      { DIVIDE }
 | '='      { ASSIGN }
+| ','      { COMMA }	
 | "=="     { EQ }	
 | "!="     { NEQ }
 | '<'      { LT }
@@ -35,6 +36,7 @@ rule token = parse
 | "string" { STRING }
 | "bool"   { BOOL }
 | "void"   { VOID }
+| "color"  { COLOR }
 | "true"   { TRUE }
 | "false"  { FALSE }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }

@@ -8,6 +8,7 @@ open Ast
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
+%token DOLLAR COLOR
 %token <int> LITERAL
 %token <string> ID
 %token <float> FLOATLIT
@@ -60,6 +61,7 @@ typ:
   | BOOL { Bool }
   | VOID { Void }
   | STRING { String }
+  | COLOR { Color }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -92,6 +94,7 @@ expr:
   | STRINGLIT        { StringLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
+  | LT expr COMMA expr COMMA expr GT { ColorLit($2, $4, $6) }
   | ID               { Id($1) }
   | FLOATLIT         { FloatLit($1) }  /* Float is expression which handles negatives*/
   | expr PLUS   expr { Binop($1, Add,   $3) }

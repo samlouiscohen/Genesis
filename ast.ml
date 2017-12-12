@@ -14,6 +14,7 @@ type expr =
   | StringLit of string
   | FloatLit of float
   | BoolLit of bool
+  | ColorLit of expr * expr * expr
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -65,6 +66,7 @@ let rec string_of_expr = function
   | StringLit(s) -> s
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
+  | ColorLit(r,g,b) -> "$" ^ string_of_expr r ^ "," ^ string_of_expr g ^ "," ^ string_of_expr b ^ "$"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
