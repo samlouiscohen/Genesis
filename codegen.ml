@@ -21,15 +21,17 @@ module String = String
 
 let translate (globals, functions) =
   let context = L.global_context () in
-  let the_module = L.create_module context "MicroC"
-  and i32_t  = L.i32_type  context
-  and i8_t   = L.i8_type   context
-  and i1_t   = L.i1_type   context
-  and flt_t =  L.double_type context
-  and pointer_t = L.pointer_type
-  and void_t = L.void_type context
-  and color_t = L.named_struct_type context "color" in
-    L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
+  let the_module = L.create_module context "MicroC" in
+  let i64_t = L.i64_type context in
+  let i32_t  = L.i32_type  context in
+  let i8_t   = L.i8_type   context in
+  let i1_t   = L.i1_type   context in
+  let flt_t =  L.double_type context in
+  let pointer_t = L.pointer_type in
+  let void_t = L.void_type context in
+  let color_t = L.named_struct_type context "color" in
+    ignore(L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false); (* need to change here if source file changes *)
+  let col_ptr_t = L.pointer_type color_t in
 
   let ltype_of_typ = function
       A.Int -> i32_t
@@ -37,7 +39,7 @@ let translate (globals, functions) =
     | A.String -> pointer_t i8_t
     | A.Bool -> i1_t
     | A.Void -> void_t 
-    | A.Color -> color_t
+    | A.Color -> col_ptr_t
   in
 
   (* Declare each global variable; remember its value in a map *)
@@ -59,8 +61,8 @@ let translate (globals, functions) =
 (*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
   let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
 
-  let initScreenT_t = L.function_type i32_t [| i32_t |] in
-  let initScreenT_func = L.declare_function "initScreenT" initScreenT_t the_module in
+  let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t; |] in
+  let initScreen_func = L.declare_function "initScreen" initScreen_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -118,6 +120,30 @@ let translate (globals, functions) =
       | A.StringLit s -> L.build_global_stringptr s "tmp" builder
       | A.FloatLit fl -> L.const_float flt_t fl
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+      | A.ColorLit (r, g, b) -> 
+        let ctmp = L.build_alloca color_t "color_tmp" builder in
+        let cptr = L.build_alloca (L.pointer_type color_t) "clr_ptr" builder in
+
+        let e1 = expr builder r 
+        and e2 = expr builder g 
+        and e3 = expr builder b in
+
+(*         let rtmp = L.build_struct_gep ctmp 0 "r" builder in 
+          ignore (L.build_store e1 rtmp builder);
+        let gtmp = L.build_struct_gep ctmp 1 "g" builder in 
+          ignore (L.build_store e2 gtmp builder);
+        let btmp = L.build_struct_gep ctmp 2 "b" builder in 
+          ignore (L.build_store e3 btmp builder); *)
+        let rtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0 ; L.const_int i32_t 0|] "r" builder in
+          ignore (L.build_store e1 rtmp builder);
+        let gtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 1|] "g" builder in
+          ignore (L.build_store e2 rtmp builder);  
+        let btmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 2|] "b" builder in
+          ignore (L.build_store e3 rtmp builder);
+        let _ = L.build_store ctmp cptr builder in
+        L.build_load cptr "" builder
+
+
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
@@ -184,8 +210,13 @@ let translate (globals, functions) =
       | A.Call ("printbig", [e]) ->
           L.build_call printbig_func [| (expr builder e) |] "printbig" builder
 (* external function -- for testing *)
-      | A.Call ("initScreenT", [e]) ->
-          L.build_call initScreenT_func [| (expr builder e) |] "initScreenT" builder
+      | A.Call ("initScreen", [w; h; c]) -> 
+          let width = expr builder w 
+          and height = expr builder h
+          and color = expr builder c in
+(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
+          ignore(L.build_store color clr_ptr builder) ; *)
+          L.build_call initScreen_func [| color; width; height |] "initScreen" builder
       | A.Call ("prints", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
       | A.Call (f, act) ->

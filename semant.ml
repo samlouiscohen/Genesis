@@ -67,8 +67,8 @@ let check (globals, functions) =
      { typ = Void; fname = "printfl"; formals = [(Float, "x")];
        locals = []; body = [] } 
 
-       (StringMap.add "initScreenT"
-     { typ = Void; fname = "initScreenT"; formals = [(Int, "x")];
+       (StringMap.add "initScreen"
+     { typ = Int; fname = "initScreen"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
        locals = []; body = [] } 
 
        (StringMap.add "prints"
@@ -120,6 +120,7 @@ let check (globals, functions) =
       | FloatLit _ -> Float
       | StringLit _ -> String
       | BoolLit _ -> Bool
+      | ColorLit _ -> Color
       | Id s -> type_of_identifier s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
     (match op with
