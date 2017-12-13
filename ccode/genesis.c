@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 
 extern void update();
+extern void init();
 
 typedef struct color {
     int r;
@@ -18,12 +19,13 @@ SDL_Renderer *gRenderer = NULL;
 int backgroundR = 0xFF;
 int backgroundG = 0xFF;
 int backgroundB = 0xFF;
+int quit = 0;
+const Uint8 *keyStates = NULL;
 
 int initScreen(struct color *c, int width, int height);
 void clearScreen();
 void static close();
 void showDisplay();
-int initScreenT(int x);
 
 //Create screen
 int initScreen(struct color *c, int width, int height){
@@ -67,17 +69,9 @@ int initScreen(struct color *c, int width, int height){
                 backgroundG = c->g;
                 backgroundB = c->b;
 
-                printf("init background: %i, %i, %i",backgroundR, backgroundG, backgroundB);
-
                 //Clear background
                 clearScreen();
                 showDisplay();
-
-                for(int i = 0; i < 4000; i++){
-                    SDL_PumpEvents();
-                    SDL_Delay(1);
-                }
-                close();
                 //SDL_RenderPresent(gRenderer);
             }
         }
@@ -112,6 +106,33 @@ void static close(){
     SDL_Quit();
 }
 
+void pollEvents(){
+    SDL_Event event;
+    while(SDL_PollEvent(&event)){
+        if (event.type == SDL_QUIT){
+            quit = 1;
+        } 
+    }
+    keyStates = SDL_GetKeyboardState(NULL);
+}
+
+int isKeyPressed(char key){
+    if (keyStates != NULL){
+        return keyStates[SDL_GetScancodeFromKey(key)];
+    } else {
+        return 0;
+    }
+}
+
+void mainLoop(){
+    quit = 0;
+    // init();
+    while (!quit){
+        pollEvents();
+    }
+}
+
+
 /* Exported function (visible in Genesis) */
 // int initScreenT(int x){
 //     struct color col;
@@ -126,23 +147,21 @@ void static close(){
 
 // #ifdef BUILD_TEST
 // int main(int argc, char* args[]){
-
 //     struct color col;
 //     col.r = 0xFF;
 //     col.g = 0xFF;
 //     col.b = 0xFF;
 //     //Make new screen
-//     if (initScreen(640, 480, &col)){
-//         drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
-//         showDisplay();
-//         //wait 4 seconds
-//         for(int i = 0; i < 4000; i++){
-//             SDL_PumpEvents();
-//             SDL_Delay(1);
-//         }
-//         close();
-//     }
 
-//     return 0;
+//     struct color *colptr = &col;
+//     initScreen(colptr, 640, 480);
+
+//     while(quit == 0){
+//         pollEvents();
+//         if(isKeyPressed('a')){
+//             printf("%s\n", "hello");
+//         }
+//     }
+//     close();
 // }
 // #endif
