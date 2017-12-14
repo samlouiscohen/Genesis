@@ -124,10 +124,13 @@ int isKeyPressed(char key){
     }
 }
 
-void mainLoop(){
+void startGame(struct color *c, int width, int height){
     quit = 0;
-    // init();
+    initScreen(c, width, height);
+    init();
+    printf("%s\n", "Init successful");
     while (!quit){
+        update();
         pollEvents();
     }
 }
