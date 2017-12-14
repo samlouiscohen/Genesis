@@ -40,7 +40,8 @@ let translate (globals, functions) =
     | A.Bool -> i1_t
     | A.Void -> void_t 
     | A.Color -> color_t
-    | A.ArrayType (typ, size) -> array_t (ltype_of_typ typ) size 
+    | A.ArrayType(t) -> L.pointer_type (ltype_of_typ t)
+    | _ -> raise(Failure ("invalid left-hand type\n")
 
   in
 
