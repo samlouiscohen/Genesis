@@ -65,6 +65,9 @@ let translate (globals, functions) =
   let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t; |] in
   let initScreen_func = L.declare_function "initScreen" initScreen_t the_module in
 
+  let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t; |] in
+  let startGame_func = L.declare_function "startGame" startGame_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -226,6 +229,14 @@ let translate (globals, functions) =
  *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
           ignore(L.build_store color clr_ptr builder) ; *)
           L.build_call initScreen_func [| color; width; height |] "initScreen" builder
+      | A.Call ("startGame", [w; h; c]) -> 
+          let width = expr builder w 
+          and height = expr builder h
+          and color = expr builder c in
+(*             ignore(L.set_alignment 8 color);
+ *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
+          ignore(L.build_store color clr_ptr builder) ; *)
+          L.build_call startGame_func [| color; width; height |] "" builder          
       | A.Call ("prints", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
       | A.Call (f, act) ->
