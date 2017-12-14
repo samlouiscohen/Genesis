@@ -1,14 +1,11 @@
-/* Ocamlyacc parser for Genesis */
 
-%{
-open Ast
-%}
+%{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
-%token DOLLAR COLOR
+%token DOLLAR COLOR CLUSTER
 %token <int> LITERAL
 %token <string> ID
 %token <float> FLOATLIT
@@ -62,6 +59,7 @@ typ:
   | VOID { Void }
   | STRING { String }
   | COLOR { Color }
+  | CLUSTER {Cluster}
 
 vdecl_list:
     /* nothing */    { [] }

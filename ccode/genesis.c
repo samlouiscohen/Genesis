@@ -1,19 +1,11 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include "genesis.h"
 
 extern void update();
 extern void init();
-
-typedef struct color {
-    int r;
-    int g;
-    int b;
-} color;
-
-typedef struct position {
-    int x;
-    int y;    
-} position;
+extern board_t *curBoard;
+extern cluster_t *toRemove;
 
 char *additionalKeynames[] = {"Up", "Down", "Left", "Right", "Space", "Escape"};
 
@@ -28,7 +20,7 @@ uint64_t heldState = 0;
 uint64_t upState = 0;
 const Uint8 *keyStates = NULL;
 
-int initScreen(struct color *c, int width, int height);
+int initScreen(color_t *c, int width, int height);
 void clearScreen();
 void static close();
 void showDisplay();
@@ -36,7 +28,7 @@ int keyToInt(const char *keyName);
 uint64_t keyMask(int number);
 
 //Create screen
-int initScreen(struct color *c, int width, int height){
+int initScreen(color_t *c, int width, int height){
     //Initialization flag
     int success = 1;
 
@@ -185,16 +177,42 @@ uint64_t keyMask(int number){
     return mask << number;
 }
 
-void startGame(struct color *c, int width, int height){
+void startGame(color_t *c, int width, int height){
     quit = 0;
     initScreen(c, width, height);
-    init();
+    //init();
     printf("%s\n", "Init successful");
     while (!quit){
+
         pollEvents();
         update();
     }
 }
+
+
+/*
+void add_Cluster(cluster_t *c){
+    cluster_t *clusterList;
+    HASH_FIND_STR(curBoard->clusters, c->name,clusterList);
+    if(clusterList == NULL){
+        clusterList = malloc(sizeof(cluster_t));
+        clusterList->name = c->name;
+        clusterList->next = NULL;
+        HASH_ADD_STR(curBoard->clusters, name, clusterList);
+    }
+    LL_APPEND(clusterList,c);
+}
+
+void remove_Cluster(cluster_t *c){
+    cluster_t *clusterList;
+    HASH_FIND_STR(curBoard->clusters, c->name,clusterList);
+
+    if(clusterList != NULL){
+        LL_DELETE(clusterList, c);
+        LL_APPEND(toRemove, c);
+    }
+}
+*/
 
 /* Exported function (visible in Genesis) */
 // int initScreenT(int x){
