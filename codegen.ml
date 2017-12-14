@@ -52,29 +52,28 @@ let translate (globals, functions) =
       |_ -> build_uniform_array (the_llvm_value::the_array) the_llvm_value (repeat_count-1))
     in
 
-  (* Declare each global variable; remember its value in a map *)
-(*   let global_vars =
-    let global_var m (t, n) =
-      let init = L.const_int (ltype_of_typ t) 0
-      in StringMap.add n (L.define_global n init the_module) m in
-    List.fold_left global_var StringMap.empty globals in
-   *)
+
   (* Declare each global variable; remember its value in a map *)
   (* Define the starting values of global vars and init them to this, also store vars in the map *)
-  let global_variables map (var_typ, name) =
+(*   let global_variables map (var_typ, name) =
     let global_value = (match var_typ with 
-      A.int -> L.define_global name (L.const_int (ltype_of_typ A.int) 0) the_module
+      A.Int -> L.define_global name (L.const_int (ltype_of_typ A.Int) 0) the_module
     | A.Bool -> L.define_global name (L.const_int (ltype_of_typ A.Bool) 0) the_module
-    | A.Float -> 
+    | A.Float -> L.define_global name (L.const_float (ltype_of_typA.Float)
     | A.ArrayType(typ, size) -> (* array starts full of nulls *)
       let element_val = L.const_null (ltype_of_typ typ) in
       let init = L.const_array (ltype_of_typ typ) 
       (Array.of_list (build_uniform_array [] element_val size)) in 
       StringMap.add name (L.define_global name init the_module) map in
     List.fold_left global_var StringMap.empty globals in
- 
-(*Why not use Hashtbl?*)
-
+  *)
+  (* Declare each global variable; remember its value in a map *)
+  let global_vars =
+    let global_var m (t, n) =
+      let init = L.const_int (ltype_of_typ t) 0
+      in StringMap.add n (L.define_global n init the_module) m in
+    List.fold_left global_var StringMap.empty globals in
+  
 
   (* Declare printf(), which the print built-in function will call *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
