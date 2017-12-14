@@ -121,7 +121,10 @@ let check (globals, functions) =
       | StringLit _ -> String
       | BoolLit _ -> Bool
       | Id s -> type_of_identifier s
+      | ArrayInit(t,_) -> Array(t)
+      | ArrayAccess(_,_,t) -> t
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
+
     (match op with
         Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
       | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float

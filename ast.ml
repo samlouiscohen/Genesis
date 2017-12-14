@@ -5,7 +5,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Float | String | Bool | Void | Color
+type typ = Int | Float | String | Bool | Void | Color | Array of typ
 
 type bind = typ * string
 
@@ -19,6 +19,8 @@ type expr =
   | Unop of uop * expr
   | Assign of string * expr
   | Call of string * expr list
+  | ArrayInit of typ * int
+  | ArrayAccess of expr * int
   | Noexpr
 
 type stmt =
@@ -59,6 +61,15 @@ let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
 
+let rec string_of_typ = function
+    Int -> "int"
+  | Bool -> "bool"
+  | String -> "string"
+  | Void -> "void"
+  | Float -> "float"
+  | Color -> "color"
+  | Array(t) -> "ArrayType:" ^ string_of_typ t
+
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
   | FloatLit(f) -> string_of_float f
@@ -72,6 +83,8 @@ let rec string_of_expr = function
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | ArrayInit(typ, length) -> "(Array type " ^ string_of_typ typ ^ " of len " ^ string_of_int length ^ ")"
+  | ArrayAccess(name, i) -> "(Array name: " ^ string_of_expr name ^ " index: " ^ string_of_int i ^ ")"
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -87,13 +100,7 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_typ = function
-    Int -> "int"
-  | Bool -> "bool"
-  | String -> "string"
-  | Void -> "void"
-  | Float -> "float"
-  | Color -> "color"
+
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
