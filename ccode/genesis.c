@@ -1,18 +1,9 @@
 #include <SDL2/SDL.h>
+#include "genesis.h"
 
 extern void update();
 extern void init();
 
-typedef struct color {
-    int r;
-    int g;
-    int b;
-} color;
-
-typedef struct position {
-    int x;
-    int y;    
-} position;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -22,13 +13,13 @@ int backgroundB = 0xFF;
 int quit = 0;
 const Uint8 *keyStates = NULL;
 
-int initScreen(struct color *c, int width, int height);
+int initScreen(color_t *c, int width, int height);
 void clearScreen();
 void static close();
 void showDisplay();
 
 //Create screen
-int initScreen(struct color *c, int width, int height){
+int initScreen(color_t *c, int width, int height){
     //Initialization flag
     int success = 1;
 
@@ -124,17 +115,19 @@ int isKeyPressed(char key){
     }
 }
 
-void startGame(struct color *c, int width, int height){
+void startGame(color_t *c, int width, int height){
     quit = 0;
     initScreen(c, width, height);
-    init();
+    //init();
     printf("%s\n", "Init successful");
     while (!quit){
-        update();
+        //update();
         pollEvents();
     }
 }
+int main(){
 
+}
 
 /* Exported function (visible in Genesis) */
 // int initScreenT(int x){

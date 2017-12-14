@@ -9,7 +9,6 @@ Detailed documentation on the OCaml LLVM library:
 
 http://llvm.moe/
 http://llvm.moe/ocaml/
-
 *)
 
 module L = Llvm
@@ -30,9 +29,12 @@ let translate (globals, functions) =
   let flt_t =  L.double_type context in
   let pointer_t = L.pointer_type in
   let void_t = L.void_type context in
+  let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in
   let color_t = L.named_struct_type context "color" in
-    ignore(L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false); (* need to change here if source file changes *)
+    L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
   let col_ptr_t = L.pointer_type color_t in
+  let cluster_t = L.named_struct_type context "cluster" in
+    L.struct_set_body cluster_t [|color_t ; i32_t ; i32_t ; L.pointer_type i1_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
 
   let ltype_of_typ = function
       A.Int -> i32_t
