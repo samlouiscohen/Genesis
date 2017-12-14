@@ -8,7 +8,7 @@ open Ast
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
-%token LBRACKET RBRACKET
+%token LBRACKET RBRACKET COLOR
 %token <int> LITERAL
 %token <string> ID
 %token <float> FLOATLIT
@@ -61,9 +61,8 @@ typ:
   | BOOL { Bool }
   | VOID { Void }
   | STRING { String }
-  | COLOR { Color }
-  | ID { String }  
-  | typ LBRACKET RBRACKET { ArrayType($1) }
+  | COLOR { Color } 
+  | typ LBRACKET RBRACKET { ArrayType($1) } 
 
 vdecl_list:
     /* nothing */    { [] }
@@ -119,17 +118,6 @@ expr:
   | ID LBRACKET expr RBRACKET ASSIGN expr { ArrayAssign($1, $3, $6) }
   | ID LBRACKET expr RBRACKET { ArrayAccess($1, $3) }
   | ID ASSIGN typ LBRACKET LITERAL RBRACKET { ArrayInit($1, $3, $5) }
-
-
-sequence:
-    LBRACE sequence COMMA expr RBRACE   { (fst $2, $4 :: (snd $2)) }
-  | LBRACE primitive COMMA expr RBRACE  { ($2, [$4]) }
-  | LBRACE obj_typ COMMA expr RBRACE    { ($2, [$4]) }
-
-sequence_access:
-    LBRACE expr RBRACE  { $2 }
-
-
 
 actuals_opt:
     /* nothing */ { [] }

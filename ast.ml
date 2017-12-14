@@ -6,10 +6,11 @@ type uop = Neg | Not
 type typ = 
           Int
         | Float
+        | String
         | Bool 
-        | Void 
+        | Void
         | Color 
-        | Cluster of String
+        | Cluster of string
         | ArrayType of typ
 
 type bind = typ * string
