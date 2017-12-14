@@ -1,11 +1,11 @@
-# Make sure ocamlbuild can find opam-managed packages: first run
+#Make sure ocamlbuild can find opam-managed packages: first run
 #
 # eval `opam config env`
 
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
 .PHONY : all
-all : microc.native printbig.o
+all : microc.native printbig.o genesis.o
 
 .PHONY : microc.native
 microc.native :
@@ -18,7 +18,7 @@ microc.native :
 clean :
 	ocamlbuild -clean
 	rm -rf testall.log *.diff microc scanner.ml parser.ml parser.mli
-	rm -rf printbig
+	rm -rf printbig ccode/genesis.o
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
@@ -48,11 +48,18 @@ parser.ml parser.mli : parser.mly
 printbig : printbig.c
 	cc -o printbig -DBUILD_TEST printbig.c
 
-tests: rtest test
+genesis.o: ccode/genesis.c
+	cc -c -o ccode/genesis.o $< -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
+
+tests: rtest test vtest
 
 rtest: all
 	@echo "Running regression tests..."
 	@./testall.sh rtests/test-*.mc rtests/fail-*.mc
+
+vtest: all
+	@echo "Running Genesis SDL tests..."
+	@./testall.sh vtests/test-*.mc
 
 test: all
 	@echo "Running Genesis tests..."

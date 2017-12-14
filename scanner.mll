@@ -4,11 +4,14 @@
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
+| "//"     { scomment lexbuf }           (* Comments *)
 | "/*"     { comment lexbuf }           (* Comments *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
+| '['      { LBRACKET }
+| ']'      { RBRACKET }
 | ';'      { SEMI }
 | ','      { COMMA }
 | '+'      { PLUS }
@@ -47,3 +50,7 @@ rule token = parse
 and comment = parse
   "*/" { token lexbuf }
 | _    { comment lexbuf }
+
+and scomment = parse
+  "\n" { token lexbuf }
+ | _   { scomment lexbuf } 

@@ -1,6 +1,15 @@
-#include <iostream>
 #include <SDL2/SDL.h>
-#include <stdio.h>
+
+typedef struct color {
+    int r;
+    int g;
+    int b;
+} color;
+
+typedef struct position {
+    int x;
+    int y;    
+} position;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -8,21 +17,22 @@ int backgroundR = 0xFF;
 int backgroundG = 0xFF;
 int backgroundB = 0xFF;
 
-bool initScreen(int width, int height, int R, int G, int B);
+int initScreen(int width, int height, color c);
 void clearScreen();
-void close();
+void static close();
 void showDisplay();
+int initScreenT(int x);
 
 //Create screen
-bool initScreen(int width, int height, int R, int G, int B){
+int initScreen(int width, int height, color c){
     //Initialization flag
-    bool success = true;
+    int success = 1;
 
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
     {
         printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
-        success = false;
+        success = 0;
     }
     else
     {
@@ -37,7 +47,7 @@ bool initScreen(int width, int height, int R, int G, int B){
         if( gWindow == NULL )
         {
             printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
-            success = false;
+            success = 0;
         }
         else
         {
@@ -46,14 +56,14 @@ bool initScreen(int width, int height, int R, int G, int B){
             if( gRenderer == NULL )
             {
                 printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-                success = false;
+                success = 0;
             }
             else
             {
                 //Set background color
-                backgroundR = R;
-                backgroundG = G;
-                backgroundB = B;
+                backgroundR = c.r;
+                backgroundG = c.g;
+                backgroundB = c.b;
                 //Clear background
                 clearScreen();
                 //SDL_RenderPresent(gRenderer);
@@ -81,7 +91,7 @@ void showDisplay(){
 }
 
 //Must be called when program finishes
-void close(){
+void static close(){
     SDL_DestroyRenderer(gRenderer);
     SDL_DestroyWindow(gWindow);
     gWindow = NULL;
@@ -90,10 +100,37 @@ void close(){
     SDL_Quit();
 }
 
+/* Exported function (visible in Genesis) */
+int initScreenT(int x){
+    struct color col;
+    col.r = 0xFF;
+    col.g = 0xFF;
+    col.b = 0xFF;
+    //Make new screen
+    if (initScreen(640, 480, col)){
+        drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
+        showDisplay();
+        //wait 4 seconds
+		int i;
+        for(i = 0; i < 4000; i++){
+            SDL_PumpEvents();
+            SDL_Delay(1);
+        }
+        close();
+    }
+
+    return 0;
+}
+
+#ifdef BUILD_TEST
 int main(int argc, char* args[]){
 
+    struct color col;
+    col.r = 0xFF;
+    col.g = 0xFF;
+    col.b = 0xFF;
     //Make new screen
-    if (initScreen(640, 480, 0xFF, 0xFF, 0xFF)){
+    if (initScreen(640, 480, col)){
         drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
         showDisplay();
         //wait 4 seconds
@@ -106,3 +143,4 @@ int main(int argc, char* args[]){
 
     return 0;
 }
+#endif

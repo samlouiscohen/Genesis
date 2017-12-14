@@ -83,6 +83,13 @@ let translate (globals, functions) =
   let printbig_t = L.function_type i32_t [| i32_t |] in
   let printbig_func = L.declare_function "printbig" printbig_t the_module in
 
+  (* Declare function for making a new board *)
+(*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
+  let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
+
+  let initScreenT_t = L.function_type i32_t [| i32_t |] in
+  let initScreenT_func = L.declare_function "initScreenT" initScreenT_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -150,6 +157,7 @@ let translate (globals, functions) =
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+      | A.ArrayInit(typ, length) -> init_array typ length 
       | A.Binop (e1, op, e2) ->
     let e1' = expr builder e1
     and e2' = expr builder e2 in
@@ -213,6 +221,9 @@ let translate (globals, functions) =
           "printf" builder
       | A.Call ("printbig", [e]) ->
           L.build_call printbig_func [| (expr builder e) |] "printbig" builder
+(* external function -- for testing *)
+      | A.Call ("initScreenT", [e]) ->
+          L.build_call initScreenT_func [| (expr builder e) |] "initScreenT" builder
       | A.Call ("prints", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
       | A.Call (f, act) ->

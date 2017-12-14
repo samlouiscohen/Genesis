@@ -10,7 +10,8 @@ type typ =
         | Void 
         | Color 
         | Cluster of String
-        | Arraytype of typ
+        | ArrayType of typ
+
 type bind = typ * string
 
 type expr =
@@ -23,7 +24,7 @@ type expr =
   | Unop of uop * expr
   | Assign of string * expr
   | Call of string * expr list
-  | ArrayLit of expr list
+  | ArrayInit of string * typ * int
   | ArrayAssign of string * expr * expr
   | ArrayAccess of string * expr
   | Noexpr
@@ -68,6 +69,15 @@ let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
 
+let rec string_of_typ = function
+    Int -> "int"
+  | Bool -> "bool"
+  | String -> "string"
+  | Void -> "void"
+  | Float -> "float"
+  | Color -> "color"
+  | ArrayType(t) -> "ArrayType:" ^ string_of_typ t
+
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
   | FloatLit(f) -> string_of_float f
@@ -82,10 +92,9 @@ let rec string_of_expr = function
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | ArrayAccess(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
-  | ArrayLiteral(e) -> 
-      "ArrayLiteral[" ^ String.concat "," (List.map string_of_expr e) ^ "]"
   | ArrayAssign(s, e1, e2) -> 
       s ^ "[" ^string_of_expr e1 ^"] ="^ string_of_expr e2 
+  | ArrayInit(s, typ, len) -> "s = " ^ string_of_typ typ ^ "[" ^ string_of_int len ^ "]"
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -100,16 +109,6 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-
-let rec string_of_typ = function
-    Int -> "int"
-  | Bool -> "bool"
-  | String -> "string"
-  | Void -> "void"
-  | Float -> "float"
-  | Color -> "color"
-  | ArrayType(typ, e) -> string_of_typ typ ^ "[" ^ string_of_int e ^ "]"
-
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

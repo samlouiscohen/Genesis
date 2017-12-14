@@ -67,13 +67,17 @@ let check (globals, functions) =
      { typ = Void; fname = "printfl"; formals = [(Float, "x")];
        locals = []; body = [] } 
 
+       (StringMap.add "initScreenT"
+     { typ = Void; fname = "initScreenT"; formals = [(Int, "x")];
+       locals = []; body = [] } 
+
        (StringMap.add "prints"
      { typ = Void; fname = "prints"; formals = [(String, "x")];
        locals = []; body = [] }
 
        (StringMap.singleton "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] }))))
+       locals = []; body = [] })))))
    in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -108,7 +112,7 @@ let check (globals, functions) =
     let type_of_identifier s =
       try let id_typ = StringMap.find s symbols in 
           (match id_typ with
-            ArrayType(t,_) -> t
+              ArrayType(t) -> t
             | _ -> id_typ
           )
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
@@ -121,14 +125,9 @@ let check (globals, functions) =
       | StringLit _ -> String
       | BoolLit _ -> Bool
       | Id s -> type_of_identifier s
-      | ArrayAssign(_, _, e3) -> expr e3
-      | Array
-      | Access(s, _) -> type_of_identifier s
-      | ArrayLit(e) -> expr (List.hd e)
-
-
-
+      | ArrayAccess(s) -> type_of_identifier s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
+
     (match op with
         Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
       | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
