@@ -5,7 +5,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Float | String | Bool | Void | Color
+type typ = Int | Float | String | Bool | Void | Color | Cluster
 
 type bind = typ * string
 
@@ -15,6 +15,7 @@ type expr =
   | FloatLit of float
   | BoolLit of bool
   | ColorLit of expr * expr * expr
+  | ClusterLit of expr
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -67,6 +68,7 @@ let rec string_of_expr = function
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | ColorLit(r,g,b) -> "<" ^ string_of_expr r ^ "," ^ string_of_expr g ^ "," ^ string_of_expr b ^ ">"
+  | ClusterLit(c) -> "<" ^ string_of_expr c ^ ">"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -96,6 +98,7 @@ let string_of_typ = function
   | Void -> "void"
   | Float -> "float"
   | Color -> "color"
+  | Cluster -> "cluster"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
