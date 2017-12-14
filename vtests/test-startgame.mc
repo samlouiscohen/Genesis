@@ -1,4 +1,14 @@
-void update(){}
+void update(){
+	if (keyDown("Space")){
+		prints("Space pressed");
+	}
+	if (keyHeld("Space")){
+		prints("Space held");
+	}
+	if (keyUp("Space")){
+		prints("Space released");
+	}
+}
 
 void init(){}
 
