@@ -34,6 +34,40 @@ _init:                                  ## @init
 _update:                                ## @update
 	.cfi_startproc
 ## BB#0:                                ## %entry
+	pushq	%rax
+Lcfi1:
+	.cfi_def_cfa_offset 16
+	leaq	L_tmp(%rip), %rdi
+	callq	_isKeyDown
+	testb	$1, %al
+	je	LBB2_1
+## BB#5:                                ## %then
+	leaq	L_fmt.8(%rip), %rdi
+	leaq	L_tmp.9(%rip), %rsi
+	xorl	%eax, %eax
+	callq	_printf
+LBB2_1:                                 ## %merge
+	leaq	L_tmp.10(%rip), %rdi
+	callq	_isKeyHeld
+	testb	$1, %al
+	je	LBB2_2
+## BB#6:                                ## %then2
+	leaq	L_fmt.8(%rip), %rdi
+	leaq	L_tmp.11(%rip), %rsi
+	xorl	%eax, %eax
+	callq	_printf
+LBB2_2:                                 ## %merge1
+	leaq	L_tmp.12(%rip), %rdi
+	callq	_isKeyUp
+	testb	$1, %al
+	je	LBB2_4
+## BB#3:                                ## %then6
+	leaq	L_fmt.8(%rip), %rdi
+	leaq	L_tmp.13(%rip), %rsi
+	xorl	%eax, %eax
+	callq	_printf
+LBB2_4:                                 ## %merge5
+	popq	%rax
 	retq
 	.cfi_endproc
                                         ## -- End function
@@ -64,6 +98,24 @@ L_fmt.7:                                ## @fmt.7
 
 L_fmt.8:                                ## @fmt.8
 	.asciz	"%s\n"
+
+L_tmp:                                  ## @tmp
+	.asciz	"Space"
+
+L_tmp.9:                                ## @tmp.9
+	.asciz	"Space pressed"
+
+L_tmp.10:                               ## @tmp.10
+	.asciz	"Space"
+
+L_tmp.11:                               ## @tmp.11
+	.asciz	"Space held"
+
+L_tmp.12:                               ## @tmp.12
+	.asciz	"Space"
+
+L_tmp.13:                               ## @tmp.13
+	.asciz	"Space released"
 
 
 .subsections_via_symbols

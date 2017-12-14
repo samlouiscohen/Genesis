@@ -68,6 +68,15 @@ let translate (globals, functions) =
   let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t; |] in
   let startGame_func = L.declare_function "startGame" startGame_t the_module in
 
+  let isKeyDown_t = L.function_type i1_t [| pointer_t i8_t |] in
+  let isKeyDown_func = L.declare_function "isKeyDown" isKeyDown_t the_module in
+
+  let isKeyUp_t = L.function_type i1_t [| pointer_t i8_t |] in
+  let isKeyUp_func = L.declare_function "isKeyUp" isKeyUp_t the_module in
+
+  let isKeyHeld_t = L.function_type i1_t [| pointer_t i8_t |] in
+  let isKeyHeld_func = L.declare_function "isKeyHeld" isKeyHeld_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -236,7 +245,16 @@ let translate (globals, functions) =
 (*             ignore(L.set_alignment 8 color);
  *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
           ignore(L.build_store color clr_ptr builder) ; *)
-          L.build_call startGame_func [| color; width; height |] "" builder          
+          L.build_call startGame_func [| color; width; height |] "" builder  
+      | A.Call ("keyDown", [s]) ->
+          let keyName = expr builder s in
+          L.build_call isKeyDown_func [|keyName|] "keyD" builder
+      | A.Call ("keyUp", [s]) ->
+          let keyName = expr builder s in
+          L.build_call isKeyUp_func [|keyName|] "keyU" builder
+      | A.Call ("keyHeld", [s]) ->
+          let keyName = expr builder s in
+          L.build_call isKeyHeld_func [|keyName|] "keyH" builder
       | A.Call ("prints", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
       | A.Call (f, act) ->

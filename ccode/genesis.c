@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <stdbool.h>
 
 extern void update();
 extern void init();
@@ -31,7 +32,7 @@ int initScreen(struct color *c, int width, int height);
 void clearScreen();
 void static close();
 void showDisplay();
-int keyToInt(char *keyName);
+int keyToInt(const char *keyName);
 uint64_t keyMask(int number);
 
 //Create screen
@@ -143,19 +144,19 @@ int keyInBitmask(uint64_t bitmask, char *keyName){
     return (bitmask & keyMask(keyInt)) != 0;
 }
 
-int isKeyHeld(char *key){
+bool isKeyHeld(char *key){
     return keyInBitmask( heldState, key);
 }
 
-int isKeyDown(char *key){
+bool isKeyDown(char *key){
     return keyInBitmask( downState, key);
 }
 
-int isKeyUp(char *key){
+bool isKeyUp(char *key){
     return keyInBitmask( upState, key);
 }
 
-int keyToInt(char *keyName){
+int keyToInt(const char *keyName){
     int numChars = 26;
     int numInts = 10;
     if (strlen(keyName) == 1){
@@ -176,6 +177,7 @@ int keyToInt(char *keyName){
             }
         }
     }
+    return -1; //Key does not have an int representation
 }
 
 uint64_t keyMask(int number){
@@ -186,18 +188,13 @@ uint64_t keyMask(int number){
 void startGame(struct color *c, int width, int height){
     quit = 0;
     initScreen(c, width, height);
-    // init();
+    init();
     printf("%s\n", "Init successful");
     while (!quit){
         pollEvents();
-        // update();
-
-        if(isKeyDown("Escape")){
-            printf("%s\n", "a was pressed");
-        }
+        update();
     }
 }
-
 
 /* Exported function (visible in Genesis) */
 // int initScreenT(int x){
@@ -211,15 +208,15 @@ void startGame(struct color *c, int width, int height){
 //     initScreen(640, 480, colptr);
 // }
 
-// #ifdef BUILD_TEST
-int main(int argc, char* args[]){
-    struct color col;
-    col.r = 0xFF;
-    col.g = 0xFF;
-    col.b = 0xFF;
-    //Make new screen
+// // #ifdef BUILD_TEST
+// int main(int argc, char* args[]){
+//     struct color col;
+//     col.r = 0xFF;
+//     col.g = 0xFF;
+//     col.b = 0xFF;
+//     //Make new screen
 
-    struct color *colptr = &col;
-    startGame(colptr, 640, 480);
-}
-// #endif
+//     struct color *colptr = &col;
+//     startGame(colptr, 640, 480);
+// }
+// // #endif

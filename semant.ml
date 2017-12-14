@@ -67,6 +67,18 @@ let check (globals, functions) =
      { typ = Void; fname = "printfl"; formals = [(Float, "x")];
        locals = []; body = [] } 
 
+       (StringMap.add "keyDown"
+     { typ = Bool; fname = "keyDown"; formals = [(String, "keyName")];
+       locals = []; body = [] } 
+       
+       (StringMap.add "keyUp"
+     { typ = Bool; fname = "keyUp"; formals = [(String, "keyName")];
+       locals = []; body = [] } 
+
+       (StringMap.add "keyHeld"
+     { typ = Bool; fname = "keyHeld"; formals = [(String, "keyName")];
+       locals = []; body = [] } 
+
        (StringMap.add "initScreen"
      { typ = Int; fname = "initScreen"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
        locals = []; body = [] } 
@@ -81,7 +93,7 @@ let check (globals, functions) =
 
        (StringMap.singleton "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] }))))))
+       locals = []; body = [] })))))))))
    in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
