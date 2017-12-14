@@ -1,8 +1,5 @@
-/* Ocamlyacc parser for Genesis */
 
-%{
-open Ast
-%}
+%{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
