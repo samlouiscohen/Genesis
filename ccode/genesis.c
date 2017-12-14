@@ -3,7 +3,8 @@
 
 extern void update();
 extern void init();
-
+extern board_t *curBoard;
+extern cluster_t *toRemove;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -125,10 +126,30 @@ void startGame(color_t *c, int width, int height){
         pollEvents();
     }
 }
-int main(){
 
+/*
+void add_Cluster(cluster_t *c){
+    cluster_t *clusterList;
+    HASH_FIND_STR(curBoard->clusters, c->name,clusterList);
+    if(clusterList == NULL){
+        clusterList = malloc(sizeof(cluster_t));
+        clusterList->name = c->name;
+        clusterList->next = NULL;
+        HASH_ADD_STR(curBoard->clusters, name, clusterList);
+    }
+    LL_APPEND(clusterList,c);
 }
 
+void remove_Cluster(cluster_t *c){
+    cluster_t *clusterList;
+    HASH_FIND_STR(curBoard->clusters, c->name,clusterList);
+
+    if(clusterList != NULL){
+        LL_DELETE(clusterList, c);
+        LL_APPEND(toRemove, c);
+    }
+}
+*/
 /* Exported function (visible in Genesis) */
 // int initScreenT(int x){
 //     struct color col;

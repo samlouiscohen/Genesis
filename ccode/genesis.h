@@ -2,6 +2,8 @@
 #define GENESIS_H
 
 #include "uthash/include/uthash.h"
+#include "uthash/include/utlist.h"
+
 
 typedef struct color {
 	int r;
@@ -31,9 +33,11 @@ typedef struct board {
 	color_t color;
 	int height;
 	int width;
-	cluster_t clusters;
+	cluster_t *clusters;
 	UT_hash_handle hh;
 
 } board_t;
 
+void add_Cluster(cluster_t *c);
+void remove_Cluster(cluster_t *c);
 #endif

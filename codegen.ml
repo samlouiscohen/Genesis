@@ -29,12 +29,25 @@ let translate (globals, functions) =
   let flt_t =  L.double_type context in
   let pointer_t = L.pointer_type in
   let void_t = L.void_type context in
-  let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in
+  let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in 
+  let ut_hash_table_t = L.named_struct_type context "UT_hash_table" in
+  let ut_hash_bucket_t = L.named_struct_type context "UT_hash_bucket" in
+    L.struct_set_body ut_hash_handle_t [|L.pointer_type ut_hash_table_t; L.pointer_type i8_t; L.pointer_type i8_t; L.pointer_type ut_hash_handle_t; L.pointer_type ut_hash_handle_t; L.pointer_type i8_t; i32_t; i32_t|] false; 
+    L.struct_set_body ut_hash_table_t  [|L.pointer_type ut_hash_bucket_t; i32_t; i32_t; i32_t; L.pointer_type ut_hash_handle_t; i64_t; i32_t; i32_t; i32_t; i32_t; i32_t|] false;
+    L.struct_set_body ut_hash_bucket_t [|L.pointer_type ut_hash_handle_t; i32_t; i32_t|] false;
+
   let color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
+
   let col_ptr_t = L.pointer_type color_t in
+
+  let position_t = L.named_struct_type context "position" in
+    L.struct_set_body position_t [| i32_t ; i32_t |] false;
+
   let cluster_t = L.named_struct_type context "cluster" in
-    L.struct_set_body cluster_t [|color_t ; i32_t ; i32_t ; L.pointer_type i1_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
+    L.struct_set_body cluster_t [| position_t ; color_t ; i32_t ; i32_t ; L.pointer_type i8_t ; L.pointer_type cluster_t ; ut_hash_handle_t|] false;
+  let board_t = L.named_struct_type context "board" in
+    L.struct_set_body board_t [| L.pointer_type i8_t ; color_t ; i32_t ; i32_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
 
   let ltype_of_typ = function
       A.Int -> i32_t
@@ -43,6 +56,7 @@ let translate (globals, functions) =
     | A.Bool -> i1_t
     | A.Void -> void_t 
     | A.Color -> col_ptr_t
+    | A.Cluster -> cluster_t
   in
 
   (* Declare each global variable; remember its value in a map *)
@@ -61,11 +75,14 @@ let translate (globals, functions) =
   let printbig_func = L.declare_function "printbig" printbig_t the_module in
 
   (* Declare function for making a new board *)
-(*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
+  (*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
   let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
 
   let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t; |] in
   let initScreen_func = L.declare_function "initScreen" initScreen_t the_module in
+
+  (*let add_cluster_t = L.function_type (L.void_type context) [| L.pointer_type gb_t] in
+  let add_cluster = L.declare_function "addCluster" add_cluster_t the_module in*)
 
   let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t; |] in
   let startGame_func = L.declare_function "startGame" startGame_t the_module in
@@ -155,8 +172,18 @@ let translate (globals, functions) =
         let colld = L.build_load cptr "" builder in
 (*           ignore(L.set_alignment 8 colld); *)
         colld
-
-
+      | A.ClusterLit (c)->
+        let name = expr builder c in
+        let clustPtr = L.build_malloc cluster_t ("clustPtr") builder in
+        let posPtr = L.build_struct_gep clustPtr 0 ("posPtr") builder in
+        let colorPtr = L.build_struct_gep clustPtr 1 ("colorPtr") builder in
+        let heightPtr = L.build_struct_gep clustPtr 2 ("heightPtr") builder in
+        let widthPtr = L.build_struct_gep clustPtr 3 ("widthPtr") builder in
+        let name_ptr = L.build_struct_gep clustPtr 4 ("name ptr") builder in
+        let next_ptr = L.build_struct_gep clustPtr 5 ("nextPtr") builder in
+        let handle_ptr = L.build_struct_gep clustPtr 6 ("handle_ptr") builder in
+        clustPtr
+        
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
