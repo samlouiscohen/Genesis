@@ -183,9 +183,8 @@ void startGame(color_t *c, int width, int height){
     //init();
     printf("%s\n", "Init successful");
     while (!quit){
-
         pollEvents();
-        update();
+        //update();
     }
 }
 
