@@ -14,15 +14,20 @@ Usage Notes
 
 Dependencies
  - SDL: graphics library, available at:
- - UTHash: hastable library, available at:
+ - UTHash: hastable library (source included w/ Genesis)
 
 Building
  - Type "make"
 
 Sanity Tests
+ - Download an updated testall.sh here (only if cloning from github):
+
+     https://gist.github.com/zhaosjason/ff8012613dbfdea131001986aeda325d
+
  - Type "make rtest" to run MicroC-specific tests
  - Type "make test" to run Genesis-specific tests
- - Type "make testall" to run all available tests
+ - Type "make vtest" to run Genesis-specific visual tests
+ - Type "make tests" to run all available tests
 
 Usage
  - Please refer to our Language reference manual for documentation, 
@@ -38,6 +43,7 @@ Usage
 Endorsements
  - "For a having .god extension, you can't anything with this language!"
  - "Our language is like god.  It doesn't exist."
+
 
 ------------------------------
 The MicroC compiler
