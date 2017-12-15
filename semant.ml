@@ -145,6 +145,7 @@ let check (globals, functions) =
       | StringLit _ -> String
       | BoolLit _ -> Bool
       | ColorLit _ -> Color
+      | ClusterLit _ -> Cluster
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier s
       | ArrayInit(_, _, _) -> raise (Failure ("Ya no you can't do that with arrays"))
