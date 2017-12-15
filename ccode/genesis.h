@@ -5,11 +5,12 @@
 #include "uthash/include/utlist.h"
 
 
+
 typedef struct color {
 	int r;
 	int g;
 	int b;
-} color_t;
+} color;
 
 typedef struct position {
 	int x;
@@ -19,18 +20,21 @@ typedef struct position {
 
 //what is our implementation here?
 typedef struct cluster{
-	position_t position;
-	color_t color;
+	int x;
+	int y;
+	int dx;
+	int dy;
+	color color;
 	int height;
 	int width;
 	const char *name;
-	struct cluster *next;
+	int id;
 	UT_hash_handle hh;
 } cluster_t;
 
 typedef struct board {
 	const char* name;
-	color_t color;
+	color color;
 	int height;
 	int width;
 	cluster_t *clusters;
@@ -38,6 +42,7 @@ typedef struct board {
 
 } board_t;
 
-void add_Cluster(cluster_t *c);
-void remove_Cluster(cluster_t *c);
+void add_Cluster(int length, int width, int x, int y, int dx, int dy, color *color);
+void remove_Cluster(int id);
+int create_id();
 #endif
