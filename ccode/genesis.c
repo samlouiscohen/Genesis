@@ -15,6 +15,8 @@ int backgroundR = 0xFF;
 int backgroundG = 0xFF;
 int backgroundB = 0xFF;
 int quit = 0;
+int cluster_id = 0;
+cluster_t *clusters = NULL;
 uint64_t downState = 0;
 uint64_t heldState = 0;
 uint64_t upState = 0;
@@ -192,30 +194,40 @@ void startGame(color_t *c, int width, int height){
     }
 }
 
+//called from add_cluster. DO NOT CALL OTHERWISE
+int create_id(){
+    int temp = cluster_id;
+    cluster_id = cluster_id + 1;
+    
+    return temp;
 
-/*
-void add_Cluster(cluster_t *c){
-    cluster_t *clusterList;
-    HASH_FIND_STR(curBoard->clusters, c->name,clusterList);
-    if(clusterList == NULL){
-        clusterList = malloc(sizeof(cluster_t));
-        clusterList->name = c->name;
-        clusterList->next = NULL;
-        HASH_ADD_STR(curBoard->clusters, name, clusterList);
-    }
-    LL_APPEND(clusterList,c);
 }
 
-void remove_Cluster(cluster_t *c){
-    cluster_t *clusterList;
-    HASH_FIND_STR(curBoard->clusters, c->name,clusterList);
+void add_Cluster(int length, int width, int x, int y, int dx, int dy, color *color){
+    cluster_t *cluster;
+    //HASH_FIND_STR(curBoard->clusters, cluster_id, cluster);
+    cluster = malloc(sizeof(cluster_t));
+    cluster->height = length;
+    cluster->width = width;
+    cluster->x = x;
+    cluster->y = y;
+    cluster->dx = dx;
+    cluster->dy = dy;
+    cluster->color = *color;
+    cluster->id = create_id();
+    printf("%d\n",cluster->id);
+    HASH_ADD_INT(clusters, id, cluster);
+    
+    //LL_APPEND(clusterList,c);
+}
 
-    if(clusterList != NULL){
-        LL_DELETE(clusterList, c);
-        LL_APPEND(toRemove, c);
+void remove_Cluster(int id){
+    cluster_t *toRemove;
+    HASH_FIND_INT(clusters,&id,toRemove);
+    if(toRemove != NULL){
+        HASH_DEL(clusters,toRemove);
     }
 }
-*/
 
 /* Exported function (visible in Genesis) */
 // int initScreenT(int x){
