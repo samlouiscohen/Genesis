@@ -29,26 +29,26 @@ let translate (globals, functions) =
   let flt_t =  L.double_type context in
   let pointer_t = L.pointer_type in
   let void_t = L.void_type context in
-  let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in 
+(*   let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in 
   let ut_hash_table_t = L.named_struct_type context "UT_hash_table" in
   let ut_hash_bucket_t = L.named_struct_type context "UT_hash_bucket" in
     L.struct_set_body ut_hash_handle_t [|L.pointer_type ut_hash_table_t; L.pointer_type i8_t; L.pointer_type i8_t; L.pointer_type ut_hash_handle_t; L.pointer_type ut_hash_handle_t; L.pointer_type i8_t; i32_t; i32_t|] false; 
     L.struct_set_body ut_hash_table_t  [|L.pointer_type ut_hash_bucket_t; i32_t; i32_t; i32_t; L.pointer_type ut_hash_handle_t; i64_t; i32_t; i32_t; i32_t; i32_t; i32_t|] false;
     L.struct_set_body ut_hash_bucket_t [|L.pointer_type ut_hash_handle_t; i32_t; i32_t|] false;
-
+ *)
   let color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
-
   let col_ptr_t = L.pointer_type color_t in
 
-  let position_t = L.named_struct_type context "position" in
+  let cluster_t = i32_t in
+(*   let position_t = L.named_struct_type context "position" in
     L.struct_set_body position_t [| i32_t ; i32_t |] false;
 
   let cluster_t = L.named_struct_type context "cluster" in
     L.struct_set_body cluster_t [| position_t ; color_t ; i32_t ; i32_t ; L.pointer_type i8_t ; L.pointer_type cluster_t ; ut_hash_handle_t|] false;
   let board_t = L.named_struct_type context "board" in
     L.struct_set_body board_t [| L.pointer_type i8_t ; color_t ; i32_t ; i32_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
-
+ *)
   let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
@@ -112,13 +112,13 @@ let translate (globals, functions) =
   (*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
   let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
 
-  let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t; |] in
+  let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t |] in
   let initScreen_func = L.declare_function "initScreen" initScreen_t the_module in
 
   (*let add_cluster_t = L.function_type (L.void_type context) [| L.pointer_type gb_t] in
   let add_cluster = L.declare_function "addCluster" add_cluster_t the_module in*)
 
-  let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t; |] in
+  let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t |] in
   let startGame_func = L.declare_function "startGame" startGame_t the_module in
 
   let isKeyDown_t = L.function_type i1_t [| pointer_t i8_t |] in
@@ -129,6 +129,9 @@ let translate (globals, functions) =
 
   let isKeyHeld_t = L.function_type i1_t [| pointer_t i8_t |] in
   let isKeyHeld_func = L.declare_function "isKeyHeld" isKeyHeld_t the_module in
+
+  let newCluster_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t; col_ptr_t |] in
+  let newCluster_func = L.declare_function "newCluster" newCluster_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -251,8 +254,17 @@ let translate (globals, functions) =
         let colld = L.build_load cptr "" builder in
 (*           ignore(L.set_alignment 8 colld); *)
         colld
-      | A.ClusterLit (c)->
-        let name = expr builder c in
+      | A.ClusterLit (l, w, x, y, dx, dy, c)->
+        let xPos = expr builder x in
+        let yPos = expr builder y in
+        let xVel = expr builder dx in
+        let yVel = expr builder dy in 
+        let len = expr builder l in
+        let wid = expr builder w in
+        let color = expr builder c in
+
+        L.build_call newCluster_func [| len; wid; xPos; yPos; xVel; yVel; color|] "newClust" builder
+(*         let name = expr builder c in
         let clustPtr = L.build_malloc cluster_t ("clustPtr") builder in
         let posPtr = L.build_struct_gep clustPtr 0 ("posPtr") builder in
         let colorPtr = L.build_struct_gep clustPtr 1 ("colorPtr") builder in
@@ -261,7 +273,7 @@ let translate (globals, functions) =
         let name_ptr = L.build_struct_gep clustPtr 4 ("name ptr") builder in
         let next_ptr = L.build_struct_gep clustPtr 5 ("nextPtr") builder in
         let handle_ptr = L.build_struct_gep clustPtr 6 ("handle_ptr") builder in
-        clustPtr
+        clustPtr *)
         
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder

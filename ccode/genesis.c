@@ -31,7 +31,6 @@ int newCluster(int l, int w, int x, int y, int dx, int dy, struct color *col){
     return 12;
 }
 
-
 //Create screen
 int initScreen(color_t *c, int width, int height){
     //Initialization flag
