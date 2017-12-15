@@ -27,6 +27,11 @@ void showDisplay();
 int keyToInt(const char *keyName);
 uint64_t keyMask(int number);
 
+int newCluster(int l, int w, int x, int y, int dx, int dy, struct color *col){
+    return 12;
+}
+
+
 //Create screen
 int initScreen(color_t *c, int width, int height){
     //Initialization flag
