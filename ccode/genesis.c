@@ -162,23 +162,24 @@ void remove_Cluster(cluster_t *c){
 //     initScreen(640, 480, colptr);
 // }
 
-// #ifdef BUILD_TEST
-// int main(int argc, char* args[]){
-//     struct color col;
-//     col.r = 0xFF;
-//     col.g = 0xFF;
-//     col.b = 0xFF;
-//     //Make new screen
 
-//     struct color *colptr = &col;
-//     initScreen(colptr, 640, 480);
+#ifdef BUILD_TEST
+int main(int argc, char* args[]){
+    struct color col;
+    col.r = 0xFF;
+    col.g = 0xFF;
+    col.b = 0xFF;
+    //Make new screen
 
-//     while(quit == 0){
-//         pollEvents();
-//         if(isKeyPressed('a')){
-//             printf("%s\n", "hello");
-//         }
-//     }
-//     close();
-// }
-// #endif
+    struct color *colptr = &col;
+    initScreen(colptr, 640, 480);
+
+    while(quit == 0){
+        pollEvents();
+        if(isKeyPressed('a')){
+            printf("%s\n", "hello");
+        }
+    }
+    close();
+}
+#endif

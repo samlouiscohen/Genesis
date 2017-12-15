@@ -20,7 +20,7 @@ module String = String
 
 let translate (globals, functions) =
   let context = L.global_context () in
-  let the_module = L.create_module context "MicroC" in
+  let the_module = L.create_module context "Genesis" in
     ignore(L.set_data_layout "e-m:o-i64:64-f80:128-n8:16:32:64-S128" the_module); (* sets data layout to match machine *)
   let i64_t = L.i64_type context in
   let i32_t  = L.i32_type  context in
@@ -49,7 +49,7 @@ let translate (globals, functions) =
   let board_t = L.named_struct_type context "board" in
     L.struct_set_body board_t [| L.pointer_type i8_t ; color_t ; i32_t ; i32_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
 
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
     | A.String -> pointer_t i8_t
@@ -57,7 +57,35 @@ let translate (globals, functions) =
     | A.Void -> void_t 
     | A.Color -> col_ptr_t
     | A.Cluster -> cluster_t
+	(* A.Struct -> pointer_t void_t *)
+    | A.ArrayType(t) -> pointer_t (ltype_of_typ t)
+    | _ -> raise(Failure ("invalid left-hand type"))
+
   in
+
+(*
+  (* Method to build an array *)
+  let rec build_uniform_array the_array the_llvm_value repeat_count =
+    (match repeat_count with
+      0 -> the_array (*base case*)
+      |_ -> build_uniform_array (the_llvm_value::the_array) the_llvm_value (repeat_count-1))
+    in
+*)
+
+  (* Declare each global variable; remember its value in a map *)
+  (* Define the starting values of global vars and init them to this, also store vars in the map *)
+(*   let global_variables map (var_typ, name) =
+    let global_value = (match var_typ with 
+      A.Int -> L.define_global name (L.const_int (ltype_of_typ A.Int) 0) the_module
+    | A.Bool -> L.define_global name (L.const_int (ltype_of_typ A.Bool) 0) the_module
+    | A.Float -> L.define_global name (L.const_float (ltype_of_typA.Float)
+    | A.ArrayType(typ, size) -> (* array starts full of nulls *)
+      let element_val = L.const_null (ltype_of_typ typ) in
+      let init = L.const_array (ltype_of_typ typ) 
+      (Array.of_list (build_uniform_array [] element_val size)) in 
+      StringMap.add name (L.define_global name init the_module) map in
+    List.fold_left global_var StringMap.empty globals in
+  *)
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
@@ -65,6 +93,12 @@ let translate (globals, functions) =
       let init = L.const_int (ltype_of_typ t) 0
       in StringMap.add n (L.define_global n init the_module) m in
     List.fold_left global_var StringMap.empty globals in
+  
+  let global_vars_typ = 
+	let global_var_typ map (typ, name) = 
+	  StringMap.add name typ map in
+  	List.fold_left global_var_typ StringMap.empty globals in
+	  
 
   (* Declare printf(), which the print built-in function will call *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
@@ -118,15 +152,34 @@ let translate (globals, functions) =
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
-    let local_vars =
-      let add_formal m (t, n) p = L.set_value_name n p;
-  let local = L.build_alloca (ltype_of_typ t) n builder in
-  ignore (L.build_store p local builder);
-  StringMap.add n local m in
 
+      let local_vars =
+        let add_formal m (t, n) p = L.set_value_name n p;
+        let local = L.build_alloca (ltype_of_typ t) n builder in
+          ignore (L.build_store p local builder);
+      StringMap.add n local m in
+
+(*
+	  let local_vars_typ = 
+		let add_formal typ_map (t, n) p = L.set_value_name n t; (* TODO: We don't know what this is.. *)
+	  StringMap.add n t typ_map in
+*)
+
+(*
+      let local_vars =
+      let add_formal m (t, n) p = L.set_value_name n p;
+        match t with
+            A.ArrayType(_) -> StringMap.add local_vars n p
+          | _ -> let local = L.build_alloca (ltype_of_typ t) n builder in
+          ignore (L.build_store p local builder);
+          StringMap.add n local m
+      in
+*)
+
+      (*DIDNT add strings here*)
       let add_local m (t, n) =
-  let local_var = L.build_alloca (ltype_of_typ t) n builder
-  in StringMap.add n local_var m in
+        let local_var = L.build_alloca (ltype_of_typ t) n builder
+        in StringMap.add n local_var m in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
           (Array.to_list (L.params the_function)) in
@@ -134,8 +187,25 @@ let translate (globals, functions) =
 
     (* Return the value for a variable or formal argument *)
     let lookup n = try StringMap.find n local_vars
-                   with Not_found -> StringMap.find n global_vars
+      with Not_found -> StringMap.find n global_vars
     in
+
+(*
+	let get_array_typ name = try StringMap.find name global_vars_typ 
+	  with Not_found -> raise (Failure ("dis typ don xist boiiii.")) 
+	in
+*)
+
+    let get_array_element name i builder = 
+      let ptr = L.const_gep (lookup name) [| i |] in
+      L.build_load ptr name builder
+    in
+
+(*
+	  let elem_typ_size = size_of (get_array_typ name) in 
+	  let ptr = elem_typ_size * expr + (lookup name) in
+      let elem = 
+*)
 
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
@@ -186,6 +256,7 @@ let translate (globals, functions) =
         
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+      | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
       | A.Binop (e1, op, e2) ->
     let e1' = expr builder e1
     and e2' = expr builder e2 in

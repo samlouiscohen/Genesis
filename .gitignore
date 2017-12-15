@@ -5,3 +5,4 @@ testall.sh
 testall.log
 *.swp
 ccode/SDL2-2.0.7
+ccode/genesis

@@ -5,7 +5,7 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
-%token DOLLAR COLOR CLUSTER
+%token LBRACKET RBRACKET COLOR CLUSTER
 %token <int> LITERAL
 %token <string> ID
 %token <float> FLOATLIT
@@ -58,15 +58,17 @@ typ:
   | BOOL { Bool }
   | VOID { Void }
   | STRING { String }
-  | COLOR { Color }
   | CLUSTER {Cluster}
+  | COLOR { Color } 
+  | typ LBRACKET RBRACKET { ArrayType($1) } 
 
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
-   typ ID SEMI { ($1, $2) }
+    typ ID SEMI { ($1, $2) }
+  | typ LBRACKET RBRACKET ID SEMI { ($1, $4) }
 
 stmt_list:
     /* nothing */  { [] }
@@ -112,6 +114,9 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+  | ID LBRACKET expr RBRACKET ASSIGN expr { ArrayAssign($1, $3, $6) }
+  | ID LBRACKET expr RBRACKET { ArrayAccess($1, $3) }
+  | ID ASSIGN typ LBRACKET LITERAL RBRACKET { ArrayInit($1, $3, $5) }
 
 actuals_opt:
     /* nothing */ { [] }
