@@ -58,7 +58,7 @@ let translate (globals, functions) =
     | A.Color -> col_ptr_t
     | A.Cluster -> cluster_t
 	(* A.Struct -> pointer_t void_t *)
-    | A.ArrayType(t) -> pointer_t (ltype_of_typ t)
+    | A.ArrayType(t) -> pointer_t (void_type t) (*TODO*)
     | _ -> raise(Failure ("invalid left-hand type"))
 
   in
@@ -94,6 +94,10 @@ let translate (globals, functions) =
       in StringMap.add n (L.define_global n init the_module) m in
     List.fold_left global_var StringMap.empty globals in
   
+
+
+
+
   let global_vars_typ = 
 	let global_var_typ map (typ, name) = 
 	  StringMap.add name typ map in
@@ -162,11 +166,16 @@ let translate (globals, functions) =
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
 
-      let local_vars =
-        let add_formal m (t, n) p = L.set_value_name n p;
-        let local = L.build_alloca (ltype_of_typ t) n builder in
-          ignore (L.build_store p local builder);
-      StringMap.add n local m in
+    let local_vars =
+      let add_formal m (t, n) p = L.set_value_name n p;
+      let local = L.build_alloca (ltype_of_typ t) n builder in
+        ignore (L.build_store p local builder);
+    StringMap.add n local m in
+
+
+
+    (* Allocating space for the array *)
+
 
 (*
 	  let local_vars_typ = 
@@ -174,18 +183,10 @@ let translate (globals, functions) =
 	  StringMap.add n t typ_map in
 *)
 
-(*
-      let local_vars =
-      let add_formal m (t, n) p = L.set_value_name n p;
-        match t with
-            A.ArrayType(_) -> StringMap.add local_vars n p
-          | _ -> let local = L.build_alloca (ltype_of_typ t) n builder in
-          ignore (L.build_store p local builder);
-          StringMap.add n local m
-      in
-*)
 
-      (*DIDNT add strings here*)
+
+
+
       let add_local m (t, n) =
         let local_var = L.build_alloca (ltype_of_typ t) n builder
         in StringMap.add n local_var m in
@@ -266,6 +267,7 @@ let translate (globals, functions) =
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
+      | A.ArrayInit
       | A.Binop (e1, op, e2) ->
     let e1' = expr builder e1
     and e2' = expr builder e2 in
