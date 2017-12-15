@@ -180,10 +180,10 @@ uint64_t keyMask(int number){
 void startGame(color_t *c, int width, int height){
     quit = 0;
     initScreen(c, width, height);
-    //init();
+    init();
     while (!quit){
         pollEvents();
-        //update();
+        update();
     }
 }
 
