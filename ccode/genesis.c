@@ -22,7 +22,7 @@ uint64_t heldState = 0;
 uint64_t upState = 0;
 const Uint8 *keyStates = NULL;
 
-int initScreen(color_t *c, int width, int height);
+int initScreen(color *c, int width, int height);
 void clearScreen();
 void static close();
 void showDisplay();
@@ -34,7 +34,7 @@ int newCluster(int l, int w, int x, int y, int dx, int dy, struct color *col){
 }
 
 //Create screen
-int initScreen(color_t *c, int width, int height){
+int initScreen(color *c, int width, int height){
     //Initialization flag
     int success = 1;
 
@@ -110,6 +110,11 @@ void static close(){
     gRenderer = NULL;
 
     SDL_Quit();
+    cluster_t *temp,*currentCluster;
+    HASH_ITER(hh,clusters,currentCluster,temp){
+        HASH_DEL(clusters,currentCluster);
+        free(currentCluster);
+    }
 }
 
 void pollEvents(){
@@ -183,7 +188,7 @@ uint64_t keyMask(int number){
     return mask << number;
 }
 
-void startGame(color_t *c, int width, int height){
+void startGame(color *c, int width, int height){
     quit = 0;
     initScreen(c, width, height);
     //init();
@@ -216,6 +221,9 @@ void add_Cluster(int length, int width, int x, int y, int dx, int dy, color *col
     cluster->id = create_id();
     printf("%d\n",cluster->id);
     HASH_ADD_INT(clusters, id, cluster);
+    unsigned int numUsers;
+    numUsers = HASH_COUNT(clusters);
+    printf("there are %u users\n", numUsers);
     
     //LL_APPEND(clusterList,c);
 }
