@@ -9,6 +9,7 @@ ifeq ($(UNAME_S), Linux)
 	CFLAGS += -DBUILD_TEST
 	LDFLAGS += -I /SDL2-2.0.7/include -L /SDL2-2.0.7/build -l SDL2
 endif
+
 ifeq ($(UNAME_S), Darwin)
 #	LDFLAGS += -I /Library/Frameworks/SDL2.framework/Headers -framework SDL2
 	LDFLAGS += -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks -framework SDL2
@@ -16,8 +17,8 @@ endif
 
 all: genesis
 
-genesis: genesis.c
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+genesis: genesis.c genesis.h
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) 
 
 clean:
 	rm genesis

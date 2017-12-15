@@ -9,7 +9,6 @@ Detailed documentation on the OCaml LLVM library:
 
 http://llvm.moe/
 http://llvm.moe/ocaml/
-
 *)
 
 module L = Llvm
@@ -21,25 +20,43 @@ module String = String
 
 let translate (globals, functions) =
   let context = L.global_context () in
-  let the_module = L.create_module context "Genesis"
-  and i32_t  = L.i32_type  context
-  and i8_t   = L.i8_type   context
-  and i1_t   = L.i1_type   context
-  and flt_t =  L.double_type context
-  and pointer_t = L.pointer_type
-  and void_t = L.void_type context
-  and color_t = L.i32_type context in
-(*  and color_t = L.named_struct_type context "color" in
-    L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false;*) (* need to change here if source file changes *)
+  let the_module = L.create_module context "Genesis" in
+    ignore(L.set_data_layout "e-m:o-i64:64-f80:128-n8:16:32:64-S128" the_module); (* sets data layout to match machine *)
+  let i64_t = L.i64_type context in
+  let i32_t  = L.i32_type  context in
+  let i8_t   = L.i8_type   context in
+  let i1_t   = L.i1_type   context in
+  let flt_t =  L.double_type context in
+  let pointer_t = L.pointer_type in
+  let void_t = L.void_type context in
+  let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in 
+  let ut_hash_table_t = L.named_struct_type context "UT_hash_table" in
+  let ut_hash_bucket_t = L.named_struct_type context "UT_hash_bucket" in
+    L.struct_set_body ut_hash_handle_t [|L.pointer_type ut_hash_table_t; L.pointer_type i8_t; L.pointer_type i8_t; L.pointer_type ut_hash_handle_t; L.pointer_type ut_hash_handle_t; L.pointer_type i8_t; i32_t; i32_t|] false; 
+    L.struct_set_body ut_hash_table_t  [|L.pointer_type ut_hash_bucket_t; i32_t; i32_t; i32_t; L.pointer_type ut_hash_handle_t; i64_t; i32_t; i32_t; i32_t; i32_t; i32_t|] false;
+    L.struct_set_body ut_hash_bucket_t [|L.pointer_type ut_hash_handle_t; i32_t; i32_t|] false;
 
-  (*Go from a type in MicroC to a type in LLVM*)
+  let color_t = L.named_struct_type context "color" in
+    L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
+
+  let col_ptr_t = L.pointer_type color_t in
+
+  let position_t = L.named_struct_type context "position" in
+    L.struct_set_body position_t [| i32_t ; i32_t |] false;
+
+  let cluster_t = L.named_struct_type context "cluster" in
+    L.struct_set_body cluster_t [| position_t ; color_t ; i32_t ; i32_t ; L.pointer_type i8_t ; L.pointer_type cluster_t ; ut_hash_handle_t|] false;
+  let board_t = L.named_struct_type context "board" in
+    L.struct_set_body board_t [| L.pointer_type i8_t ; color_t ; i32_t ; i32_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
+
   let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
     | A.String -> pointer_t i8_t
     | A.Bool -> i1_t
     | A.Void -> void_t 
-    | A.Color -> color_t
+    | A.Color -> col_ptr_t
+    | A.Cluster -> cluster_t
 	(* A.Struct -> pointer_t void_t *)
     | A.ArrayType(t) -> pointer_t (ltype_of_typ t)
     | _ -> raise(Failure ("invalid left-hand type"))
@@ -92,11 +109,26 @@ let translate (globals, functions) =
   let printbig_func = L.declare_function "printbig" printbig_t the_module in
 
   (* Declare function for making a new board *)
-(*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
+  (*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
   let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
 
-  let initScreenT_t = L.function_type i32_t [| i32_t |] in
-  let initScreenT_func = L.declare_function "initScreenT" initScreenT_t the_module in
+  let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t; |] in
+  let initScreen_func = L.declare_function "initScreen" initScreen_t the_module in
+
+  (*let add_cluster_t = L.function_type (L.void_type context) [| L.pointer_type gb_t] in
+  let add_cluster = L.declare_function "addCluster" add_cluster_t the_module in*)
+
+  let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t; |] in
+  let startGame_func = L.declare_function "startGame" startGame_t the_module in
+
+  let isKeyDown_t = L.function_type i1_t [| pointer_t i8_t |] in
+  let isKeyDown_func = L.declare_function "isKeyDown" isKeyDown_t the_module in
+
+  let isKeyUp_t = L.function_type i1_t [| pointer_t i8_t |] in
+  let isKeyUp_func = L.declare_function "isKeyUp" isKeyUp_t the_module in
+
+  let isKeyHeld_t = L.function_type i1_t [| pointer_t i8_t |] in
+  let isKeyHeld_func = L.declare_function "isKeyHeld" isKeyHeld_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -190,6 +222,47 @@ let translate (globals, functions) =
       | A.StringLit s -> L.build_global_stringptr s "tmp" builder
       | A.FloatLit fl -> L.const_float flt_t fl
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+      | A.ColorLit (r, g, b) -> 
+        let ctmp = L.build_alloca color_t "color_tmp" builder in
+(*           ignore(L.set_alignment 4 ctmp); *)
+        let cptr = L.build_alloca (L.pointer_type color_t) "clr_ptr" builder in
+(*           ignore(L.set_alignment 8 cptr); *)
+        let e1 = expr builder r 
+        and e2 = expr builder g 
+        and e3 = expr builder b in
+
+        let rtmp = L.build_struct_gep ctmp 0 "r" builder in 
+          ignore (L.build_store e1 rtmp builder);
+        let gtmp = L.build_struct_gep ctmp 1 "g" builder in 
+          ignore (L.build_store e2 gtmp builder);
+        let btmp = L.build_struct_gep ctmp 2 "b" builder in 
+          ignore (L.build_store e3 btmp builder);
+(*         let rtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0 ; L.const_int i32_t 0|] "r" builder in
+        let rstr = L.build_store e1 rtmp builder in
+(*           ignore(L.set_alignment 4 rstr); *)
+        let gtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 1|] "g" builder in
+        let gstr = L.build_store e2 rtmp builder in 
+(*           ignore(L.set_alignment 4 gstr); *)
+        let btmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 2|] "b" builder in
+        let  bstr = L.build_store e3 rtmp builder in
+(*           ignore(L.set_alignment 4 bstr); *) *)
+        let colstr = L.build_store ctmp cptr builder in
+(*           ignore(L.set_alignment 8 colstr); *)
+        let colld = L.build_load cptr "" builder in
+(*           ignore(L.set_alignment 8 colld); *)
+        colld
+      | A.ClusterLit (c)->
+        let name = expr builder c in
+        let clustPtr = L.build_malloc cluster_t ("clustPtr") builder in
+        let posPtr = L.build_struct_gep clustPtr 0 ("posPtr") builder in
+        let colorPtr = L.build_struct_gep clustPtr 1 ("colorPtr") builder in
+        let heightPtr = L.build_struct_gep clustPtr 2 ("heightPtr") builder in
+        let widthPtr = L.build_struct_gep clustPtr 3 ("widthPtr") builder in
+        let name_ptr = L.build_struct_gep clustPtr 4 ("name ptr") builder in
+        let next_ptr = L.build_struct_gep clustPtr 5 ("nextPtr") builder in
+        let handle_ptr = L.build_struct_gep clustPtr 6 ("handle_ptr") builder in
+        clustPtr
+        
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
@@ -257,8 +330,31 @@ let translate (globals, functions) =
       | A.Call ("printbig", [e]) ->
           L.build_call printbig_func [| (expr builder e) |] "printbig" builder
 (* external function -- for testing *)
-      | A.Call ("initScreenT", [e]) ->
-          L.build_call initScreenT_func [| (expr builder e) |] "initScreenT" builder
+      | A.Call ("initScreen", [w; h; c]) -> 
+          let width = expr builder w 
+          and height = expr builder h
+          and color = expr builder c in
+(*             ignore(L.set_alignment 8 color);
+ *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
+          ignore(L.build_store color clr_ptr builder) ; *)
+          L.build_call initScreen_func [| color; width; height |] "initScreen" builder
+      | A.Call ("startGame", [w; h; c]) -> 
+          let width = expr builder w 
+          and height = expr builder h
+          and color = expr builder c in
+(*             ignore(L.set_alignment 8 color);
+ *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
+          ignore(L.build_store color clr_ptr builder) ; *)
+          L.build_call startGame_func [| color; width; height |] "" builder  
+      | A.Call ("keyDown", [s]) ->
+          let keyName = expr builder s in
+          L.build_call isKeyDown_func [|keyName|] "keyD" builder
+      | A.Call ("keyUp", [s]) ->
+          let keyName = expr builder s in
+          L.build_call isKeyUp_func [|keyName|] "keyU" builder
+      | A.Call ("keyHeld", [s]) ->
+          let keyName = expr builder s in
+          L.build_call isKeyHeld_func [|keyName|] "keyH" builder
       | A.Call ("prints", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
       | A.Call (f, act) ->

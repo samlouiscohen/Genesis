@@ -3,6 +3,7 @@
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq | And | Or
 type uop = Neg | Not
 
+
 type typ = 
           Int
         | Float
@@ -10,8 +11,9 @@ type typ =
         | Bool 
         | Void
         | Color 
-        | Cluster of string
+        | Cluster
         | ArrayType of typ
+
 
 type bind = typ * string
 
@@ -20,6 +22,8 @@ type expr =
   | StringLit of string
   | FloatLit of float
   | BoolLit of bool
+  | ColorLit of expr * expr * expr
+  | ClusterLit of expr
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -77,6 +81,7 @@ let rec string_of_typ = function
   | Void -> "void"
   | Float -> "float"
   | Color -> "color"
+  | Cluster -> "cluster"
   | ArrayType(t) -> "ArrayType:" ^ string_of_typ t
 
 let rec string_of_expr = function
@@ -85,6 +90,8 @@ let rec string_of_expr = function
   | StringLit(s) -> s
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
+  | ColorLit(r,g,b) -> "<" ^ string_of_expr r ^ "," ^ string_of_expr g ^ "," ^ string_of_expr b ^ ">"
+  | ClusterLit(c) -> "<" ^ string_of_expr c ^ ">"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2

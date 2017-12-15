@@ -67,8 +67,24 @@ let check (globals, functions) =
      { typ = Void; fname = "printfl"; formals = [(Float, "x")];
        locals = []; body = [] } 
 
-       (StringMap.add "initScreenT"
-     { typ = Void; fname = "initScreenT"; formals = [(Int, "x")];
+       (StringMap.add "keyDown"
+     { typ = Bool; fname = "keyDown"; formals = [(String, "keyName")];
+       locals = []; body = [] } 
+       
+       (StringMap.add "keyUp"
+     { typ = Bool; fname = "keyUp"; formals = [(String, "keyName")];
+       locals = []; body = [] } 
+
+       (StringMap.add "keyHeld"
+     { typ = Bool; fname = "keyHeld"; formals = [(String, "keyName")];
+       locals = []; body = [] } 
+
+       (StringMap.add "initScreen"
+     { typ = Int; fname = "initScreen"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
+       locals = []; body = [] } 
+
+       (StringMap.add "startGame"
+     { typ = Void; fname = "startGame"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
        locals = []; body = [] } 
 
        (StringMap.add "prints"
@@ -77,7 +93,7 @@ let check (globals, functions) =
 
        (StringMap.singleton "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] })))))
+       locals = []; body = [] })))))))))
    in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -128,6 +144,7 @@ let check (globals, functions) =
       | FloatLit _ -> Float
       | StringLit _ -> String
       | BoolLit _ -> Bool
+      | ColorLit _ -> Color
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier s
       | ArrayInit(_, _, _) -> raise (Failure ("Ya no you can't do that with arrays"))

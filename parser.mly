@@ -1,14 +1,11 @@
-/* Ocamlyacc parser for Genesis */
 
-%{
-open Ast
-%}
+%{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
-%token LBRACKET RBRACKET COLOR
+%token LBRACKET RBRACKET COLOR CLUSTER
 %token <int> LITERAL
 %token <string> ID
 %token <float> FLOATLIT
@@ -61,6 +58,7 @@ typ:
   | BOOL { Bool }
   | VOID { Void }
   | STRING { String }
+  | CLUSTER {Cluster}
   | COLOR { Color } 
   | typ LBRACKET RBRACKET { ArrayType($1) } 
 
@@ -96,6 +94,7 @@ expr:
   | STRINGLIT        { StringLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
+  | LT expr COMMA expr COMMA expr GT { ColorLit($2, $4, $6) }
   | ID               { Id($1) }
   | FLOATLIT         { FloatLit($1) }  /* Float is expression which handles negatives*/
   | expr PLUS   expr { Binop($1, Add,   $3) }

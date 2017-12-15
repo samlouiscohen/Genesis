@@ -1,30 +1,34 @@
 #include <SDL2/SDL.h>
+#include <stdbool.h>
+#include "genesis.h"
 
-typedef struct color {
-    int r;
-    int g;
-    int b;
-} color;
+extern void update();
+extern void init();
+extern board_t *curBoard;
+extern cluster_t *toRemove;
 
-typedef struct position {
-    int x;
-    int y;    
-} position;
+char *additionalKeynames[] = {"Up", "Down", "Left", "Right", "Space", "Escape"};
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 int backgroundR = 0xFF;
 int backgroundG = 0xFF;
 int backgroundB = 0xFF;
+int quit = 0;
+uint64_t downState = 0;
+uint64_t heldState = 0;
+uint64_t upState = 0;
+const Uint8 *keyStates = NULL;
 
-int initScreen(int width, int height, color c);
+int initScreen(color_t *c, int width, int height);
 void clearScreen();
 void static close();
 void showDisplay();
-int initScreenT(int x);
+int keyToInt(const char *keyName);
+uint64_t keyMask(int number);
 
 //Create screen
-int initScreen(int width, int height, color c){
+int initScreen(color_t *c, int width, int height){
     //Initialization flag
     int success = 1;
 
@@ -61,11 +65,13 @@ int initScreen(int width, int height, color c){
             else
             {
                 //Set background color
-                backgroundR = c.r;
-                backgroundG = c.g;
-                backgroundB = c.b;
+                backgroundR = c->r;
+                backgroundG = c->g;
+                backgroundB = c->b;
+
                 //Clear background
                 clearScreen();
+                showDisplay();
                 //SDL_RenderPresent(gRenderer);
             }
         }
@@ -100,47 +106,135 @@ void static close(){
     SDL_Quit();
 }
 
-/* Exported function (visible in Genesis) */
-int initScreenT(int x){
-    struct color col;
-    col.r = 0xFF;
-    col.g = 0xFF;
-    col.b = 0xFF;
-    //Make new screen
-    if (initScreen(640, 480, col)){
-        drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
-        showDisplay();
-        //wait 4 seconds
-		int i;
-        for(i = 0; i < 4000; i++){
-            SDL_PumpEvents();
-            SDL_Delay(1);
+void pollEvents(){
+    SDL_Event event;
+    downState = 0;
+    upState = 0;
+    heldState = 0;
+    while(SDL_PollEvent(&event)){
+        if (event.type == SDL_QUIT){
+            quit = 1;
+        } else if (event.type == SDL_KEYDOWN){
+            const char* keyName = SDL_GetKeyName(event.key.keysym.sym);
+            uint64_t mask = keyMask(keyToInt(keyName));
+            if (event.key.repeat){
+                heldState |= mask;
+            } else {
+                downState |= mask;
+            }
+        } else if (event.type == SDL_KEYUP){
+            const char* keyName = SDL_GetKeyName(event.key.keysym.sym);
+            uint64_t mask = keyMask(keyToInt(keyName));
+            upState |= mask;
         }
-        close();
     }
-
-    return 0;
+    keyStates = SDL_GetKeyboardState(NULL);
 }
+
+int keyInBitmask(uint64_t bitmask, char *keyName){
+    int keyInt = keyToInt(keyName);
+    return (bitmask & keyMask(keyInt)) != 0;
+}
+
+bool isKeyHeld(char *key){
+    return keyInBitmask( heldState, key);
+}
+
+bool isKeyDown(char *key){
+    return keyInBitmask( downState, key);
+}
+
+bool isKeyUp(char *key){
+    return keyInBitmask( upState, key);
+}
+
+int keyToInt(const char *keyName){
+    int numChars = 26;
+    int numInts = 10;
+    if (strlen(keyName) == 1){
+        //Check values for alphabet and number chars
+        char keyChar = keyName[0];
+        if(isalpha(keyChar)){
+            keyChar = toupper(keyChar);
+            return keyChar - 'A';
+        } else if (isdigit(keyChar)){
+            return numChars + keyChar - '0';
+        }
+    } else {
+        int i;
+        int numAdditionalKeys = sizeof(additionalKeynames) / sizeof(additionalKeynames[0]);
+        for(i = 0; i < numAdditionalKeys; i = i + 1){
+            if (strcmp(additionalKeynames[i], keyName) == 0){
+                return numChars + numInts + i;
+            }
+        }
+    }
+    return -1; //Key does not have an int representation
+}
+
+uint64_t keyMask(int number){
+    uint64_t mask = 1;
+    return mask << number;
+}
+
+void startGame(color_t *c, int width, int height){
+    quit = 0;
+    initScreen(c, width, height);
+    //init();
+    printf("%s\n", "Init successful");
+    while (!quit){
+        pollEvents();
+        //update();
+    }
+}
+
+
+/*
+void add_Cluster(cluster_t *c){
+    cluster_t *clusterList;
+    HASH_FIND_STR(curBoard->clusters, c->name,clusterList);
+    if(clusterList == NULL){
+        clusterList = malloc(sizeof(cluster_t));
+        clusterList->name = c->name;
+        clusterList->next = NULL;
+        HASH_ADD_STR(curBoard->clusters, name, clusterList);
+    }
+    LL_APPEND(clusterList,c);
+}
+
+void remove_Cluster(cluster_t *c){
+    cluster_t *clusterList;
+    HASH_FIND_STR(curBoard->clusters, c->name,clusterList);
+
+    if(clusterList != NULL){
+        LL_DELETE(clusterList, c);
+        LL_APPEND(toRemove, c);
+    }
+}
+*/
+
+/* Exported function (visible in Genesis) */
+// int initScreenT(int x){
+//     struct color col;
+//     col.r = 0xFF;
+//     col.g = 0xFF;
+//     col.b = 0xFF;
+//     //Make new screen
+
+//     struct color *colptr = &col;
+//     initScreen(640, 480, colptr);
+// }
+
 
 #ifdef BUILD_TEST
 int main(int argc, char* args[]){
-
     struct color col;
     col.r = 0xFF;
     col.g = 0xFF;
     col.b = 0xFF;
     //Make new screen
-    if (initScreen(640, 480, col)){
-        drawRectangle(0, 0, 20, 20, 0xFF, 0, 0);
-        showDisplay();
-        //wait 4 seconds
-        for(int i = 0; i < 4000; i++){
-            SDL_PumpEvents();
-            SDL_Delay(1);
-        }
-        close();
-    }
 
-    return 0;
+    struct color *colptr = &col;
+    startGame(colptr, 640, 480);
 }
 #endif
