@@ -133,8 +133,8 @@ let translate (globals, functions) =
   let newCluster_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t; col_ptr_t |] in
   let newCluster_func = L.declare_function "newCluster" newCluster_t the_module in
 
-  let random_t = L.function_type i32_t [|i32_t|] in
-  let random_func = L.declare_function "random" random_t the_module in
+  let randomInt_t = L.function_type i32_t [|i32_t|] in
+  let randomInt_func = L.declare_function "randomInt" randomInt_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -372,7 +372,7 @@ let translate (globals, functions) =
           L.build_call isKeyHeld_func [|keyName|] "keyH" builder
       | A.Call ("random", [e]) ->
           let maxInt = expr builder e in
-          L.build_call random_func [|maxInt|] "randInt" builder
+          L.build_call randomInt_func [|maxInt|] "randInt" builder
       | A.Call ("prints", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
       | A.Call (f, act) ->

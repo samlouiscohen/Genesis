@@ -211,7 +211,7 @@ void startGame(color *c, int width, int height){
         unsigned int frameStart = SDL_GetTicks();
         pollEvents();
         //update(frameNum);
-        unsigned int frameTime = SDL_GetTicks - frameStart;
+        unsigned int frameTime = SDL_GetTicks() - frameStart;
         if(frameTime < msPerFrame){
             SDL_Delay(msPerFrame - frameTime);
         }
@@ -256,7 +256,7 @@ void remove_Cluster(int id){
     }
 }
 
-int random(int max){
+int randomInt(int max){
     srand(time(NULL));
     return (rand() % max);
 }
