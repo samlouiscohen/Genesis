@@ -355,11 +355,14 @@ int detectCollision(int id1, int id2){
         r2.w = c2->width;
         r2.h = c2->height;
 
-        SDLRect res;
-        SDL_bool ans;
-        ans = SDL_IntersectRect(r1,r2,res)
+        const SDL_Rect *r3 = &r1;
+        const SDL_Rect *r4 = &r2;
 
-        if(ans = SDL_True){
+        SDL_Rect res;
+        SDL_bool ans;
+        ans = SDL_IntersectRect(r3,r4,&res);
+
+        if(ans = SDL_TRUE){
             return 1;
         }
         else{
@@ -380,12 +383,12 @@ color getColor(int id){
    
 }
 
-void cluster_setColor(int id, struct color color){
+void cluster_setColor(int id, struct color *color){
     cluster_t *cluster;
     HASH_FIND_INT(clusters, &id, cluster);
 
     if(cluster != NULL){
-        cluster->color = color;
+        cluster->color = *color;
     }
 }
 
