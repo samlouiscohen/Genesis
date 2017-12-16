@@ -21,6 +21,7 @@ int backgroundB = 0xFF;
 int quit = 0;
 int cluster_id = 0;
 cluster_t *clusters = NULL;
+cluster_t *drawSet = NULL;
 uint64_t downState = 0;
 uint64_t heldState = 0;
 uint64_t upState = 0;
@@ -215,6 +216,7 @@ void startGame(color *c, int width, int height){
     initScreen(c, width, height);
 
     cluster_t *cl;
+    //draws all clusters in hash
     for (cl = clusters; cl!=NULL;cl = cl->hh.next){
         drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
     }
@@ -229,7 +231,7 @@ void startGame(color *c, int width, int height){
         unsigned int frameStart = SDL_GetTicks();
         pollEvents();
 
-        //update(frameNum);
+        update(frameNum);
         unsigned int frameTime = SDL_GetTicks() - frameStart;
         if(frameTime < msPerFrame){
             SDL_Delay(msPerFrame - frameTime);
@@ -265,6 +267,15 @@ int newCluster(int length, int width, int x, int y, int dx, int dy, color *color
     // printf("there are %u clusters\n", numClusters);
     return cluster->id;
     //LL_APPEND(clusterList,c);
+}
+
+unsigned int draw(int id, cluster_t *cluster){
+    HASH_ADD_INT(drawSet, id, cluster);
+    unsigned int size;
+    size = HASH_COUNT(drawSet);
+    return size;
+
+
 }
 
 int getX(int id){
