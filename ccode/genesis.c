@@ -82,6 +82,7 @@ int initScreen(color *c, int width, int height){
             }
         }
     }
+    printf( "Success!\n" );
     return success;
 }
 
@@ -191,10 +192,10 @@ uint64_t keyMask(int number){
 void startGame(color *c, int width, int height){
     quit = 0;
     initScreen(c, width, height);
-    //init();
+    init();
     while (!quit){
         pollEvents();
-        //update();
+        update();
     }
 }
 
