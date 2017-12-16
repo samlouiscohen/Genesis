@@ -182,10 +182,10 @@ uint64_t keyMask(int number){
 void startGame(color *c, int width, int height){
     quit = 0;
     initScreen(c, width, height);
-    init();
+    //init();
     while (!quit){
         pollEvents();
-        update();
+        //update();
     }
 }
 //called from add_cluster. DO NOT CALL OTHERWISE
@@ -246,7 +246,7 @@ void remove_Cluster(int id){
 // }
 
 
-#ifdef BUILD_TEST
+#ifndef SKIP_MAIN
 int main(int argc, char* args[]){
     struct color col;
     col.r = 0xFF;

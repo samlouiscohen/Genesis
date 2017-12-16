@@ -48,8 +48,10 @@ parser.ml parser.mli : parser.mly
 printbig : printbig.c
 	cc -o printbig -DBUILD_TEST printbig.c
 
-genesis.o: ccode/genesis.c
-	cc -c -o ccode/genesis.o $< -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
+genesis.o: 
+# ccode/genesis.c
+#	cc -c -o ccode/genesis.o $< -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
+	cd ccode && make CFLAGS="-DSKIP_MAIN" genesis.o
 
 tests: rtest test vtest
 
