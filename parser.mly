@@ -6,7 +6,8 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
-%token LBRACKET RBRACKET COLOR CLUSTER NEW
+%token LBRACKET RBRACKET COLOR CLUSTER NEW DOLLAR 
+%token <string> PROPERTY
 %token <int> LITERAL
 %token <string> ID
 %token <float> FLOATLIT
@@ -95,6 +96,7 @@ expr:
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | LT expr COMMA expr COMMA expr GT { ColorLit($2, $4, $6) }
+  | DOLLAR expr COMMA expr COMMA expr COMMA expr COMMA expr COMMA expr COMMA expr DOLLAR { ClusterLit($2, $4, $6, $8, $10, $12, $14)}
   | ID               { Id($1) }
   | FLOATLIT         { FloatLit($1) }  /* Float is expression which handles negatives*/
   | expr PLUS   expr { Binop($1, Add,   $3) }
@@ -109,6 +111,7 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
+  | expr PROPERTY { PropertyAccess($1, $2) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | ID ASSIGN NEW typ LBRACKET expr RBRACKET { ArrayInit($1, $4, $6) }

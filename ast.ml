@@ -23,7 +23,8 @@ type expr =
   | FloatLit of float
   | BoolLit of bool
   | ColorLit of expr * expr * expr
-  | ClusterLit of expr
+  | ClusterLit of expr * expr * expr * expr * expr * expr * expr
+  | Property of string
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -32,6 +33,7 @@ type expr =
   | ArrayInit of string * typ * expr
   | ArrayAssign of string * expr * expr
   | ArrayAccess of string * expr
+  | PropertyAccess of expr * string
   | Noexpr
 
 type stmt =
@@ -91,7 +93,9 @@ let rec string_of_expr = function
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | ColorLit(r,g,b) -> "<" ^ string_of_expr r ^ "," ^ string_of_expr g ^ "," ^ string_of_expr b ^ ">"
-  | ClusterLit(c) -> "<" ^ string_of_expr c ^ ">"
+  | ClusterLit(l, w, _, _, _, _, c) -> "Cluster $" ^ string_of_expr l ^ "," ^ string_of_expr w ^ "," ^ string_of_expr c ^  "$"
+  | PropertyAccess(e, p) -> string_of_expr e ^ p
+  | Property(s) -> s
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
