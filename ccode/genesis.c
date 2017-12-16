@@ -91,11 +91,11 @@ void clearScreen(){
     SDL_RenderClear(gRenderer);
 }
 
-SDL_Rect drawRectangle(int x, int y, int w, int h, int r, int g, int b){
+void drawRectangle(int x, int y, int w, int h, int r, int g, int b){
     SDL_Rect rect = {x, y, w, h};
     SDL_SetRenderDrawColor(gRenderer, r, g, b, 0xFF);
     SDL_RenderFillRect(gRenderer, &rect);
-    return rect;
+
 }
 
 int inGoalArea(SDL_Rect rect, SDL_Rect goal){
@@ -231,7 +231,6 @@ void startGame(color *c, int width, int height){
         //draws all clusters in hash
         for (cl = clusters; cl!=NULL;cl = cl->hh.next){
             if(cl->draw == 1){
-                printf("Pos is %d\n",cl->x );
                 drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
                 }
         }
@@ -277,6 +276,24 @@ int newCluster(int length, int width, int x, int y, int dx, int dy, color *color
     //LL_APPEND(clusterList,c);
 }
 
+void setDraw(int id, bool b){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+    if(cluster != NULL){
+        cluster->draw = b;
+    }
+}
+
+int getDraw(int id){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters,&id,cluster);
+    if(cluster != NULL){
+        return cluster->draw;
+    }
+    else{
+        return -1;
+    }
+}
 int getX(int id){
     cluster_t *cluster;
     HASH_FIND_INT(clusters,&id,cluster);
