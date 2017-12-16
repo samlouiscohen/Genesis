@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 int i;
 bool b;
 int j;
