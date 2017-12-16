@@ -31,17 +31,18 @@ let check (globals, functions) =
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type. (int can be assigned to float and vice versa) *)
   let check_assign lValueType rValueType err =
+
     if ((isNum lValueType) && (isNum rValueType)) then lValueType
-    else if lValueType == rValueType then lValueType else raise err
+    else if lValueType = rValueType then lValueType else raise err
   in
 
   let check_assign_array lval rval err = 
-    if lval == rval then lval else raise err
+    if lval = rval then lval else raise err
   in
 
-  (*   let check_assign lvaluet rvaluet err =
-     if lvaluet == rvaluet then lvaluet else raise err
-  in *)
+  
+
+
 
    
   (**** Checking Global Variables ****)
@@ -100,10 +101,12 @@ let check (globals, functions) =
        locals = []; body = [] })))))))))
    in
 
+  (*Add the built-in functions to the function declaration list*)
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
                          built_in_decls functions
   in
 
+  (*Grab the function declaration given its name*)
   let function_decl s = try StringMap.find s function_decls
        with Not_found -> raise (Failure ("unrecognized function " ^ s))
   in
@@ -131,16 +134,21 @@ let check (globals, functions) =
 
     let type_of_identifier s =
       try let id_typ = StringMap.find s symbols in 
+          id_typ
+      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
+
+    let type_of_identifier_array s =
+      try let id_typ = StringMap.find s symbols in 
           (match id_typ with
               ArrayType(t) -> t
             | _ -> id_typ
           )
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
-(*
-      try StringMap.find s symbols
-      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
-*)
+
     in
+
+
 
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
@@ -150,7 +158,7 @@ let check (globals, functions) =
       | BoolLit _ -> Bool
       | ColorLit _ -> Color
       | Id s -> type_of_identifier s
-      | ArrayAccess(s, _) -> type_of_identifier s
+      | ArrayAccess(s, _) -> type_of_identifier_array s
 (*
       | ArrayInit(s, typ, expr) -> raise (Failure ("Ya no you can't do that with arrays"))
       | ArrayAssign(s, lhs, rhs) -> raise (Failure ("Ya no you can't do that with arrays"))
@@ -176,10 +184,10 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
           string_of_typ t ^ " in " ^ string_of_expr ex)))
         | Noexpr -> Void
-        | ArrayInit(s, typ, _) -> let lt = type_of_identifier s and rt = typ in
+        | ArrayInit(s, typ, _) -> let lt = type_of_identifier_array s and rt = typ in
             if string_of_typ lt = string_of_typ rt then lt else 
             raise (Failure ("Thou shall not initialize mismatched array types"))
-        | ArrayAssign(s, _, e) -> let lt = type_of_identifier s and rt = expr e in
+        | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
             check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
         | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
@@ -187,17 +195,28 @@ let check (globals, functions) =
              " = " ^ string_of_typ rt ^ " in " ^ 
              string_of_expr ex))
         | Call(fname, actuals) as call -> let fd = function_decl fname in
+          
+          (*Check mismatching number of arguments*)
           if List.length actuals != List.length fd.formals then
             raise (Failure ("expecting " ^ string_of_int
               (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
-          else
-            List.iter2 (fun (ft, _) e -> let et = expr e in
-               ignore (check_assign ft et
+
+          (* Iterate over args and check if each of those passed match *)
+          else 
+            List.iter2 (fun (ft, b) e -> let et = expr e in
+
+
+
+              ignore (check_assign ft et
                  (Failure ("illegal actual argument found " ^ string_of_typ et ^
                  " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
               fd.formals actuals;
             fd.typ
-      in
+
+
+          in
+
+
 
     let check_bool_expr e = if expr e != Bool
      then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
