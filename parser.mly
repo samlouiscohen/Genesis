@@ -6,12 +6,15 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
-%token LBRACKET RBRACKET COLOR CLUSTER NEW
+%token LBRACKET RBRACKET COLOR CLUSTER NEW DOLLAR DOT POUND
+%token AT
+%token <string> PROPERTY
 %token <int> LITERAL
 %token <string> ID
 %token <float> FLOATLIT
 %token <string> STRINGLIT
 %token EOF
+
 
 %nonassoc NOELSE
 %nonassoc ELSE
@@ -23,6 +26,7 @@
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right NOT NEG
+%left DOT
 
 %start program
 %type <Ast.program> program
@@ -94,9 +98,11 @@ expr:
   | STRINGLIT        { StringLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
-  | LT expr COMMA expr COMMA expr GT { ColorLit($2, $4, $6) }
+  | POUND expr COMMA expr COMMA expr POUND { ColorLit($2, $4, $6) }
+  | DOLLAR expr COMMA expr COMMA expr COMMA expr COMMA expr COMMA expr COMMA expr DOLLAR { ClusterLit($2, $4, $6, $8, $10, $12, $14)}
   | ID               { Id($1) }
   | FLOATLIT         { FloatLit($1) }  /* Float is expression which handles negatives*/
+  | expr AT expr { Collision($1, $3) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -109,6 +115,8 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
+  | expr DOT ID { PropertyAccess($1, $3) }
+  | expr DOT ID ASSIGN expr { PropertyAssign($1, $3, $5) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | ID ASSIGN NEW typ LBRACKET expr RBRACKET { ArrayInit($1, $4, $6) }

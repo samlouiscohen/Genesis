@@ -30,26 +30,26 @@ let translate (globals, functions) =
   let pointer_t = L.pointer_type in
   let void_t = L.void_type context in
 
-  let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in 
+(*   let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in 
   let ut_hash_table_t = L.named_struct_type context "UT_hash_table" in
   let ut_hash_bucket_t = L.named_struct_type context "UT_hash_bucket" in
     L.struct_set_body ut_hash_handle_t [|L.pointer_type ut_hash_table_t; L.pointer_type i8_t; L.pointer_type i8_t; L.pointer_type ut_hash_handle_t; L.pointer_type ut_hash_handle_t; L.pointer_type i8_t; i32_t; i32_t|] false; 
     L.struct_set_body ut_hash_table_t  [|L.pointer_type ut_hash_bucket_t; i32_t; i32_t; i32_t; L.pointer_type ut_hash_handle_t; i64_t; i32_t; i32_t; i32_t; i32_t; i32_t|] false;
     L.struct_set_body ut_hash_bucket_t [|L.pointer_type ut_hash_handle_t; i32_t; i32_t|] false;
-
+ *)
   let color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
-
   let col_ptr_t = L.pointer_type color_t in
 
-  let position_t = L.named_struct_type context "position" in
+  let cluster_t = i32_t in
+(*   let position_t = L.named_struct_type context "position" in
     L.struct_set_body position_t [| i32_t ; i32_t |] false;
 
   let cluster_t = L.named_struct_type context "cluster" in
     L.struct_set_body cluster_t [| position_t ; color_t ; i32_t ; i32_t ; L.pointer_type i8_t ; L.pointer_type cluster_t ; ut_hash_handle_t|] false;
   let board_t = L.named_struct_type context "board" in
     L.struct_set_body board_t [| L.pointer_type i8_t ; color_t ; i32_t ; i32_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
-
+ *)
   let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
@@ -85,13 +85,13 @@ let translate (globals, functions) =
   (*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
   let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
 
-  let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t; |] in
+  let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t |] in
   let initScreen_func = L.declare_function "initScreen" initScreen_t the_module in
 
   (*let add_cluster_t = L.function_type (L.void_type context) [| L.pointer_type gb_t] in
   let add_cluster = L.declare_function "addCluster" add_cluster_t the_module in*)
 
-  let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t; |] in
+  let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t |] in
   let startGame_func = L.declare_function "startGame" startGame_t the_module in
 
   let isKeyDown_t = L.function_type i1_t [| pointer_t i8_t |] in
@@ -102,6 +102,68 @@ let translate (globals, functions) =
 
   let isKeyHeld_t = L.function_type i1_t [| pointer_t i8_t |] in
   let isKeyHeld_func = L.declare_function "isKeyHeld" isKeyHeld_t the_module in
+
+  let newCluster_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t; col_ptr_t |] in
+  let newCluster_func = L.declare_function "newCluster" newCluster_t the_module in
+
+  let deleteCluster_t = L.function_type void_t [|i32_t|] in
+  let deleteCluster_func = L.declare_function "deleteCluster" deleteCluster_t the_module in
+
+  let randomInt_t = L.function_type i32_t [|i32_t|] in
+  let randomInt_func = L.declare_function "randomInt" randomInt_t the_module in
+
+  let detectCollision_t = L.function_type i1_t [|i32_t; i32_t|] in
+  let detectCollision_func = L.declare_function "detectCollision" detectCollision_t the_module in
+
+  (* Getters *)
+  let getX_t = L.function_type i32_t [|i32_t|] in
+  let getX_func = L.declare_function "getX" getX_t the_module in
+
+  let getY_t = L.function_type i32_t [|i32_t|] in
+  let getY_func = L.declare_function "getY" getY_t the_module in
+
+  let getDX_t = L.function_type i32_t [|i32_t|] in
+  let getDX_func = L.declare_function "getDX" getDX_t the_module in
+
+  let getDY_t = L.function_type i32_t [|i32_t|] in
+  let getDY_func = L.declare_function "getDY" getDY_t the_module in
+
+  let getHeight_t = L.function_type i32_t [|i32_t|] in
+  let getHeight_func = L.declare_function "getHeight" getHeight_t the_module in
+
+  let getWidth_t = L.function_type i32_t [|i32_t|] in
+  let getWidth_func = L.declare_function "getWidth" getWidth_t the_module in
+
+  let getColor_t = L.function_type col_ptr_t [|i32_t|] in
+  let getColor_func = L.declare_function "getColor" getColor_t the_module in
+
+  let getDraw_t = L.function_type i1_t [|i32_t|] in
+  let getDraw_func = L.declare_function "getDraw" getDraw_t the_module in
+
+ (* Setters *)
+  let setX_t = L.function_type i32_t [|i32_t; i32_t|] in
+  let setX_func = L.declare_function "setX" setX_t the_module in
+
+  let setY_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setY_func = L.declare_function "setY" setY_t the_module in
+
+  let setDX_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setDX_func = L.declare_function "setDX" setDX_t the_module in
+
+  let setDY_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setDY_func = L.declare_function "setDY" setDY_t the_module in
+
+  let setHeight_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setHeight_func = L.declare_function "setHeight" setHeight_t the_module in
+
+  let setWidth_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setWidth_func = L.declare_function "setWidth" setWidth_t the_module in
+
+  let setColor_t = L.function_type void_t [|i32_t; col_ptr_t|] in
+  let setColor_func = L.declare_function "setColor" setColor_t the_module in
+
+  let setDraw_t = L.function_type void_t [|i32_t; i1_t|] in
+  let setDraw_func = L.declare_function "setDraw" setDraw_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -226,8 +288,17 @@ let translate (globals, functions) =
         let colld = L.build_load cptr "" builder in
 (*           ignore(L.set_alignment 8 colld); *)
         colld
-      | A.ClusterLit (c)->
-        let name = expr builder c in
+      | A.ClusterLit (l, w, x, y, dx, dy, c)->
+        let xPos = expr builder x in
+        let yPos = expr builder y in
+        let xVel = expr builder dx in
+        let yVel = expr builder dy in 
+        let len = expr builder l in
+        let wid = expr builder w in
+        let color = expr builder c in
+
+        L.build_call newCluster_func [| len; wid; xPos; yPos; xVel; yVel; color|] "newClust" builder
+(*         let name = expr builder c in
         let clustPtr = L.build_malloc cluster_t ("clustPtr") builder in
         let posPtr = L.build_struct_gep clustPtr 0 ("posPtr") builder in
         let colorPtr = L.build_struct_gep clustPtr 1 ("colorPtr") builder in
@@ -236,10 +307,41 @@ let translate (globals, functions) =
         let name_ptr = L.build_struct_gep clustPtr 4 ("name ptr") builder in
         let next_ptr = L.build_struct_gep clustPtr 5 ("nextPtr") builder in
         let handle_ptr = L.build_struct_gep clustPtr 6 ("handle_ptr") builder in
-        clustPtr
-        
+        clustPtr *)
+      | A.Collision (c1, c2) ->
+        let c1' = expr builder c1 in
+        let c2' = expr builder c2 in 
+        L.build_call detectCollision_func [|c1'; c2'|] "col" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+      | A.Property s -> L.const_int i32_t 0
+      | A.PropertyAccess(c, p) ->
+        let cluster = expr builder c in
+        (match p with
+        | "x" -> L.build_call getX_func [|cluster|] "xVal" builder
+        | "y" -> L.build_call getY_func [|cluster|] "yVal" builder
+        | "dx" -> L.build_call getDX_func [|cluster|] "dxVal" builder
+        | "dy" -> L.build_call getDY_func [|cluster|] "dyVal" builder  
+        | "height" -> L.build_call getHeight_func [|cluster|] "hVal" builder
+        | "width" -> L.build_call getWidth_func [|cluster|] "wVal" builder              
+        | "color" -> L.build_call getColor_func [|cluster|] "colVal" builder 
+        | "draw" -> L.build_call getDraw_func [|cluster|] "drawVal" builder             
+        | _ -> raise (Failure ("Property does not exist"))
+        )
+      | A.PropertyAssign(c, p, e) ->
+        let cluster = expr builder c in
+        let e' = expr builder e in
+        (match p with
+        | "x" -> L.build_call setX_func [|cluster; e'|] "" builder
+        | "y" -> L.build_call setY_func [|cluster; e'|] "" builder
+        | "dx" -> L.build_call setDX_func [|cluster; e'|] "" builder
+        | "dy" -> L.build_call setDY_func [|cluster; e'|] "" builder  
+        | "height" -> L.build_call setHeight_func [|cluster; e'|] "" builder
+        | "width" -> L.build_call setWidth_func [|cluster; e'|] "" builder              
+        | "color" -> L.build_call setColor_func [|cluster; e'|] "" builder
+        | "draw" -> L.build_call setDraw_func [|cluster; e'|] "" builder              
+        | _ -> raise (Failure ("Property does not exist"))
+        )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
       | A.ArrayInit(s, typ, e) -> let len = (expr builder e) in 
           init_array s typ len builder
@@ -325,6 +427,9 @@ let translate (globals, functions) =
  *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
           ignore(L.build_store color clr_ptr builder) ; *)
           L.build_call startGame_func [| color; width; height |] "" builder  
+      | A.Call ("delete", [c]) ->
+          let cluster = expr builder c in
+          L.build_call deleteCluster_func [|cluster|] "" builder
       | A.Call ("keyDown", [s]) ->
           let keyName = expr builder s in
           L.build_call isKeyDown_func [|keyName|] "keyD" builder
@@ -334,6 +439,9 @@ let translate (globals, functions) =
       | A.Call ("keyHeld", [s]) ->
           let keyName = expr builder s in
           L.build_call isKeyHeld_func [|keyName|] "keyH" builder
+      | A.Call ("random", [e]) ->
+          let maxInt = expr builder e in
+          L.build_call randomInt_func [|maxInt|] "randInt" builder
       | A.Call ("prints", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
       | A.Call (f, act) ->

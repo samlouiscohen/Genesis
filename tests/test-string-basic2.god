@@ -3,8 +3,9 @@ void update(int f){}
 
 int main()
 {
-  print(42);
-  print(71);
-  print(1);
+  string s;
+  s = "Hello World!";
+  prints(s);
+  
   return 0;
 }

@@ -7,3 +7,5 @@ testall.log
 ccode/SDL2-2.0.7
 ccode/genesis
 /**/.DS_Store
+libcxx/
+libcxxabi/

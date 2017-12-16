@@ -4,6 +4,19 @@
 
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
+CFLAGS = -DSKIP_MAIN
+LDFLAGS = 
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Linux)
+	LDFLAGS += -I /SDL2-2.0.7/include -L /SDL2-2.0.7/build -l SDL2
+endif
+
+ifeq ($(UNAME_S), Darwin)
+	CFLAGS += -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
+	LDFLAGS += -F/Library/Frameworks -framework SDL2
+endif
+
 .PHONY : all
 all : genesis.native printbig.o genesis.o
 
@@ -49,7 +62,9 @@ printbig : printbig.c
 	cc -o printbig -DBUILD_TEST printbig.c
 
 genesis.o: ccode/genesis.c
-	cc -c -o ccode/genesis.o $< -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
+	# cc -c -o ccode/genesis.o $< -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
+	# make -C ccode CFLAGS="-DSKIP_MAIN" genesis.o
+	$(CC) -c $(CFLAGS) $< -o ccode/$@
 
 tests: rtest test vtest
 

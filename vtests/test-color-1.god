@@ -1,9 +1,10 @@
 void init(){}
-void update(){}
+void update(int f){}
 
 int main(){
     color c;
-    c = <256, 256, 256>;
+    int i;
+    c = #256, 256, 256#;
     prints("color declared");
     return 0;
 }

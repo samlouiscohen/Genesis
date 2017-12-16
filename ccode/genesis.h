@@ -4,6 +4,9 @@
 #include "uthash/include/uthash.h"
 #include "uthash/include/utlist.h"
 
+#include <stdbool.h>
+
+
 
 
 typedef struct color {
@@ -29,6 +32,7 @@ typedef struct cluster{
 	int width;
 	const char *name;
 	int id;
+	bool draw;
 	UT_hash_handle hh;
 } cluster_t;
 

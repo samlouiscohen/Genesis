@@ -4,47 +4,54 @@
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| "//"      { scomment lexbuf }           (* Comments *)
-| "/*"      { comment lexbuf }           (* Comments *)
-| '('       { LPAREN }
-| ')'       { RPAREN }
-| '{'       { LBRACE }
-| '}'       { RBRACE }
-| '['       { LBRACKET }
-| ']'       { RBRACKET }
-| ';'       { SEMI }
-| '+'       { PLUS }
-| '-'       { MINUS }
-| '*'       { TIMES }
-| '/'       { DIVIDE }
-| '='       { ASSIGN }
-| ','       { COMMA }	
-| "=="      { EQ }	
-| "!="      { NEQ }
-| '<'       { LT }
-| "<="      { LEQ }
-| ">"       { GT }
-| ">="      { GEQ }
-| "&&"      { AND }
-| "||"      { OR }
-| "!"       { NOT }
-| "if"      { IF }
-| "else"    { ELSE }
-| "for"     { FOR }
-| "while"   { WHILE }
-| "return"  { RETURN }
-| "int"     { INT }
-| "float"   { FLOAT }
-| "string"  { STRING }
-| "bool"    { BOOL }
-| "void"    { VOID }
-| "color"   { COLOR }
+| "//"     { scomment lexbuf }           (* Comments *)
+| "/*"     { comment lexbuf }           (* Comments *)
+| '@'      { AT }
+| '#'	   { POUND }
+| '$'	   { DOLLAR }
+| '('      { LPAREN }
+| ')'      { RPAREN }
+| '{'      { LBRACE }
+| '}'      { RBRACE }
+| '['      { LBRACKET }
+| ']'      { RBRACKET }
+| ';'      { SEMI }
+| '+'      { PLUS }
+| '-'      { MINUS }
+| '*'      { TIMES }
+| '/'      { DIVIDE }
+| '='      { ASSIGN }
+| ','      { COMMA }
+| '.'	   { DOT }
+| "=="     { EQ }	
+| "!="     { NEQ }
+| '<'      { LT }
+| "<="     { LEQ }
+| ">"      { GT }
+| ">="     { GEQ }
+| "&&"     { AND }
+| "||"     { OR }
+| "!"      { NOT }
+| "if"     { IF }
+| "else"   { ELSE }
+| "for"    { FOR }
+| "while"  { WHILE }
+| "return" { RETURN }
+| "int"    { INT }
+| "float"  { FLOAT }
+| "string" { STRING }
+| "bool"   { BOOL }
+| "void"   { VOID }
+| "color"  { COLOR }
 | "cluster" { CLUSTER }
 | "true"    { TRUE }
 | "false"   { FALSE }
 | "new"     { NEW }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['0'-'9']+'.'['0'-'9']+ as lxm { FLOATLIT(float_of_string lxm) }
+(*
+| '.'['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm {PROPERTY(String.sub lxm 1 ((String.length lxm) - 1))}
+*)
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRINGLIT(strlit) }
 | eof { EOF }

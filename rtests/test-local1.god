@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 void foo(bool i)
 {
   int i; /* Should hide the formal i */

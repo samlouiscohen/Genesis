@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 /*
  * Test for linking external C functions to LLVM-generated code
  *
