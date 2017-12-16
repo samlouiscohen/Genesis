@@ -24,8 +24,6 @@ cluster_t *clusters = NULL;
 uint64_t downState = 0;
 uint64_t heldState = 0;
 uint64_t upState = 0;
-int cluster_id = 0;
-cluster_t *clusters = NULL;
 const Uint8 *keyStates = NULL;
 int frameNum = 0;
 
@@ -297,13 +295,7 @@ int getWidth(int id){
         return -1;
     }
 }
-//called from add_cluster. DO NOT CALL OTHERWISE
-int create_id(){
-    int temp = cluster_id;
-    cluster_id = cluster_id + 1;
-    
-    return temp;
-}
+
 
 void add_Cluster(int length, int width, int x, int y, int dx, int dy, color *color){
     cluster_t *cluster;
@@ -441,13 +433,6 @@ void setColor(int id, struct color *color){
     }
 }
 
-void remove_Cluster(int id){
-    cluster_t *toRemove;
-    HASH_FIND_INT(clusters,&id,toRemove);
-    if(toRemove != NULL){
-        HASH_DEL(clusters,toRemove);
-    }
-}
 
 int randomInt(int max){
     srand(time(NULL));
