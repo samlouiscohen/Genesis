@@ -5,28 +5,28 @@
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
 .PHONY : all
-all : microc.native printbig.o genesis.o
+all : genesis.native printbig.o genesis.o
 
-.PHONY : microc.native
-microc.native :
+.PHONY : genesis.native
+genesis.native :
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
-		microc.native
+		genesis.native
 
 # "make clean" removes all generated files
 
 .PHONY : clean
 clean :
 	ocamlbuild -clean
-	rm -rf testall.log *.diff microc scanner.ml parser.ml parser.mli
+	rm -rf testall.log *.diff genesis scanner.ml parser.ml parser.mli
 	rm -rf printbig ccode/genesis.o
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
-OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx microc.cmx
+OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx genesis.cmx
 
-microc : $(OBJS)
-	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o microc
+genesis : $(OBJS)
+	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o genesis
 
 scanner.ml : scanner.mll
 	ocamllex scanner.mll
@@ -55,11 +55,11 @@ tests: rtest test vtest
 
 rtest: all
 	@echo "Running regression tests..."
-	@./testall.sh rtests/test-*.mc rtests/fail-*.mc
+	@./testall.sh rtests/test-*.god rtests/fail-*.god
 
 vtest: all
 	@echo "Running Genesis SDL tests..."
-	@./testall.sh vtests/test-*.mc
+	@./testall.sh vtests/test-*.god
 
 test: all
 	@echo "Running Genesis tests..."
@@ -70,8 +70,8 @@ ast.cmo :
 ast.cmx :
 codegen.cmo : ast.cmo
 codegen.cmx : ast.cmx
-microc.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
-microc.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx
+genesis.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
+genesis.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
 scanner.cmo : parser.cmi
@@ -92,13 +92,13 @@ FAILS = assign1 assign2 assign3 dead1 dead2 expr1 expr2 for1 for2	\
     func9 global1 global2 if1 if2 if3 nomain return1 return2 while1	\
     while2
 
-TESTFILES = $(TESTS:%=test-%.mc) $(TESTS:%=test-%.out) \
-	    $(FAILS:%=fail-%.mc) $(FAILS:%=fail-%.err)
+TESTFILES = $(TESTS:%=test-%.god) $(TESTS:%=test-%.out) \
+	    $(FAILS:%=fail-%.god) $(FAILS:%=fail-%.err)
 
-TARFILES = ast.ml codegen.ml Makefile _tags microc.ml parser.mly README \
+TARFILES = ast.ml codegen.ml Makefile _tags genesis.ml parser.mly README \
         scanner.mll semant.ml testall.sh printbig.c arcade-font.pbm font2c \
 	$(TESTFILES:%=tests/%) 
 
-microc-llvm.tar.gz : $(TARFILES)
-	cd .. && tar czf microc-llvm/microc-llvm.tar.gz \
-		$(TARFILES:%=microc-llvm/%)
+genesis-llvm.tar.gz : $(TARFILES)
+	cd .. && tar czf genesis-llvm/genesis-llvm.tar.gz \
+		$(TARFILES:%=genesis-llvm/%)

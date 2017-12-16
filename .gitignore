@@ -1,6 +1,6 @@
 _build/
 *.o
-microc.native
+genesis.native
 testall.sh
 testall.log
 *.swp

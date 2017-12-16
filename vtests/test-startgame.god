@@ -16,5 +16,6 @@ int main(){
     color c;
     c = <0, 0, 0>;
     startGame(640, 480, c);
+    print(1);
     return 0;
 }

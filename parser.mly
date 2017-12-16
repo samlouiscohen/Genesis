@@ -1,3 +1,4 @@
+/* Ocamlyacc parser for Genesis */
 
 %{ open Ast %}
 
