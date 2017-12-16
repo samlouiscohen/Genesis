@@ -83,7 +83,6 @@ int initScreen(color *c, int width, int height){
             }
         }
     }
-    printf( "Success!\n" );
     return success;
 }
 
@@ -199,19 +198,19 @@ void startGame(color *c, int width, int height){
     int i = 0;
     HASH_FIND_INT(clusters,&i,cl);
     if(c != NULL){
-        printf("%d\n", cl->x);
-        printf("%d",cl->color.r);
+        // printf("%d\n", cl->x);
+        // printf("%d",cl->color.r);
         drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
     }
     //update screen
     showDisplay();
    
-    //init();
+    init();
     while (!quit){
         frameNum += 1;
         unsigned int frameStart = SDL_GetTicks();
         pollEvents();
-        //update(frameNum);
+        update(frameNum);
         unsigned int frameTime = SDL_GetTicks() - frameStart;
         if(frameTime < msPerFrame){
             SDL_Delay(msPerFrame - frameTime);
@@ -240,11 +239,11 @@ int newCluster(int length, int width, int x, int y, int dx, int dy, color *color
     cluster->dy = dy;
     cluster->color = *color;
     cluster->id = create_id();
-    printf("%d\n",cluster->id);
+    // printf("%d\n",cluster->id);
     HASH_ADD_INT(clusters, id, cluster);
     unsigned int numClusters;
     numClusters = HASH_COUNT(clusters);
-    printf("there are %u clusters\n", numClusters);
+    // printf("there are %u clusters\n", numClusters);
     return cluster->id;
     //LL_APPEND(clusterList,c);
 }
