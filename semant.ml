@@ -87,13 +87,17 @@ let check (globals, functions) =
      { typ = Void; fname = "startGame"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
        locals = []; body = [] } 
 
+       (StringMap.add "random"
+     { typ = Int; fname = "random"; formals = [(Int, "max")];
+       locals = []; body = [] }        
+
        (StringMap.add "prints"
      { typ = Void; fname = "prints"; formals = [(String, "x")];
        locals = []; body = [] }
 
        (StringMap.singleton "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] })))))))))
+       locals = []; body = [] }))))))))))
    in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -138,6 +142,19 @@ let check (globals, functions) =
 *)
     in
 
+    let type_of_property s =
+      (match s with
+        | "x" -> Int
+        | "y" -> Int
+        | "dx" -> Int
+        | "dy" -> Int
+        | "height" -> Int
+        | "width" -> Int
+        | "color" -> Color 
+        | _ -> raise (Failure ("property is not defined"))
+      )
+    in
+
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
         Literal _ -> Int
@@ -145,6 +162,9 @@ let check (globals, functions) =
       | StringLit _ -> String
       | BoolLit _ -> Bool
       | ColorLit _ -> Color
+      | ClusterLit _ -> Cluster
+      | PropertyAccess (_, s) -> type_of_property s
+      | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier s
       | ArrayInit(_, _, _) -> raise (Failure ("Ya no you can't do that with arrays"))
