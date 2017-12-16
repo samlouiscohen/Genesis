@@ -223,7 +223,7 @@ void startGame(color *c, int width, int height){
     //update screen
     showDisplay();
    
-    //init();
+    init();
 
     //main loop
     while (!quit){
