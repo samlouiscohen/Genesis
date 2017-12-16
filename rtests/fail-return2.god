@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 void foo()
 {
   if (true) return 42; /* Should return void */

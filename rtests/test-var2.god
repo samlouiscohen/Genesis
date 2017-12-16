@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 int a;
 
 void foo(int c)

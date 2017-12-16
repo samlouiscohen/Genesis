@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 void myvoid()
 {
   return;

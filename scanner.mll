@@ -41,8 +41,9 @@ rule token = parse
 | "void"   { VOID }
 | "color"  { COLOR }
 | "cluster" { CLUSTER }
-| "true"   { TRUE }
-| "false"  { FALSE }
+| "true"    { TRUE }
+| "false"   { FALSE }
+| "new"     { NEW }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['0'-'9']+'.'['0'-'9']+ as lxm { FLOATLIT(float_of_string lxm) }
 | '.'['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm {PROPERTY(String.sub lxm 1 ((String.length lxm) - 1))}

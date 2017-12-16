@@ -6,8 +6,8 @@
 
 extern void update(int frame);
 extern void init();
-extern board_t *curBoard;
-extern cluster_t *toRemove;
+//extern board_t *curBoard;
+//extern cluster_t *toRemove;
 
 const int framesPerSec = 30;
 char *additionalKeynames[] = {"Up", "Down", "Left", "Right", "Space", "Escape"};
@@ -99,6 +99,25 @@ SDL_Rect drawRectangle(int x, int y, int w, int h, int r, int g, int b){
     return rect;
 }
 
+int inGoalArea(SDL_Rect rect, SDL_Rect goal){
+    int leftBlock = rect.x;
+    int rightBlock = rect.x + rect.w;
+    int bottomBlock = rect.y;
+    int topBlock = rect.y + rect.h;
+        
+    int leftGoal = goal.x;
+    int rightGoal = goal.x + goal.w;
+    int bottomGoal = goal.y;
+    int topGoal  = goal.y + goal.h;
+
+    if ( bottomBlock > bottomGoal && topBlock < topGoal && leftBlock > leftGoal && rightBlock < rightGoal ) {
+        return 1;
+    }
+
+    return 0;
+
+
+}
 void showDisplay(){
     SDL_RenderPresent(gRenderer);
 }
@@ -194,23 +213,23 @@ void startGame(color *c, int width, int height){
     quit = 0;
     int msPerFrame = (int) (1000 / framesPerSec);
     initScreen(c, width, height);
+
     cluster_t *cl;
-    int i = 0;
-    HASH_FIND_INT(clusters,&i,cl);
-    if(c != NULL){
-        // printf("%d\n", cl->x);
-        // printf("%d",cl->color.r);
+    for (cl = clusters; cl!=NULL;cl = cl->hh.next){
         drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
     }
     //update screen
     showDisplay();
    
-    init();
+    //init();
+
+    //main loop
     while (!quit){
         frameNum += 1;
         unsigned int frameStart = SDL_GetTicks();
         pollEvents();
-        update(frameNum);
+
+        //update(frameNum);
         unsigned int frameTime = SDL_GetTicks() - frameStart;
         if(frameTime < msPerFrame){
             SDL_Delay(msPerFrame - frameTime);
@@ -259,15 +278,25 @@ int getX(int id){
         return -1;
     }
 }
-void setXY(int id, int x, int y){
+void setX(int id, int x){
 
     cluster_t *cluster;
     HASH_FIND_INT(clusters, &id, cluster);
     if(cluster != NULL){
         cluster->x = x;
+        
+    }
+}
+
+void setY(int id, int y){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+
+    if(cluster != NULL){
         cluster->y = y;
     }
 }
+
 
 int getHeight(int id){
     cluster_t *cluster;
@@ -292,6 +321,43 @@ int getWidth(int id){
         return -1;
     }
 }
+
+
+void add_Cluster(int length, int width, int x, int y, int dx, int dy, color *color){
+    cluster_t *cluster;
+    //HASH_FIND_STR(curBoard->clusters, cluster_id, cluster);
+    cluster = malloc(sizeof(cluster_t));
+    cluster->height = length;
+    cluster->width = width;
+    cluster->x = x;
+    cluster->y = y;
+    cluster->dx = dx;
+    cluster->dy = dy;
+    cluster->color = *color;
+    cluster->id = create_id();
+    printf("%d\n",cluster->id);
+    HASH_ADD_INT(clusters, id, cluster);
+    
+    //LL_APPEND(clusterList,c);
+}
+
+void remove_Cluster(int id){
+    cluster_t *toRemove;
+    HASH_FIND_INT(clusters,&id,toRemove);
+    if(toRemove != NULL){
+        HASH_DEL(clusters,toRemove);
+    }
+}
+
+// int main(){
+//     color c = {255,0,0};
+   
+//     add_Cluster(5,10,50,100,0,0, &c);
+//     unsigned int numUsers;
+//     numUsers = HASH_COUNT(clusters);
+//     printf("there are %u users\n", numUsers);
+//     return 1;
+// }
 
 int getDX(int id){
     cluster_t *cluster;
@@ -393,18 +459,12 @@ void setColor(int id, struct color *color){
     }
 }
 
-void remove_Cluster(int id){
-    cluster_t *toRemove;
-    HASH_FIND_INT(clusters,&id,toRemove);
-    if(toRemove != NULL){
-        HASH_DEL(clusters,toRemove);
-    }
-}
 
 int randomInt(int max){
     srand(time(NULL));
     return (rand() % max);
 }
+
 
 /* Exported function (visible in Genesis) */
 // int initScreenT(int x){
@@ -419,7 +479,7 @@ int randomInt(int max){
 // }
 
 
-#ifdef BUILD_TEST
+#ifndef SKIP_MAIN
 int main(int argc, char* args[]){
     struct color col;
     col.r = 0;

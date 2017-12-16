@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 int add(int a, int b)
 {
   return a + b;

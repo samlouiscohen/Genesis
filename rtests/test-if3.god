@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 int main()
 {
   if (false) print(42);
