@@ -362,13 +362,14 @@ int detectCollision(int id1, int id2){
         SDL_bool ans;
         ans = SDL_IntersectRect(r3,r4,&res);
 
-        if(ans = SDL_TRUE){
+        if(ans == SDL_TRUE){
             return 1;
         }
         else{
             return 0;
         }
     }
+    return 0;
  }
 
 
@@ -380,7 +381,7 @@ color getColor(int id){
     if(cluster != NULL){
         return cluster->color;
     }
-   
+
 }
 
 void cluster_setColor(int id, struct color *color){
