@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 void foo() {}
 
 int bar(int a, bool b, int c) { return a + c; }

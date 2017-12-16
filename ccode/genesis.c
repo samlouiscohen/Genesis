@@ -83,7 +83,6 @@ int initScreen(color *c, int width, int height){
             }
         }
     }
-    printf( "Success!\n" );
     return success;
 }
 
@@ -222,7 +221,7 @@ void startGame(color *c, int width, int height){
     //update screen
     showDisplay();
    
-    init();
+    //init();
 
     //main loop
     while (!quit){
@@ -230,7 +229,7 @@ void startGame(color *c, int width, int height){
         unsigned int frameStart = SDL_GetTicks();
         pollEvents();
 
-        update(frameNum);
+        //update(frameNum);
         unsigned int frameTime = SDL_GetTicks() - frameStart;
         if(frameTime < msPerFrame){
             SDL_Delay(msPerFrame - frameTime);
@@ -259,11 +258,11 @@ int newCluster(int length, int width, int x, int y, int dx, int dy, color *color
     cluster->dy = dy;
     cluster->color = *color;
     cluster->id = create_id();
-    printf("%d\n",cluster->id);
+    // printf("%d\n",cluster->id);
     HASH_ADD_INT(clusters, id, cluster);
     unsigned int numClusters;
     numClusters = HASH_COUNT(clusters);
-    printf("there are %u clusters\n", numClusters);
+    // printf("there are %u clusters\n", numClusters);
     return cluster->id;
     //LL_APPEND(clusterList,c);
 }
@@ -480,7 +479,7 @@ int randomInt(int max){
 // }
 
 
-#ifdef BUILD_TEST
+#ifndef SKIP_MAIN
 int main(int argc, char* args[]){
     struct color col;
     col.r = 0;

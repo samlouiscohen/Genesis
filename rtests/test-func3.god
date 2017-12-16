@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 void printem(int a, int b, int c, int d)
 {
   print(a);
