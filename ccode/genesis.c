@@ -332,26 +332,7 @@ int getWidth(int id){
     }
 }
 
-
-void add_Cluster(int length, int width, int x, int y, int dx, int dy, color *color){
-    cluster_t *cluster;
-    //HASH_FIND_STR(curBoard->clusters, cluster_id, cluster);
-    cluster = malloc(sizeof(cluster_t));
-    cluster->height = length;
-    cluster->width = width;
-    cluster->x = x;
-    cluster->y = y;
-    cluster->dx = dx;
-    cluster->dy = dy;
-    cluster->color = *color;
-    cluster->id = create_id();
-    printf("%d\n",cluster->id);
-    HASH_ADD_INT(clusters, id, cluster);
-    
-    //LL_APPEND(clusterList,c);
-}
-
-void remove_Cluster(int id){
+void deleteCluster(int id){
     cluster_t *toRemove;
     HASH_FIND_INT(clusters,&id,toRemove);
     if(toRemove != NULL){
