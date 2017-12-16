@@ -106,7 +106,7 @@ let rec string_of_expr = function
   | ArrayAccess(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
   | ArrayAssign(s, e1, e2) -> 
       s ^ "[" ^string_of_expr e1 ^"] ="^ string_of_expr e2 
-  | ArrayInit(s, typ, len) -> "s = " ^ string_of_typ typ ^ "[" ^ string_of_expr len ^ "]"
+  | ArrayInit(s, typ, len) -> s ^ " = " ^ string_of_typ typ ^ "[" ^ string_of_expr len ^ "]"
   | Noexpr -> ""
 
 let rec string_of_stmt = function
