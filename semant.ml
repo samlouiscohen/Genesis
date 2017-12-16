@@ -91,6 +91,10 @@ let check (globals, functions) =
      { typ = Void; fname = "startGame"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
        locals = []; body = [] } 
 
+       (StringMap.add "delete"
+     { typ = Void; fname = "delete"; formals = [(Cluster, "c")];
+       locals = []; body = [] } 
+
        (StringMap.add "random"
      { typ = Int; fname = "random"; formals = [(Int, "max")];
        locals = []; body = [] }        
@@ -101,7 +105,7 @@ let check (globals, functions) =
 
        (StringMap.singleton "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] }))))))))))
+       locals = []; body = [] })))))))))))
    in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)

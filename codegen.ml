@@ -106,6 +106,9 @@ let translate (globals, functions) =
   let newCluster_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t; col_ptr_t |] in
   let newCluster_func = L.declare_function "newCluster" newCluster_t the_module in
 
+  let deleteCluster_t = L.function_type void_t [|i32_t|] in
+  let deleteCluster_func = L.declare_function "deleteCluster" deleteCluster_t the_module in
+
   let randomInt_t = L.function_type i32_t [|i32_t|] in
   let randomInt_func = L.declare_function "randomInt" randomInt_t the_module in
 
@@ -424,6 +427,9 @@ let translate (globals, functions) =
  *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
           ignore(L.build_store color clr_ptr builder) ; *)
           L.build_call startGame_func [| color; width; height |] "" builder  
+      | A.Call ("delete", [c]) ->
+          let cluster = expr builder c in
+          L.build_call deleteCluster_func [|cluster|] "" builder
       | A.Call ("keyDown", [s]) ->
           let keyName = expr builder s in
           L.build_call isKeyDown_func [|keyName|] "keyD" builder
