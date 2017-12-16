@@ -1,5 +1,4 @@
 #include <SDL2/SDL.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
 #include "genesis.h"
@@ -21,7 +20,6 @@ int backgroundB = 0xFF;
 int quit = 0;
 int cluster_id = 0;
 cluster_t *clusters = NULL;
-cluster_t *drawSet = NULL;
 uint64_t downState = 0;
 uint64_t heldState = 0;
 uint64_t upState = 0;
@@ -218,12 +216,15 @@ void startGame(color *c, int width, int height){
     cluster_t *cl;
     //draws all clusters in hash
     for (cl = clusters; cl!=NULL;cl = cl->hh.next){
-        drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
+        if(cl->draw == 1){
+            drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
+
+        }
     }
     //update screen
     showDisplay();
    
-    init();
+    //init();
 
     //main loop
     while (!quit){
@@ -231,7 +232,7 @@ void startGame(color *c, int width, int height){
         unsigned int frameStart = SDL_GetTicks();
         pollEvents();
 
-        update(frameNum);
+        //update(frameNum);
         unsigned int frameTime = SDL_GetTicks() - frameStart;
         if(frameTime < msPerFrame){
             SDL_Delay(msPerFrame - frameTime);
@@ -260,22 +261,15 @@ int newCluster(int length, int width, int x, int y, int dx, int dy, color *color
     cluster->dy = dy;
     cluster->color = *color;
     cluster->id = create_id();
+    cluster->draw = 1;
+
     // printf("%d\n",cluster->id);
     HASH_ADD_INT(clusters, id, cluster);
     unsigned int numClusters;
     numClusters = HASH_COUNT(clusters);
-    // printf("there are %u clusters\n", numClusters);
+    printf("there are %u clusters\n", numClusters);
     return cluster->id;
     //LL_APPEND(clusterList,c);
-}
-
-unsigned int draw(int id, cluster_t *cluster){
-    HASH_ADD_INT(drawSet, id, cluster);
-    unsigned int size;
-    size = HASH_COUNT(drawSet);
-    return size;
-
-
 }
 
 int getX(int id){
@@ -361,6 +355,7 @@ void remove_Cluster(int id){
 }
 
 // int main(){
+
 //     color c = {255,0,0};
    
 //     add_Cluster(5,10,50,100,0,0, &c);
