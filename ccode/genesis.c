@@ -34,13 +34,6 @@ void showDisplay();
 int keyToInt(const char *keyName);
 uint64_t keyMask(int number);
 
-int getX(int id){
-    return 12;
-}
-
-int getY(int id){
-    return 15;
-}
 //Create screen
 int initScreen(color *c, int width, int height){
     //Initialization flag
