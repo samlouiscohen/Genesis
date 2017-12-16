@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 /* Bug noticed by Pin-Chin Huang */
 
 int fun(int x, int y)

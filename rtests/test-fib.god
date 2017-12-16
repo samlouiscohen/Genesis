@@ -1,3 +1,6 @@
+void init(){}
+void update(int f){}
+
 int fib(int x)
 {
   if (x < 2) return 1;
