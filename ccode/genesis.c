@@ -210,6 +210,7 @@ void startGame(color *c, int width, int height){
         printf("%d",cl->color.r);
         drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
     }
+    //update screen
     showDisplay();
    
     //init();
@@ -248,11 +249,151 @@ int newCluster(int length, int width, int x, int y, int dx, int dy, color *color
     cluster->id = create_id();
     printf("%d\n",cluster->id);
     HASH_ADD_INT(clusters, id, cluster);
-    unsigned int numUsers;
-    numUsers = HASH_COUNT(clusters);
-    printf("there are %u users\n", numUsers);
+    unsigned int numClusters;
+    numClusters = HASH_COUNT(clusters);
+    printf("there are %u clusters\n", numClusters);
     return cluster->id;
     //LL_APPEND(clusterList,c);
+}
+
+int getX(int id){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters,&id,cluster);
+
+    if(cluster != NULL){
+        return cluster->x;
+    }
+    else{
+        return NULL;
+    }
+}
+void setXY(int id, int x, int y){
+
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+    if(cluster != NULL){
+        cluster->x = x;
+        cluster->y = y;
+    }
+}
+
+int getHeight(int id){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters,&id,cluster);
+
+    if(cluster != NULL){
+        return cluster->height;
+    }
+    else{
+        return NULL;
+    }
+}
+
+int getWidth(int id){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters,&id,cluster);
+
+    if(cluster != NULL){
+        return cluster->width;
+    }
+    else{
+        return NULL;
+    }
+}
+
+int getDX(int id){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters,&id,cluster);
+
+    if(cluster != NULL){
+        return cluster->dx;
+    }
+    else{
+        return NULL;
+    }
+}
+void setDX(int id, int dx){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+
+    if(cluster != NULL){
+        cluster-> dx = dx;
+    }
+}
+
+int getDY(int id){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters,&id,cluster);
+
+    if(cluster != NULL){
+        return cluster->dy;
+    }
+    else{
+        return NULL;
+    }
+}
+void setDY(int id, int dy){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+
+    if(cluster != NULL){
+        cluster-> dy = dy;
+    }
+}
+
+int detectCollision(int id1, int id2){
+
+    cluster_t *c1;
+    cluster_t *c2;
+
+    HASH_FIND_INT(clusters,&id1,c1);
+    HASH_FIND_INT(clusters,&id2,c2);
+
+    if((c1 != NULL) && (c2 != NULL)){
+        SDL_Rect r1;
+        r1.x = c1->x;
+        r1.y = c1->y;
+        r1.w = c1->width;
+        r1.h = c1->height;
+
+        SDL_Rect r2;
+        r2.x = c2->x;
+        r2.y = c2->y;
+        r2.w = c2->width;
+        r2.h = c2->height;
+
+        SDLRect res;
+        SDL_bool ans;
+        ans = SDL_IntersectRect(r1,r2,res)
+
+        if(ans = SDL_True){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+ }
+
+
+//assumes cluster will be in hash
+color getColor(int id){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+
+    if(cluster != NULL){
+        return cluster->color;
+    }
+   
+}
+
+void cluster_setColor(int id, struct color color){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+
+    if(cluster != NULL){
+        cluster->color = color;
+    }
 }
 
 void remove_Cluster(int id){
