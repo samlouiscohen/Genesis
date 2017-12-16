@@ -27,7 +27,7 @@ uint64_t upState = 0;
 const Uint8 *keyStates = NULL;
 int frameNum = 0;
 
-int initScreen(color_t *c, int width, int height);
+int initScreen(color *c, int width, int height);
 void clearScreen();
 void static close();
 void showDisplay();
@@ -35,7 +35,7 @@ int keyToInt(const char *keyName);
 uint64_t keyMask(int number);
 
 //Create screen
-int initScreen(color_t *c, int width, int height){
+int initScreen(color *c, int width, int height){
     //Initialization flag
     int success = 1;
 
@@ -83,6 +83,7 @@ int initScreen(color_t *c, int width, int height){
             }
         }
     }
+    printf( "Success!\n" );
     return success;
 }
 
@@ -111,6 +112,12 @@ void static close(){
     gRenderer = NULL;
 
     SDL_Quit();
+
+    cluster_t *temp,*currentCluster;
+    HASH_ITER(hh,clusters,currentCluster,temp){
+        HASH_DEL(clusters,currentCluster);
+        free(currentCluster);
+    }
 }
 
 void pollEvents(){
@@ -184,10 +191,20 @@ uint64_t keyMask(int number){
     return mask << number;
 }
 
-void startGame(color_t *c, int width, int height){
+void startGame(color *c, int width, int height){
     quit = 0;
     int msPerFrame = (int) (1000 / framesPerSec);
     initScreen(c, width, height);
+    cluster_t *cl;
+    int i = 0;
+    HASH_FIND_INT(clusters,&i,cl);
+    if(c != NULL){
+        printf("%d\n", cl->x);
+        printf("%d",cl->color.r);
+        drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
+    }
+    showDisplay();
+   
     //init();
     while (!quit){
         frameNum += 1;
@@ -201,7 +218,7 @@ void startGame(color_t *c, int width, int height){
     }
 }
 
-//called from add_cluster. DO NOT CALL OTHERWISE
+//called from newCluster. DO NOT CALL OTHERWISE
 int create_id(){
     int temp = cluster_id;
     cluster_id = cluster_id + 1;
@@ -210,7 +227,7 @@ int create_id(){
 
 }
 
-void newCluster(int length, int width, int x, int y, int dx, int dy, color *color){
+int newCluster(int length, int width, int x, int y, int dx, int dy, color *color){
     cluster_t *cluster;
     //HASH_FIND_STR(curBoard->clusters, cluster_id, cluster);
     cluster = malloc(sizeof(cluster_t));
@@ -224,7 +241,10 @@ void newCluster(int length, int width, int x, int y, int dx, int dy, color *colo
     cluster->id = create_id();
     printf("%d\n",cluster->id);
     HASH_ADD_INT(clusters, id, cluster);
-    
+    unsigned int numUsers;
+    numUsers = HASH_COUNT(clusters);
+    printf("there are %u users\n", numUsers);
+    return cluster->id;
     //LL_APPEND(clusterList,c);
 }
 
@@ -257,11 +277,28 @@ int random(int max){
 #ifdef BUILD_TEST
 int main(int argc, char* args[]){
     struct color col;
-    col.r = 0xFF;
-    col.g = 0xFF;
-    col.b = 0xFF;
-    //Make new screen
+    col.r = 0;
+    col.g = 0;
+    col.b = 0;
 
+    struct color col2;
+    col2.r = 0xFF;
+    col2.g = 0;
+    col2.b = 0;
+    //Make new screen
+    cluster_t *c = NULL;
+    c = malloc(sizeof(cluster_t));
+    c->height = 50;
+    c->width = 50;
+    c->x = 50;
+    c->y = 100;
+    c->dx = 0;
+    c->dy = 0;
+    c->color = col2;
+    c->id = 0;
+    
+    HASH_ADD_INT(clusters,id,c);
+    printf("%d\n", c->x);
     struct color *colptr = &col;
     startGame(colptr, 640, 480);
 }
