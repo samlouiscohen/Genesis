@@ -6,3 +6,4 @@ testall.log
 *.swp
 ccode/SDL2-2.0.7
 ccode/genesis
+/**/.DS_Store
