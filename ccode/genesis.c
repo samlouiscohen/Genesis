@@ -206,7 +206,7 @@ void startGame(color *c, int width, int height){
     //update screen
     showDisplay();
    
-    //init();
+    init();
 
     //main loop
     while (!quit){
@@ -214,7 +214,7 @@ void startGame(color *c, int width, int height){
         unsigned int frameStart = SDL_GetTicks();
         pollEvents();
 
-        //update(frameNum);
+        update(frameNum);
         unsigned int frameTime = SDL_GetTicks() - frameStart;
         if(frameTime < msPerFrame){
             SDL_Delay(msPerFrame - frameTime);
