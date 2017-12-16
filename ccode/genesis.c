@@ -257,7 +257,7 @@ int getX(int id){
         return cluster->x;
     }
     else{
-        return NULL;
+        return -1;
     }
 }
 void setXY(int id, int x, int y){
@@ -278,7 +278,7 @@ int getHeight(int id){
         return cluster->height;
     }
     else{
-        return NULL;
+        return -1;
     }
 }
 
@@ -290,7 +290,7 @@ int getWidth(int id){
         return cluster->width;
     }
     else{
-        return NULL;
+        return -1;
     }
 }
 
@@ -302,7 +302,7 @@ int getDX(int id){
         return cluster->dx;
     }
     else{
-        return NULL;
+        return 0;
     }
 }
 void setDX(int id, int dx){
@@ -322,7 +322,7 @@ int getDY(int id){
         return cluster->dy;
     }
     else{
-        return NULL;
+        return 0;
     }
 }
 void setDY(int id, int dy){
@@ -381,6 +381,7 @@ color getColor(int id){
     if(cluster != NULL){
         return cluster->color;
     }
+    return cluster->color;
 
 }
 
