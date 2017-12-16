@@ -168,6 +168,7 @@ let check (globals, functions) =
       | ColorLit _ -> Color
       | ClusterLit _ -> Cluster
       | PropertyAccess (_, s) -> type_of_property s
+      | PropertyAssign (_, s, _) -> type_of_property s
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier s
