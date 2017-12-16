@@ -35,6 +35,10 @@ let check (globals, functions) =
     else if lValueType == rValueType then lValueType else raise err
   in
 
+  let check_assign_array lval rval err = 
+    if lval == rval then lval else raise err
+  in
+
   (*   let check_assign lvaluet rvaluet err =
      if lvaluet == rvaluet then lvaluet else raise err
   in *)
@@ -147,8 +151,10 @@ let check (globals, functions) =
       | ColorLit _ -> Color
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier s
-      | ArrayInit(_, _, _) -> raise (Failure ("Ya no you can't do that with arrays"))
-      | ArrayAssign(_, _, _) -> raise (Failure ("Ya no you can't do that with arrays"))
+(*
+      | ArrayInit(s, typ, expr) -> raise (Failure ("Ya no you can't do that with arrays"))
+      | ArrayAssign(s, lhs, rhs) -> raise (Failure ("Ya no you can't do that with arrays"))
+*)
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
 
@@ -170,6 +176,11 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
           string_of_typ t ^ " in " ^ string_of_expr ex)))
         | Noexpr -> Void
+        | ArrayInit(s, typ, _) -> let lt = type_of_identifier s and rt = typ in
+            if string_of_typ lt = string_of_typ rt then lt else 
+            raise (Failure ("Thou shall not initialize mismatched array types"))
+        | ArrayAssign(s, _, e) -> let lt = type_of_identifier s and rt = expr e in
+            check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
         | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
