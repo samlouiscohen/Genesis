@@ -100,6 +100,25 @@ SDL_Rect drawRectangle(int x, int y, int w, int h, int r, int g, int b){
     return rect;
 }
 
+int inGoalArea(SDL_Rect rect, SDL_Rect goal){
+    int leftBlock = rect.x;
+    int rightBlock = rect.x + rect.w;
+    int bottomBlock = rect.y;
+    int topBlock = rect.y + rect.h;
+        
+    int leftGoal = goal.x;
+    int rightGoal = goal.x + goal.w;
+    int bottomGoal = goal.y;
+    int topGoal  = goal.y + goal.h;
+
+    if ( bottomBlock > bottomGoal && topBlock < topGoal && leftBlock > leftGoal && rightBlock < rightGoal ) {
+        return 1;
+    }
+
+    return 0;
+
+
+}
 void showDisplay(){
     SDL_RenderPresent(gRenderer);
 }
@@ -197,11 +216,7 @@ void startGame(color *c, int width, int height){
     initScreen(c, width, height);
 
     cluster_t *cl;
-    int i = 0;
-    HASH_FIND_INT(clusters,&i,cl);
-    if(c != NULL){
-        printf("%d\n", cl->x);
-        printf("%d",cl->color.r);
+    for (cl = clusters; cl!=NULL;cl = cl->hh.next){
         drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
     }
     //update screen
