@@ -31,6 +31,7 @@ type expr =
   | Assign of string * expr
   | Call of string * expr list
   | PropertyAccess of expr * string
+  | PropertyAssign of expr * string * expr
   | ArrayInit of string * typ * int
   | ArrayAssign of string * expr * expr
   | ArrayAccess of string * expr
@@ -95,6 +96,7 @@ let rec string_of_expr = function
   | ColorLit(r,g,b) -> "<" ^ string_of_expr r ^ "," ^ string_of_expr g ^ "," ^ string_of_expr b ^ ">"
   | ClusterLit(l, w, _, _, _, _, c) -> "Cluster $" ^ string_of_expr l ^ "," ^ string_of_expr w ^ "," ^ string_of_expr c ^  "$"
   | PropertyAccess(e, p) -> string_of_expr e ^ p
+  | PropertyAssign(e1, p, e2) -> string_of_expr e1 ^ "." ^ p ^ "=" ^ string_of_expr e2
   | Property(s) -> s
   | Id(s) -> s
   | Binop(e1, o, e2) ->

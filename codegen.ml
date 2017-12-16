@@ -157,6 +157,27 @@ let translate (globals, functions) =
   let getColor_t = L.function_type col_ptr_t [|i32_t|] in
   let getColor_func = L.declare_function "getColor" getColor_t the_module in
 
+  let setX_t = L.function_type i32_t [|i32_t; i32_t|] in
+  let setX_func = L.declare_function "setX" setX_t the_module in
+
+  let setY_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setY_func = L.declare_function "setY" setY_t the_module in
+
+  let setDX_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setDX_func = L.declare_function "setDX" setDX_t the_module in
+
+  let setDY_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setDY_func = L.declare_function "setDY" setDY_t the_module in
+
+  let setHeight_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setHeight_func = L.declare_function "setHeight" setHeight_t the_module in
+
+  let setWidth_t = L.function_type void_t [|i32_t; i32_t|] in
+  let setWidth_func = L.declare_function "setWidth" setWidth_t the_module in
+
+  let setColor_t = L.function_type void_t [|i32_t; col_ptr_t|] in
+  let setColor_func = L.declare_function "setColor" setColor_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -301,6 +322,7 @@ let translate (globals, functions) =
         
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+      | A.Property s -> L.const_int i32_t 0
       | A.PropertyAccess(c, p) ->
         let cluster = expr builder c in
         (match p with
@@ -311,6 +333,19 @@ let translate (globals, functions) =
         | "height" -> L.build_call getHeight_func [|cluster|] "hVal" builder
         | "width" -> L.build_call getWidth_func [|cluster|] "wVal" builder              
         | "color" -> L.build_call getColor_func [|cluster|] "colVal" builder              
+        | _ -> raise (Failure ("Property does not exist"))
+        )
+      | A.PropertyAssign(c, p, e) ->
+        let cluster = expr builder c in
+        let e' = expr builder e in
+        (match p with
+        | "x" -> L.build_call setX_func [|cluster; e'|] "" builder
+        | "y" -> L.build_call setY_func [|cluster; e'|] "" builder
+        | "dx" -> L.build_call setDX_func [|cluster; e'|] "" builder
+        | "dy" -> L.build_call setDY_func [|cluster; e'|] "" builder  
+        | "height" -> L.build_call setHeight_func [|cluster; e'|] "" builder
+        | "width" -> L.build_call setWidth_func [|cluster; e'|] "" builder              
+        | "color" -> L.build_call setColor_func [|cluster; e'|] "" builder              
         | _ -> raise (Failure ("Property does not exist"))
         )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
