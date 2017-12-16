@@ -1,5 +1,5 @@
 void init(){}
-void update(){}
+void update(int f){}
 
 int main(){
   color c;

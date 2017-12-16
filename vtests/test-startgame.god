@@ -1,4 +1,4 @@
-void update(){
+void update(int f){
 	if (keyDown("Space")){
 		prints("Space pressed");
 	}
