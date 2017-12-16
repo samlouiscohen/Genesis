@@ -1,14 +1,18 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
 #include "genesis.h"
 
-extern void update();
+extern void update(int frame);
 extern void init();
 extern board_t *curBoard;
 extern cluster_t *toRemove;
 
+const int framesPerSec = 30;
 char *additionalKeynames[] = {"Up", "Down", "Left", "Right", "Space", "Escape"};
 
+//Global values used during runtime
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 int backgroundR = 0xFF;
@@ -21,6 +25,7 @@ uint64_t downState = 0;
 uint64_t heldState = 0;
 uint64_t upState = 0;
 const Uint8 *keyStates = NULL;
+int frameNum = 0;
 
 int initScreen(color_t *c, int width, int height);
 void clearScreen();
@@ -28,10 +33,6 @@ void static close();
 void showDisplay();
 int keyToInt(const char *keyName);
 uint64_t keyMask(int number);
-
-int newCluster(int l, int w, int x, int y, int dx, int dy, struct color *col){
-    return 12;
-}
 
 //Create screen
 int initScreen(color_t *c, int width, int height){
@@ -185,11 +186,18 @@ uint64_t keyMask(int number){
 
 void startGame(color_t *c, int width, int height){
     quit = 0;
+    int msPerFrame = (int) (1000 / framesPerSec);
     initScreen(c, width, height);
     //init();
     while (!quit){
+        frameNum += 1;
+        unsigned int frameStart = SDL_GetTicks();
         pollEvents();
-        //update();
+        //update(frameNum);
+        unsigned int frameTime = SDL_GetTicks - frameStart;
+        if(frameTime < msPerFrame){
+            SDL_Delay(msPerFrame - frameTime);
+        }
     }
 }
 
@@ -202,7 +210,7 @@ int create_id(){
 
 }
 
-void add_Cluster(int length, int width, int x, int y, int dx, int dy, color *color){
+void newCluster(int length, int width, int x, int y, int dx, int dy, color *color){
     cluster_t *cluster;
     //HASH_FIND_STR(curBoard->clusters, cluster_id, cluster);
     cluster = malloc(sizeof(cluster_t));
@@ -226,6 +234,11 @@ void remove_Cluster(int id){
     if(toRemove != NULL){
         HASH_DEL(clusters,toRemove);
     }
+}
+
+int random(int max){
+    srand(time(NULL));
+    return (rand() % max);
 }
 
 /* Exported function (visible in Genesis) */
