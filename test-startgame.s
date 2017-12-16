@@ -5,14 +5,29 @@
 _main:                                  ## @main
 	.cfi_startproc
 ## BB#0:                                ## %entry
-	subq	$40, %rsp
+	subq	$72, %rsp
 Lcfi0:
-	.cfi_def_cfa_offset 48
+	.cfi_def_cfa_offset 80
+	movabsq	$1095216660480, %rax    ## imm = 0xFF00000000
+	movq	%rax, 24(%rsp)
+	movl	$0, 32(%rsp)
+	leaq	24(%rsp), %rax
+	movq	%rax, 64(%rsp)
+	movq	%rax, 40(%rsp)
+	movq	%rax, (%rsp)
+	movl	$50, %edi
+	movl	$50, %esi
+	movl	$100, %edx
+	movl	$100, %ecx
+	xorl	%r8d, %r8d
+	xorl	%r9d, %r9d
+	callq	_newCluster
+	movl	%eax, 52(%rsp)
 	movq	$0, 8(%rsp)
 	movl	$0, 16(%rsp)
 	leaq	8(%rsp), %rdi
-	movq	%rdi, 24(%rsp)
-	movq	%rdi, 32(%rsp)
+	movq	%rdi, 56(%rsp)
+	movq	%rdi, 40(%rsp)
 	movl	$640, %esi              ## imm = 0x280
 	movl	$480, %edx              ## imm = 0x1E0
 	callq	_startGame
@@ -21,7 +36,7 @@ Lcfi0:
 	xorl	%eax, %eax
 	callq	_printf
 	xorl	%eax, %eax
-	addq	$40, %rsp
+	addq	$72, %rsp
 	retq
 	.cfi_endproc
                                         ## -- End function

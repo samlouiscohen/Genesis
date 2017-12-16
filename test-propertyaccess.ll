@@ -38,20 +38,27 @@ declare i32 @getY(i32)
 define i32 @main() {
 entry:
   %c = alloca %color*
+  %cl = alloca i32
+  %xValue = alloca i32
   %color_tmp = alloca %color
   %clr_ptr = alloca %color*
   %r = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 0
-  store i32 255, i32* %r
+  store i32 0, i32* %r
   %g = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 1
   store i32 255, i32* %g
   %b = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 2
-  store i32 255, i32* %b
+  store i32 0, i32* %b
   store %color* %color_tmp, %color** %clr_ptr
   %0 = load %color*, %color** %clr_ptr
   store %color* %0, %color** %c
   %c1 = load %color*, %color** %c
-  %initScreen = call i32 @initScreen(%color* %c1, i32 640, i32 480)
-  %printf = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @fmt, i32 0, i32 0), i32 1)
+  %newClust = call i32 @newCluster(i32 50, i32 50, i32 100, i32 100, i32 0, i32 0, %color* %c1)
+  store i32 %newClust, i32* %cl
+  %cl2 = load i32, i32* %cl
+  %xVal = call i32 @getX(i32 %cl2)
+  store i32 %xVal, i32* %xValue
+  %xValue3 = load i32, i32* %xValue
+  %printf = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @fmt, i32 0, i32 0), i32 %xValue3)
   ret i32 0
 }
 

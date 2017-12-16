@@ -37,22 +37,41 @@ declare i32 @newCluster(i32, i32, i32, i32, i32, i32, %color*)
 
 declare i32 @randomInt(i32)
 
+declare i32 @getX(i32)
+
+declare i32 @getY(i32)
+
 define i32 @main() {
 entry:
   %c = alloca %color*
+  %cl = alloca i32
   %color_tmp = alloca %color
   %clr_ptr = alloca %color*
   %r = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 0
   store i32 0, i32* %r
   %g = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 1
-  store i32 0, i32* %g
+  store i32 255, i32* %g
   %b = getelementptr inbounds %color, %color* %color_tmp, i32 0, i32 2
   store i32 0, i32* %b
   store %color* %color_tmp, %color** %clr_ptr
   %0 = load %color*, %color** %clr_ptr
   store %color* %0, %color** %c
   %c1 = load %color*, %color** %c
-  call void @startGame(%color* %c1, i32 640, i32 480)
+  %newClust = call i32 @newCluster(i32 50, i32 50, i32 100, i32 100, i32 0, i32 0, %color* %c1)
+  store i32 %newClust, i32* %cl
+  %color_tmp2 = alloca %color
+  %clr_ptr3 = alloca %color*
+  %r4 = getelementptr inbounds %color, %color* %color_tmp2, i32 0, i32 0
+  store i32 0, i32* %r4
+  %g5 = getelementptr inbounds %color, %color* %color_tmp2, i32 0, i32 1
+  store i32 0, i32* %g5
+  %b6 = getelementptr inbounds %color, %color* %color_tmp2, i32 0, i32 2
+  store i32 0, i32* %b6
+  store %color* %color_tmp2, %color** %clr_ptr3
+  %1 = load %color*, %color** %clr_ptr3
+  store %color* %1, %color** %c
+  %c7 = load %color*, %color** %c
+  call void @startGame(%color* %c7, i32 640, i32 480)
   %printf = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @fmt, i32 0, i32 0), i32 1)
   ret i32 0
 }

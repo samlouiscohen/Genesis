@@ -136,6 +136,11 @@ let translate (globals, functions) =
   let randomInt_t = L.function_type i32_t [|i32_t|] in
   let randomInt_func = L.declare_function "randomInt" randomInt_t the_module in
 
+  let getX_t = L.function_type i32_t [|i32_t|] in
+  let getX_func = L.declare_function "getX" getX_t the_module in
+
+  let getY_t = L.function_type i32_t [|i32_t|] in
+  let getY_func = L.declare_function "getY" getY_t the_module in
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -280,6 +285,13 @@ let translate (globals, functions) =
         
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+      | A.PropertyAccess(c, p) ->
+        let cluster = expr builder c in
+        (match p with
+        | "x" -> L.build_call getX_func [|cluster|] "xVal" builder
+        | "y" -> L.build_call getY_func [|cluster|] "yVal" builder
+        | _ -> raise (Failure ("Property does not exist"))
+        )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
       | A.Binop (e1, op, e2) ->
     let e1' = expr builder e1

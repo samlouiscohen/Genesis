@@ -31,6 +31,10 @@ declare i32 @newCluster(i32, i32, i32, i32, i32, i32, %color*)
 
 declare i32 @randomInt(i32)
 
+declare i32 @getX(i32)
+
+declare i32 @getY(i32)
+
 define i32 @main() {
 entry:
   %c = alloca %color*
