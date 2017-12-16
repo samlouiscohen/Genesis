@@ -155,6 +155,7 @@ let check (globals, functions) =
         | "height" -> Int
         | "width" -> Int
         | "color" -> Color 
+        | "draw" -> Bool
         | _ -> raise (Failure ("property is not defined"))
       )
     in

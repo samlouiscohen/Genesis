@@ -109,6 +109,7 @@ let translate (globals, functions) =
   let randomInt_t = L.function_type i32_t [|i32_t|] in
   let randomInt_func = L.declare_function "randomInt" randomInt_t the_module in
 
+  (* Getters *)
   let getX_t = L.function_type i32_t [|i32_t|] in
   let getX_func = L.declare_function "getX" getX_t the_module in
 
@@ -130,6 +131,10 @@ let translate (globals, functions) =
   let getColor_t = L.function_type col_ptr_t [|i32_t|] in
   let getColor_func = L.declare_function "getColor" getColor_t the_module in
 
+  let getDraw_t = L.function_type i1_t [|i32_t|] in
+  let getDraw_func = L.declare_function "getDraw" getDraw_t the_module in
+
+ (* Setters *)
   let setX_t = L.function_type i32_t [|i32_t; i32_t|] in
   let setX_func = L.declare_function "setX" setX_t the_module in
 
@@ -150,6 +155,9 @@ let translate (globals, functions) =
 
   let setColor_t = L.function_type void_t [|i32_t; col_ptr_t|] in
   let setColor_func = L.declare_function "setColor" setColor_t the_module in
+
+  let setDraw_t = L.function_type void_t [|i32_t; i1_t|] in
+  let setDraw_func = L.declare_function "setDraw" setDraw_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -307,7 +315,8 @@ let translate (globals, functions) =
         | "dy" -> L.build_call getDY_func [|cluster|] "dyVal" builder  
         | "height" -> L.build_call getHeight_func [|cluster|] "hVal" builder
         | "width" -> L.build_call getWidth_func [|cluster|] "wVal" builder              
-        | "color" -> L.build_call getColor_func [|cluster|] "colVal" builder              
+        | "color" -> L.build_call getColor_func [|cluster|] "colVal" builder 
+        | "draw" -> L.build_call getDraw_func [|cluster|] "drawVal" builder             
         | _ -> raise (Failure ("Property does not exist"))
         )
       | A.PropertyAssign(c, p, e) ->
@@ -320,7 +329,8 @@ let translate (globals, functions) =
         | "dy" -> L.build_call setDY_func [|cluster; e'|] "" builder  
         | "height" -> L.build_call setHeight_func [|cluster; e'|] "" builder
         | "width" -> L.build_call setWidth_func [|cluster; e'|] "" builder              
-        | "color" -> L.build_call setColor_func [|cluster; e'|] "" builder              
+        | "color" -> L.build_call setColor_func [|cluster; e'|] "" builder
+        | "draw" -> L.build_call setDraw_func [|cluster; e'|] "" builder              
         | _ -> raise (Failure ("Property does not exist"))
         )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
