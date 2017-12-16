@@ -79,6 +79,7 @@ int initScreen(color *c, int width, int height){
             }
         }
     }
+    printf( "Success!\n" );
     return success;
 }
 
