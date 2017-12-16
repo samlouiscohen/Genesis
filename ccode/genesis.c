@@ -208,6 +208,8 @@ void startGame(color *c, int width, int height){
     showDisplay();
    
     init();
+
+    //main loop
     while (!quit){
         frameNum += 1;
         unsigned int frameStart = SDL_GetTicks();
@@ -262,15 +264,24 @@ int getX(int id){
         return -1;
     }
 }
-void setXY(int id, int x, int y){
+void setX(int id, int x){
 
     cluster_t *cluster;
     HASH_FIND_INT(clusters, &id, cluster);
     if(cluster != NULL){
         cluster->x = x;
+        
+    }
+}
+
+void setY(int id; int y){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+    if(cluster != NULL){
         cluster->y = y;
     }
 }
+
 
 int getHeight(int id){
     cluster_t *cluster;
