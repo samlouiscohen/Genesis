@@ -7,6 +7,7 @@
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
 %token LBRACKET RBRACKET COLOR CLUSTER NEW DOLLAR DOT POUND
+%token AT
 %token <string> PROPERTY
 %token <int> LITERAL
 %token <string> ID
@@ -101,6 +102,7 @@ expr:
   | DOLLAR expr COMMA expr COMMA expr COMMA expr COMMA expr COMMA expr COMMA expr DOLLAR { ClusterLit($2, $4, $6, $8, $10, $12, $14)}
   | ID               { Id($1) }
   | FLOATLIT         { FloatLit($1) }  /* Float is expression which handles negatives*/
+  | expr AT expr { Collision($1, $3) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }

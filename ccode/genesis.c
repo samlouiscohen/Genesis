@@ -410,7 +410,7 @@ void setDY(int id, int dy){
     }
 }
 
-int detectCollision(int id1, int id2){
+bool detectCollision(int id1, int id2){
 
     cluster_t *c1;
     cluster_t *c2;

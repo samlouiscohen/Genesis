@@ -25,6 +25,7 @@ type expr =
   | ColorLit of expr * expr * expr
   | ClusterLit of expr * expr * expr * expr * expr * expr * expr
   | Property of string
+  | Collision of expr * expr
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -95,6 +96,7 @@ let rec string_of_expr = function
   | BoolLit(false) -> "false"
   | ColorLit(r,g,b) -> "<" ^ string_of_expr r ^ "," ^ string_of_expr g ^ "," ^ string_of_expr b ^ ">"
   | ClusterLit(l, w, _, _, _, _, c) -> "Cluster $" ^ string_of_expr l ^ "," ^ string_of_expr w ^ "," ^ string_of_expr c ^  "$"
+  | Collision(c1, c2) -> string_of_expr c1 ^ "@" ^ string_of_expr c2
   | PropertyAccess(e, p) -> string_of_expr e ^ p
   | PropertyAssign(e1, p, e2) -> string_of_expr e1 ^ "." ^ p ^ "=" ^ string_of_expr e2
   | Property(s) -> s

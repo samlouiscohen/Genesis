@@ -168,6 +168,7 @@ let check (globals, functions) =
       | BoolLit _ -> Bool
       | ColorLit _ -> Color
       | ClusterLit _ -> Cluster
+      | Collision _ -> Bool
       | PropertyAccess (_, s) -> type_of_property s
       | PropertyAssign (_, s, _) -> type_of_property s
       | Property _ -> raise (Failure ("Properties must be associated with an object"))

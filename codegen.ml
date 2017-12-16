@@ -109,6 +109,9 @@ let translate (globals, functions) =
   let randomInt_t = L.function_type i32_t [|i32_t|] in
   let randomInt_func = L.declare_function "randomInt" randomInt_t the_module in
 
+  let detectCollision_t = L.function_type i1_t [|i32_t; i32_t|] in
+  let detectCollision_func = L.declare_function "detectCollision" detectCollision_t the_module in
+
   (* Getters *)
   let getX_t = L.function_type i32_t [|i32_t|] in
   let getX_func = L.declare_function "getX" getX_t the_module in
@@ -302,7 +305,10 @@ let translate (globals, functions) =
         let next_ptr = L.build_struct_gep clustPtr 5 ("nextPtr") builder in
         let handle_ptr = L.build_struct_gep clustPtr 6 ("handle_ptr") builder in
         clustPtr *)
-        
+      | A.Collision (c1, c2) ->
+        let c1' = expr builder c1 in
+        let c2' = expr builder c2 in 
+        L.build_call detectCollision_func [|c1'; c2'|] "col" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Property s -> L.const_int i32_t 0

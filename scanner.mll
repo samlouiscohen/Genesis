@@ -6,6 +6,7 @@ rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "//"     { scomment lexbuf }           (* Comments *)
 | "/*"     { comment lexbuf }           (* Comments *)
+| '@'      { AT }
 | '#'	   { POUND }
 | '$'	   { DOLLAR }
 | '('      { LPAREN }
