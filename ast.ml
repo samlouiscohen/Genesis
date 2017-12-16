@@ -35,7 +35,6 @@ type expr =
   | ArrayInit of string * typ * expr
   | ArrayAssign of string * expr * expr
   | ArrayAccess of string * expr
-  | PropertyAccess of expr * string
   | Noexpr
 
 type stmt =
