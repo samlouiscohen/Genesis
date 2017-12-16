@@ -8,7 +8,7 @@ extern void init();
 //extern board_t *curBoard;
 //extern cluster_t *toRemove;
 
-const int framesPerSec = 30;
+const int framesPerSec = 2;
 char *additionalKeynames[] = {"Up", "Down", "Left", "Right", "Space", "Escape"};
 
 //Global values used during runtime
@@ -213,30 +213,35 @@ void startGame(color *c, int width, int height){
     int msPerFrame = (int) (1000 / framesPerSec);
     initScreen(c, width, height);
 
-    cluster_t *cl;
-    //draws all clusters in hash
-    for (cl = clusters; cl!=NULL;cl = cl->hh.next){
-        if(cl->draw == 1){
-            drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
 
-        }
-    }
     //update screen
     showDisplay();
    
-    //init();
+    init();
 
     //main loop
     while (!quit){
+        clearScreen();
+
         frameNum += 1;
         unsigned int frameStart = SDL_GetTicks();
         pollEvents();
 
-        //update(frameNum);
+        cluster_t *cl;
+        //draws all clusters in hash
+        for (cl = clusters; cl!=NULL;cl = cl->hh.next){
+            if(cl->draw == 1){
+                printf("Pos is %d\n",cl->x );
+                drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
+                }
+        }
+
+        update(frameNum);
         unsigned int frameTime = SDL_GetTicks() - frameStart;
         if(frameTime < msPerFrame){
             SDL_Delay(msPerFrame - frameTime);
         }
+        showDisplay();
     }
 }
 
