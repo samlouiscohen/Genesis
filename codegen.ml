@@ -141,6 +141,22 @@ let translate (globals, functions) =
 
   let getY_t = L.function_type i32_t [|i32_t|] in
   let getY_func = L.declare_function "getY" getY_t the_module in
+
+  let getDX_t = L.function_type i32_t [|i32_t|] in
+  let getDX_func = L.declare_function "getDX" getDX_t the_module in
+
+  let getDY_t = L.function_type i32_t [|i32_t|] in
+  let getDY_func = L.declare_function "getDY" getDY_t the_module in
+
+  let getHeight_t = L.function_type i32_t [|i32_t|] in
+  let getHeight_func = L.declare_function "getHeight" getHeight_t the_module in
+
+  let getWidth_t = L.function_type i32_t [|i32_t|] in
+  let getWidth_func = L.declare_function "getWidth" getWidth_t the_module in
+
+  let getColor_t = L.function_type col_ptr_t [|i32_t|] in
+  let getColor_func = L.declare_function "getColor" getColor_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -290,6 +306,11 @@ let translate (globals, functions) =
         (match p with
         | "x" -> L.build_call getX_func [|cluster|] "xVal" builder
         | "y" -> L.build_call getY_func [|cluster|] "yVal" builder
+        | "dx" -> L.build_call getDX_func [|cluster|] "dxVal" builder
+        | "dy" -> L.build_call getDY_func [|cluster|] "dyVal" builder  
+        | "height" -> L.build_call getHeight_func [|cluster|] "hVal" builder
+        | "width" -> L.build_call getWidth_func [|cluster|] "wVal" builder              
+        | "color" -> L.build_call getColor_func [|cluster|] "colVal" builder              
         | _ -> raise (Failure ("Property does not exist"))
         )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
