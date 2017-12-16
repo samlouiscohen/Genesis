@@ -274,9 +274,10 @@ void setX(int id, int x){
     }
 }
 
-void setY(int id; int y){
+void setY(int id, int y){
     cluster_t *cluster;
     HASH_FIND_INT(clusters, &id, cluster);
+
     if(cluster != NULL){
         cluster->y = y;
     }
