@@ -371,7 +371,7 @@ let translate (globals, functions) =
           let keyName = expr builder s in
           L.build_call isKeyHeld_func [|keyName|] "keyH" builder
       | A.Call ("random", [e]) ->
-          let maxInt = expr build e in
+          let maxInt = expr builder e in
           L.build_call random_func [|maxInt|] "randInt" builder
       | A.Call ("prints", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |] "printf" builder
