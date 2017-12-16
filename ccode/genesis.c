@@ -385,7 +385,7 @@ color getColor(int id){
 
 }
 
-void cluster_setColor(int id, struct color *color){
+void setColor(int id, struct color *color){
     cluster_t *cluster;
     HASH_FIND_INT(clusters, &id, cluster);
 
