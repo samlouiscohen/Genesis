@@ -324,6 +324,14 @@ void setY(int id, int y){
     }
 }
 
+int getY(int id){
+    cluster_t *cluster;
+    HASH_FIND_INT(clusters, &id, cluster);
+
+    if(cluster != NULL){
+        return cluster->y;
+    }
+}
 
 int getHeight(int id){
     cluster_t *cluster;
