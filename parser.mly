@@ -15,7 +15,6 @@
 %token <string> STRINGLIT
 %token EOF
 
-
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
@@ -23,6 +22,7 @@
 %left AND
 %left EQ NEQ
 %left LT GT LEQ GEQ
+%left AT
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right NOT NEG
