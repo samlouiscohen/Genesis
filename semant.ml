@@ -40,11 +40,6 @@ let check (globals, functions) =
     if lval = rval then lval else raise err
   in
 
-  
-
-
-
-   
   (**** Checking Global Variables ****)
 
   List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
@@ -188,10 +183,6 @@ let check (globals, functions) =
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier_array s
-(*
-      | ArrayInit(s, typ, expr) -> raise (Failure ("Ya no you can't do that with arrays"))
-      | ArrayAssign(s, lhs, rhs) -> raise (Failure ("Ya no you can't do that with arrays"))
-*)
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
 
@@ -232,20 +223,13 @@ let check (globals, functions) =
 
           (* Iterate over args and check if each of those passed match *)
           else 
-            List.iter2 (fun (ft, b) e -> let et = expr e in
-
-
-
+            List.iter2 (fun (ft, _) e -> let et = expr e in
               ignore (check_assign ft et
                  (Failure ("illegal actual argument found " ^ string_of_typ et ^
                  " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
               fd.formals actuals;
             fd.typ
-
-
           in
-
-
 
     let check_bool_expr e = if expr e != Bool
      then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))

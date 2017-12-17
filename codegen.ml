@@ -261,9 +261,7 @@ let translate (globals, functions) =
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.ColorLit (r, g, b) -> 
         let ctmp = L.build_alloca color_t "color_tmp" builder in
-(*           ignore(L.set_alignment 4 ctmp); *)
         let cptr = L.build_alloca (L.pointer_type color_t) "clr_ptr" builder in
-(*           ignore(L.set_alignment 8 cptr); *)
         let e1 = expr builder r 
         and e2 = expr builder g 
         and e3 = expr builder b in
@@ -274,19 +272,8 @@ let translate (globals, functions) =
           ignore (L.build_store e2 gtmp builder);
         let btmp = L.build_struct_gep ctmp 2 "b" builder in 
           ignore (L.build_store e3 btmp builder);
-(*         let rtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0 ; L.const_int i32_t 0|] "r" builder in
-        let rstr = L.build_store e1 rtmp builder in
-(*           ignore(L.set_alignment 4 rstr); *)
-        let gtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 1|] "g" builder in
-        let gstr = L.build_store e2 rtmp builder in 
-(*           ignore(L.set_alignment 4 gstr); *)
-        let btmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 2|] "b" builder in
-        let  bstr = L.build_store e3 rtmp builder in
-(*           ignore(L.set_alignment 4 bstr); *) *)
-        let colstr = L.build_store ctmp cptr builder in
-(*           ignore(L.set_alignment 8 colstr); *)
+          ignore (L.build_store ctmp cptr builder);
         let colld = L.build_load cptr "" builder in
-(*           ignore(L.set_alignment 8 colld); *)
         colld
       | A.ClusterLit (l, w, x, y, dx, dy, c)->
         let xPos = expr builder x in
@@ -298,23 +285,14 @@ let translate (globals, functions) =
         let color = expr builder c in
 
         L.build_call newCluster_func [| len; wid; xPos; yPos; xVel; yVel; color|] "newClust" builder
-(*         let name = expr builder c in
-        let clustPtr = L.build_malloc cluster_t ("clustPtr") builder in
-        let posPtr = L.build_struct_gep clustPtr 0 ("posPtr") builder in
-        let colorPtr = L.build_struct_gep clustPtr 1 ("colorPtr") builder in
-        let heightPtr = L.build_struct_gep clustPtr 2 ("heightPtr") builder in
-        let widthPtr = L.build_struct_gep clustPtr 3 ("widthPtr") builder in
-        let name_ptr = L.build_struct_gep clustPtr 4 ("name ptr") builder in
-        let next_ptr = L.build_struct_gep clustPtr 5 ("nextPtr") builder in
-        let handle_ptr = L.build_struct_gep clustPtr 6 ("handle_ptr") builder in
-        clustPtr *)
+
       | A.Collision (c1, c2) ->
         let c1' = expr builder c1 in
         let c2' = expr builder c2 in 
         L.build_call detectCollision_func [|c1'; c2'|] "col" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
-      | A.Property s -> L.const_int i32_t 0
+      | A.Property _ -> L.const_int i32_t 0
       | A.PropertyAccess(c, p) ->
         let cluster = expr builder c in
         (match p with
