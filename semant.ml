@@ -181,7 +181,23 @@ let check (globals, functions) =
       else raise (Failure ("expected an int input for type color"))    
 
       | ClusterLit(l,w,x,y,m,n,c) -> let t1 = expr l and t2 = expr w and t3 = expr x and t4 = expr y and t5 = expr m and t6 = expr n and t7 = expr c in
-      if (t1 = Int) then Cluster
+      if (t1 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr l))
+      else        
+      if (t2 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr w))
+      else      
+      if (t3 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr x))
+      else
+      if (t4 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr y))
+      else   
+      if (t5 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr m))
+      else      
+      if (t6 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr n))
+      else 
+      if (t7 != Color) then raise (Failure ("expected a color input for type cluster, but you inputted: " ^ string_of_expr c))
+      else
+      Cluster
+
+(*       if (t1 = Int) then Cluster
       else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr l));       
       if (t2 = Int) then Cluster
       else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr w));      
@@ -195,7 +211,7 @@ let check (globals, functions) =
       else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr n));
       if (t7 = Color) then Cluster
       else raise (Failure ("expected a color input for type cluster, but you inputted: " ^ string_of_expr c))
-
+ *)
       | Collision _ -> Bool
       | PropertyAccess (_, s) -> type_of_property s
       | PropertyAssign (_, s, _) -> type_of_property s
