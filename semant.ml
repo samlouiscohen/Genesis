@@ -197,21 +197,6 @@ let check (globals, functions) =
       else
       Cluster
 
-(*       if (t1 = Int) then Cluster
-      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr l));       
-      if (t2 = Int) then Cluster
-      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr w));      
-      if (t3 = Int) then Cluster
-      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr x));
-      if (t4 = Int) then Cluster
-      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr y));      
-      if (t5 = Int) then Cluster
-      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr m));      
-      if (t6 = Int) then Cluster
-      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr n));
-      if (t7 = Color) then Cluster
-      else raise (Failure ("expected a color input for type cluster, but you inputted: " ^ string_of_expr c))
- *)
       | Collision _ -> Bool
       | PropertyAccess (_, s) -> type_of_property s
       | PropertyAssign (_, s, _) -> type_of_property s
