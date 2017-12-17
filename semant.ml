@@ -113,10 +113,14 @@ let check (globals, functions) =
   in
 
   let function_decl s = try StringMap.find s function_decls
-       with Not_found -> raise (Failure ("unrecognized function " ^ s))
+       with Not_found -> raise (Failure ("Must define the function " ^ s))
   in
-
+  
   let _ = function_decl "main" in (* Ensure "main" is defined *)
+
+  let _ = function_decl "update" in (* Ensure "update" is defined *)
+
+  let _ = function_decl "init" in (* Ensure "init" is defined *)
 
   let check_function func =
 

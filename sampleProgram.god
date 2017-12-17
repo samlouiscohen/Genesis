@@ -1,3 +1,5 @@
+void init(){}
+
 void update(int f){
 	if (keyDown("Space")){
 		prints("Space pressed");
@@ -9,8 +11,6 @@ void update(int f){
 		prints("Space released");
 	}
 }
-
-void init(){}
 
 int main(){
     color c;
