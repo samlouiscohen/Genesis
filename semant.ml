@@ -180,8 +180,27 @@ let check (globals, functions) =
       | FloatLit _ -> Float
       | StringLit _ -> String
       | BoolLit _ -> Bool
-      | ColorLit _ -> Color
-      | ClusterLit _ -> Cluster
+
+      | ColorLit(r,g,b) -> let t1 = expr r and t2 = expr g and t3 = expr b in
+      if (t1 = Int && t2 = Int && t3 = Int) then Color
+      else raise (Failure ("expected an int input for type color"))    
+
+      | ClusterLit(l,w,x,y,m,n,c) -> let t1 = expr l and t2 = expr w and t3 = expr x and t4 = expr y and t5 = expr m and t6 = expr n and t7 = expr c in
+      if (t1 = Int) then Cluster
+      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr l));       
+      if (t2 = Int) then Cluster
+      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr w));      
+      if (t3 = Int) then Cluster
+      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr x));
+      if (t4 = Int) then Cluster
+      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr y));      
+      if (t5 = Int) then Cluster
+      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr m));      
+      if (t6 = Int) then Cluster
+      else raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr n));
+      if (t7 = Color) then Cluster
+      else raise (Failure ("expected a color input for type cluster, but you inputted: " ^ string_of_expr c))
+
       | Collision _ -> Bool
       | PropertyAccess (_, s) -> type_of_property s
       | PropertyAssign (_, s, _) -> type_of_property s
@@ -192,21 +211,19 @@ let check (globals, functions) =
       | ArrayInit(s, typ, expr) -> raise (Failure ("Ya no you can't do that with arrays"))
       | ArrayAssign(s, lhs, rhs) -> raise (Failure ("Ya no you can't do that with arrays"))
 *)
-      | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
-    in 
-
-    (match op with
-        Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-      | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
-      | Equal | Neq when t1 = t2 -> Bool
-      | Less | Leq | Greater | Geq when isNum t1 && isNum t2 -> Bool
-      | And | Or when t1 = Bool && t2 = Bool -> Bool
-      | _ -> raise (Failure ("illegal binary operator " ^
-            string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-            string_of_typ t2 ^ " in " ^ string_of_expr e))
-      )
+      | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in 
+        (match op with
+          Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+        | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
+        | Equal | Neq when t1 = t2 -> Bool
+        | Less | Leq | Greater | Geq when isNum t1 && isNum t2 -> Bool
+        | And | Or when t1 = Bool && t2 = Bool -> Bool
+        | _ -> raise (Failure ("illegal binary operator " ^
+              string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+              string_of_typ t2 ^ " in " ^ string_of_expr e))
+        )
       | Unop(op, e) as ex -> let t = expr e in
-     (match op with
+        (match op with
           Neg when t = Int -> Int
         | Neg when t = Float -> Float
         | Not when t = Bool -> Bool
