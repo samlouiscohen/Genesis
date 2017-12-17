@@ -22,8 +22,7 @@ all : genesis.native printbig.o genesis.o
 
 .PHONY : genesis.native
 genesis.native :
-	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
-		genesis.native
+	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 genesis.native
 
 # "make clean" removes all generated files
 
@@ -61,9 +60,10 @@ parser.ml parser.mli : parser.mly
 printbig : printbig.c
 	cc -o printbig -DBUILD_TEST printbig.c
 
+printbig.o :
+	cc -c printbig.c -o printbig.o
+
 genesis.o: ccode/genesis.c
-	# cc -c -o ccode/genesis.o $< -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
-	# make -C ccode CFLAGS="-DSKIP_MAIN" genesis.o
 	$(CC) -c $(CFLAGS) $< -o ccode/$@
 
 tests: rtest test vtest

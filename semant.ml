@@ -40,11 +40,6 @@ let check (globals, functions) =
     if lval = rval then lval else raise err
   in
 
-  
-
-
-
-   
   (**** Checking Global Variables ****)
 
   List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
@@ -249,20 +244,13 @@ let check (globals, functions) =
 
           (* Iterate over args and check if each of those passed match *)
           else 
-            List.iter2 (fun (ft, b) e -> let et = expr e in
-
-
-
+            List.iter2 (fun (ft, _) e -> let et = expr e in
               ignore (check_assign ft et
                  (Failure ("illegal actual argument found " ^ string_of_typ et ^
                  " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
               fd.formals actuals;
             fd.typ
-
-
           in
-
-
 
     let check_bool_expr e = if expr e != Bool
      then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))

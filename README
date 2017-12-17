@@ -22,7 +22,7 @@ Building
 Sanity Tests
  - Download an updated testall.sh here (only if cloning from github):
 
-     https://gist.github.com/zhaosjason/ff8012613dbfdea131001986aeda325d
+     https://gist.github.com/zhaosjason/8725d965bfb890c1778927ef05b462c2
 
  - Type "make rtest" to run MicroC-specific tests
  - Type "make test" to run Genesis-specific tests
