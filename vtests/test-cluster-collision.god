@@ -18,9 +18,20 @@ int main(){
 }
 
 void update(int f){
-    cl.x = cl.x + 30;
     if(cl @ cl2){ 
         cl.draw = false; 
         cl2.draw = false;
+    } 
+    if (keyDown("w") || keyHeld("w")){
+        cl.y = cl.y - 10;
     }
+    if (keyDown("a") || keyHeld("a")){
+        cl.x = cl.x - 10;
+    }
+    if (keyDown("s") || keyHeld("s")){
+        cl.y = cl.y + 10;
+    }
+    if (keyDown("d") || keyHeld("d")){
+        cl.x = cl.x + 10;
+    }    
 }

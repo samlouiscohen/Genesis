@@ -26,9 +26,14 @@ const Uint8 *keyStates = NULL;
 int frameNum = 0;
 
 int initScreen(color *c, int width, int height);
+void quitGame();
 void clearScreen();
 void static close();
 void showDisplay();
+
+void quitGame(){
+    quit = 1;
+}
 
 void copyArray(const Uint8 *src, Uint8 *dest, int len){
     int i;

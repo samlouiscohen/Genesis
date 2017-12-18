@@ -3,6 +3,7 @@ cluster player;
 cluster obstacle1;
 cluster obstacle2;
 bool jumping;
+int score;
 
 void init(){
     ground.draw = true;
@@ -10,11 +11,14 @@ void init(){
     obstacle1.draw = true;
     obstacle2.draw = true;
     jumping = false;
+    score = 0;
 }
 
 void update(int f){
     if ((player @ obstacle1) || (player @ obstacle2)){
         player.draw = false;
+        print(score);
+        quit();
     } 
 
     if (jumping){
@@ -31,12 +35,14 @@ void update(int f){
         player.y = 190;
         jumping = false;
     }
-    
+
     if (obstacle1.x < -30){
         obstacle1.x = 640;
+        score = score + 1;
     }
     if (obstacle2.x < -30){
         obstacle2.x = obstacle1.x + 225 + random(75);
+        score = score + 1;
     }
     obstacle1.x = obstacle1.x - 5;
     obstacle2.x = obstacle2.x - 5;

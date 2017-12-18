@@ -118,6 +118,9 @@ let translate (globals, functions) =
   let detectCollision_t = L.function_type i1_t [|i32_t; i32_t|] in
   let detectCollision_func = L.declare_function "detectCollision" detectCollision_t the_module in
 
+  let quitGame_t = L.function_type void_t [| |] in
+  let quitGame_func = L.declare_function "quitGame" quitGame_t the_module in
+
   (* Getters *)
   let getX_t = L.function_type i32_t [|i32_t|] in
   let getX_func = L.declare_function "getX" getX_t the_module in
@@ -407,7 +410,9 @@ let translate (globals, functions) =
 (*             ignore(L.set_alignment 8 color);
  *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
           ignore(L.build_store color clr_ptr builder) ; *)
-          L.build_call startGame_func [| color; width; height |] "" builder  
+          L.build_call startGame_func [| color; width; height |] "" builder 
+      | A.Call ("quit", []) ->
+          L.build_call quitGame_func [||] "" builder
       | A.Call ("delete", [c]) ->
           let cluster = expr builder c in
           L.build_call deleteCluster_func [|cluster|] "" builder
