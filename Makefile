@@ -7,16 +7,6 @@
 CFLAGS = -DSKIP_MAIN
 LDFLAGS = 
 
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S), Linux)
-	LDFLAGS += -I /SDL2-2.0.7/include -L /SDL2-2.0.7/build -l SDL2
-endif
-
-ifeq ($(UNAME_S), Darwin)
-	CFLAGS += -I /Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks
-	LDFLAGS += -F/Library/Frameworks -framework SDL2
-endif
-
 .PHONY : all
 all : genesis.native printbig.o genesis.o
 
