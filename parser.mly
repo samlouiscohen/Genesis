@@ -57,7 +57,7 @@ formal_list:
     typ ID                   { [($1,$2)] }
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
-typ:
+primitive:
     INT { Int }
   | FLOAT { Float }
   | BOOL { Bool }
@@ -65,7 +65,10 @@ typ:
   | STRING { String }
   | CLUSTER {Cluster}
   | COLOR { Color } 
-  | typ LBRACKET RBRACKET { ArrayType($1) } 
+
+typ:
+    primitive { $1 }
+  | primitive LBRACKET RBRACKET { ArrayType($1) } 
 
 vdecl_list:
     /* nothing */    { [] }
@@ -119,7 +122,7 @@ expr:
   | expr DOT ID ASSIGN expr { PropertyAssign($1, $3, $5) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | ID ASSIGN NEW typ LBRACKET expr RBRACKET { ArrayInit($1, $4, $6) }
+  | NEW primitive LBRACKET expr RBRACKET { ArrayInit($2, $4) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
