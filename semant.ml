@@ -208,7 +208,7 @@ let check (globals, functions) =
     in 
 
     (match op with
-        Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+        Add | Sub | Mult | Div | Mod when t1 = Int && t2 = Int -> Int
       | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
       | Equal | Neq when t1 = t2 -> Bool
       | Less | Leq | Greater | Geq when isNum t1 && isNum t2 -> Bool

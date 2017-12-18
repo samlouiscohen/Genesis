@@ -56,7 +56,7 @@ printbig.o :
 genesis.o: ccode/genesis.c
 	$(CC) -c $(CFLAGS) $< -o ccode/$@
 
-tests: rtest test vtest
+tests: rtest test 
 
 rtest: all
 	@echo "Running regression tests..."
