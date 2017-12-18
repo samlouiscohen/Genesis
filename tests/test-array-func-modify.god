@@ -1,17 +1,22 @@
-
+void init(){}
+void update(int f){}
 
 
 void modify(int[] c, int len){
 
+	int i;
 
-    c[1] = 5;
-    
+	for(i=0;i<len;i=i+1){
+		c[i] = i*i;
+	}
 }
+
 
 
 int main(){
 
     int length;
+    int j;
 
     int[] x;
 
@@ -22,10 +27,11 @@ int main(){
     modify(x, length);
 
 
-    print(x[1]);
+    for(j=0;j<length;j=j+1){
 
+    	print(x[j]);
 
-
+    }
 
 
     return 0;

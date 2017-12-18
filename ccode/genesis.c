@@ -331,6 +331,9 @@ int getY(int id){
     if(cluster != NULL){
         return cluster->y;
     }
+    else {
+        return -1;
+    }
 }
 
 int getHeight(int id){

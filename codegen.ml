@@ -39,8 +39,7 @@ let translate (globals, functions) =
  *)
   let color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
-  let col_ptr_t = L.pointer_type color_t in
-
+  let col_ptr_t = pointer_t color_t in
   let cluster_t = i32_t in
 (*   let position_t = L.named_struct_type context "position" in
     L.struct_set_body position_t [| i32_t ; i32_t |] false;
@@ -53,23 +52,27 @@ let translate (globals, functions) =
   let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
-    | A.String -> pointer_t i8_t
     | A.Bool -> i1_t
     | A.Void -> void_t 
-    | A.Color -> col_ptr_t
     | A.Cluster -> cluster_t
-(*
-    | A.Struct -> pointer_t void_t
-*)
+    | A.String -> pointer_t i8_t
     | A.ArrayType(t) -> pointer_t (ltype_of_typ t)
+    | A.Color -> col_ptr_t
 
   in
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
     let global_var m (t, n) =
-      let init = L.const_int (ltype_of_typ t) 0
+      let init = match t with 
+          A.ArrayType(_) -> L.const_pointer_null (ltype_of_typ t)
+        | A.Color -> L.const_pointer_null (ltype_of_typ t)
+        | A.String -> L.const_pointer_null (ltype_of_typ t)
+        | _ -> L.const_int (ltype_of_typ t) 0
       in StringMap.add n (L.define_global n init the_module) m in
+(*
+      StringMap.add n (L.declare_global (ltype_of_typ t) the_module) m in
+*)
     List.fold_left global_var StringMap.empty globals in
 
 
@@ -248,9 +251,8 @@ let translate (globals, functions) =
     in
 
     (* Initializes array of typ of size len *)
-    let init_array name typ len builder =
-      let malloc = L.build_array_malloc (ltype_of_typ typ) len "" builder in
-      L.build_store malloc (lookup name) builder
+    let init_array typ len builder =
+      L.build_array_malloc (ltype_of_typ typ) len "" builder
     in
 
     (* Construct code for an expression; return its value *)
@@ -321,8 +323,8 @@ let translate (globals, functions) =
         | _ -> raise (Failure ("Property does not exist"))
         )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
-      | A.ArrayInit(s, typ, e) -> let len = (expr builder e) in 
-          init_array s typ len builder
+      | A.ArrayInit(typ, e) -> let len = (expr builder e) in 
+          init_array typ len builder
       | A.ArrayAssign(s, lhs, rhs) -> 
           set_array_element s (expr builder lhs) (expr builder rhs) builder
       | A.Binop (e1, op, e2) ->
