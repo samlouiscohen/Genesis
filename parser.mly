@@ -3,7 +3,7 @@
 %{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
-%token PLUS MINUS TIMES DIVIDE ASSIGN NOT
+%token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
 %token LBRACKET RBRACKET COLOR CLUSTER NEW DOLLAR DOT POUND
@@ -24,7 +24,7 @@
 %left LT GT LEQ GEQ
 %left AT
 %left PLUS MINUS
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD
 %right NOT NEG
 %left DOT
 
@@ -57,7 +57,7 @@ formal_list:
     typ ID                   { [($1,$2)] }
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
-typ:
+primitive:
     INT { Int }
   | FLOAT { Float }
   | BOOL { Bool }
@@ -65,7 +65,10 @@ typ:
   | STRING { String }
   | CLUSTER {Cluster}
   | COLOR { Color } 
-  | typ LBRACKET RBRACKET { ArrayType($1) } 
+
+typ:
+    primitive { $1 }
+  | primitive LBRACKET RBRACKET { ArrayType($1) } 
 
 vdecl_list:
     /* nothing */    { [] }
@@ -107,6 +110,7 @@ expr:
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
+  | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }
@@ -119,7 +123,7 @@ expr:
   | expr DOT ID ASSIGN expr { PropertyAssign($1, $3, $5) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | ID ASSIGN NEW typ LBRACKET expr RBRACKET { ArrayInit($1, $4, $6) }
+  | NEW primitive LBRACKET expr RBRACKET { ArrayInit($2, $4) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }

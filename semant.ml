@@ -40,11 +40,6 @@ let check (globals, functions) =
     if lval = rval then lval else raise err
   in
 
-  
-
-
-
-   
   (**** Checking Global Variables ****)
 
   List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
@@ -180,23 +175,40 @@ let check (globals, functions) =
       | FloatLit _ -> Float
       | StringLit _ -> String
       | BoolLit _ -> Bool
-      | ColorLit _ -> Color
-      | ClusterLit _ -> Cluster
+
+      | ColorLit(r,g,b) -> let t1 = expr r and t2 = expr g and t3 = expr b in
+      if (t1 = Int && t2 = Int && t3 = Int) then Color
+      else raise (Failure ("expected an int input for type color"))    
+
+      | ClusterLit(l,w,x,y,m,n,c) -> let t1 = expr l and t2 = expr w and t3 = expr x and t4 = expr y and t5 = expr m and t6 = expr n and t7 = expr c in
+      if (t1 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr l))
+      else        
+      if (t2 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr w))
+      else      
+      if (t3 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr x))
+      else
+      if (t4 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr y))
+      else   
+      if (t5 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr m))
+      else      
+      if (t6 != Int) then raise (Failure ("expected an int input for type cluster, but you inputted: " ^ string_of_expr n))
+      else 
+      if (t7 != Color) then raise (Failure ("expected a color input for type cluster, but you inputted: " ^ string_of_expr c))
+      else
+      Cluster
+
       | Collision _ -> Bool
       | PropertyAccess (_, s) -> type_of_property s
       | PropertyAssign (_, s, _) -> type_of_property s
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier_array s
-(*
-      | ArrayInit(s, typ, expr) -> raise (Failure ("Ya no you can't do that with arrays"))
-      | ArrayAssign(s, lhs, rhs) -> raise (Failure ("Ya no you can't do that with arrays"))
-*)
+      | ArrayInit(t, _) -> ArrayType(t)
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
 
     (match op with
-        Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+        Add | Sub | Mult | Div | Mod when t1 = Int && t2 = Int -> Int
       | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
       | Equal | Neq when t1 = t2 -> Bool
       | Less | Leq | Greater | Geq when isNum t1 && isNum t2 -> Bool
@@ -206,16 +218,13 @@ let check (globals, functions) =
             string_of_typ t2 ^ " in " ^ string_of_expr e))
       )
       | Unop(op, e) as ex -> let t = expr e in
-     (match op with
+        (match op with
           Neg when t = Int -> Int
         | Neg when t = Float -> Float
         | Not when t = Bool -> Bool
         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
           string_of_typ t ^ " in " ^ string_of_expr ex)))
         | Noexpr -> Void
-        | ArrayInit(s, typ, _) -> let lt = type_of_identifier_array s and rt = typ in
-            if string_of_typ lt = string_of_typ rt then lt else 
-            raise (Failure ("Thou shall not initialize mismatched array types"))
         | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
             check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
         | Assign(var, e) as ex -> let lt = type_of_identifier var
@@ -232,20 +241,13 @@ let check (globals, functions) =
 
           (* Iterate over args and check if each of those passed match *)
           else 
-            List.iter2 (fun (ft, b) e -> let et = expr e in
-
-
-
+            List.iter2 (fun (ft, _) e -> let et = expr e in
               ignore (check_assign ft et
                  (Failure ("illegal actual argument found " ^ string_of_typ et ^
                  " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
               fd.formals actuals;
             fd.typ
-
-
           in
-
-
 
     let check_bool_expr e = if expr e != Bool
      then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))

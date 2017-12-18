@@ -20,7 +20,7 @@ int main(){
     string s;
     s = "Hello World";
     prints(s);
-    c = #0,0,255#;
+    c = #0,0,25#;
     cl = $ 50, 50, 100, 100, 0, 0, c $ ;
     c2 = #0, 255, 0#;
     startGame(640, 480, c2);

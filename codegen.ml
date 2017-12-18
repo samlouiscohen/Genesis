@@ -39,8 +39,7 @@ let translate (globals, functions) =
  *)
   let color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
-  let col_ptr_t = L.pointer_type color_t in
-
+  let col_ptr_t = pointer_t color_t in
   let cluster_t = i32_t in
 (*   let position_t = L.named_struct_type context "position" in
     L.struct_set_body position_t [| i32_t ; i32_t |] false;
@@ -53,23 +52,27 @@ let translate (globals, functions) =
   let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
-    | A.String -> pointer_t i8_t
     | A.Bool -> i1_t
     | A.Void -> void_t 
-    | A.Color -> col_ptr_t
     | A.Cluster -> cluster_t
-(*
-    | A.Struct -> pointer_t void_t
-*)
+    | A.String -> pointer_t i8_t
     | A.ArrayType(t) -> pointer_t (ltype_of_typ t)
+    | A.Color -> col_ptr_t
 
   in
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
     let global_var m (t, n) =
-      let init = L.const_int (ltype_of_typ t) 0
+      let init = match t with 
+          A.ArrayType(_) -> L.const_pointer_null (ltype_of_typ t)
+        | A.Color -> L.const_pointer_null (ltype_of_typ t)
+        | A.String -> L.const_pointer_null (ltype_of_typ t)
+        | _ -> L.const_int (ltype_of_typ t) 0
       in StringMap.add n (L.define_global n init the_module) m in
+(*
+      StringMap.add n (L.declare_global (ltype_of_typ t) the_module) m in
+*)
     List.fold_left global_var StringMap.empty globals in
 
 
@@ -248,9 +251,8 @@ let translate (globals, functions) =
     in
 
     (* Initializes array of typ of size len *)
-    let init_array name typ len builder =
-      let malloc = L.build_array_malloc (ltype_of_typ typ) len "" builder in
-      L.build_store malloc (lookup name) builder
+    let init_array typ len builder =
+      L.build_array_malloc (ltype_of_typ typ) len "" builder
     in
 
     (* Construct code for an expression; return its value *)
@@ -261,9 +263,7 @@ let translate (globals, functions) =
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.ColorLit (r, g, b) -> 
         let ctmp = L.build_alloca color_t "color_tmp" builder in
-(*           ignore(L.set_alignment 4 ctmp); *)
         let cptr = L.build_alloca (L.pointer_type color_t) "clr_ptr" builder in
-(*           ignore(L.set_alignment 8 cptr); *)
         let e1 = expr builder r 
         and e2 = expr builder g 
         and e3 = expr builder b in
@@ -274,19 +274,8 @@ let translate (globals, functions) =
           ignore (L.build_store e2 gtmp builder);
         let btmp = L.build_struct_gep ctmp 2 "b" builder in 
           ignore (L.build_store e3 btmp builder);
-(*         let rtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0 ; L.const_int i32_t 0|] "r" builder in
-        let rstr = L.build_store e1 rtmp builder in
-(*           ignore(L.set_alignment 4 rstr); *)
-        let gtmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 1|] "g" builder in
-        let gstr = L.build_store e2 rtmp builder in 
-(*           ignore(L.set_alignment 4 gstr); *)
-        let btmp = L.build_in_bounds_gep ctmp [| L.const_int i32_t 0; L.const_int i32_t 2|] "b" builder in
-        let  bstr = L.build_store e3 rtmp builder in
-(*           ignore(L.set_alignment 4 bstr); *) *)
-        let colstr = L.build_store ctmp cptr builder in
-(*           ignore(L.set_alignment 8 colstr); *)
+          ignore (L.build_store ctmp cptr builder);
         let colld = L.build_load cptr "" builder in
-(*           ignore(L.set_alignment 8 colld); *)
         colld
       | A.ClusterLit (l, w, x, y, dx, dy, c)->
         let xPos = expr builder x in
@@ -298,23 +287,14 @@ let translate (globals, functions) =
         let color = expr builder c in
 
         L.build_call newCluster_func [| len; wid; xPos; yPos; xVel; yVel; color|] "newClust" builder
-(*         let name = expr builder c in
-        let clustPtr = L.build_malloc cluster_t ("clustPtr") builder in
-        let posPtr = L.build_struct_gep clustPtr 0 ("posPtr") builder in
-        let colorPtr = L.build_struct_gep clustPtr 1 ("colorPtr") builder in
-        let heightPtr = L.build_struct_gep clustPtr 2 ("heightPtr") builder in
-        let widthPtr = L.build_struct_gep clustPtr 3 ("widthPtr") builder in
-        let name_ptr = L.build_struct_gep clustPtr 4 ("name ptr") builder in
-        let next_ptr = L.build_struct_gep clustPtr 5 ("nextPtr") builder in
-        let handle_ptr = L.build_struct_gep clustPtr 6 ("handle_ptr") builder in
-        clustPtr *)
+
       | A.Collision (c1, c2) ->
         let c1' = expr builder c1 in
         let c2' = expr builder c2 in 
         L.build_call detectCollision_func [|c1'; c2'|] "col" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
-      | A.Property s -> L.const_int i32_t 0
+      | A.Property _ -> L.const_int i32_t 0
       | A.PropertyAccess(c, p) ->
         let cluster = expr builder c in
         (match p with
@@ -343,8 +323,8 @@ let translate (globals, functions) =
         | _ -> raise (Failure ("Property does not exist"))
         )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
-      | A.ArrayInit(s, typ, e) -> let len = (expr builder e) in 
-          init_array s typ len builder
+      | A.ArrayInit(typ, e) -> let len = (expr builder e) in 
+          init_array typ len builder
       | A.ArrayAssign(s, lhs, rhs) -> 
           set_array_element s (expr builder lhs) (expr builder rhs) builder
       | A.Binop (e1, op, e2) ->
@@ -356,6 +336,7 @@ let translate (globals, functions) =
         | A.Sub     -> L.build_sub
         | A.Mult    -> L.build_mul
         | A.Div     -> L.build_sdiv
+        | A.Mod     -> L.build_srem
         | A.And     -> L.build_and
         | A.Or      -> L.build_or
         | A.Equal   -> L.build_icmp L.Icmp.Eq

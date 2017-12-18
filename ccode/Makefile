@@ -6,7 +6,7 @@ LDFLAGS =
 #Import SDL based on system type
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Linux)
-	LDFLAGS += -I /SDL2-2.0.7/include -L /SDL2-2.0.7/build -l SDL2
+	LDFLAGS += -I SDL2-2.0.7/include -L SDL2-2.0.7/build -l SDL2
 endif
 
 ifeq ($(UNAME_S), Darwin)
