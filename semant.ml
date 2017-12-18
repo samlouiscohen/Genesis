@@ -183,6 +183,7 @@ let check (globals, functions) =
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier_array s
+      | ArrayInit(t, _) -> ArrayType(t)
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
 
@@ -204,9 +205,11 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
           string_of_typ t ^ " in " ^ string_of_expr ex)))
         | Noexpr -> Void
+(*
         | ArrayInit(s, typ, _) -> let lt = type_of_identifier_array s and rt = typ in
             if string_of_typ lt = string_of_typ rt then lt else 
             raise (Failure ("Thou shall not initialize mismatched array types"))
+*)
         | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
             check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
         | Assign(var, e) as ex -> let lt = type_of_identifier var
