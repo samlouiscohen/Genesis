@@ -42,12 +42,12 @@ decls:
  | decls fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
+   typ ID LPAREN formals_opt RPAREN LBRACE decl_list RBRACE
      { { typ = $1;
 	 fname = $2;
 	 formals = $4;
-	 locals = List.rev $7;
-	 body = List.rev $8 } }
+	 locals = List.rev (fst $7);
+	 body = List.rev (snd $7) } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -70,9 +70,10 @@ typ:
     primitive { $1 }
   | primitive LBRACKET RBRACKET { ArrayType($1) } 
 
-vdecl_list:
-    /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
+decl_list:
+   /* nothing */ { [], [] }
+ | decl_list vdecl { ($2 :: fst $1), snd $1 }
+ | decl_list stmt { fst $1, ($2 :: snd $1) }
 
 vdecl:
     typ ID SEMI { ($1, $2) }
