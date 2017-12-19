@@ -17,7 +17,6 @@ module A = Ast
 module StringMap = Map.Make(String)
 module String = String
 
-
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "Genesis" in
@@ -171,16 +170,6 @@ let translate (globals, functions) =
   let setDraw_t = L.function_type void_t [|i32_t; i1_t|] in
   let setDraw_func = L.declare_function "setDraw" setDraw_t the_module in
 
-  (* Define each function (arguments and return type) so we can call it *)
-  let function_decls =
-    let function_decl m fdecl =
-      let name = fdecl.A.fname
-      and formal_types =
-  Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.A.formals)
-      in let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
-      StringMap.add name (L.define_function name ftype the_module, fdecl) m in
-    List.fold_left function_decl StringMap.empty functions in
-
   (* Cast int to float *)
   let make_float var builder =
     if L.type_of var = flt_t then
@@ -205,7 +194,17 @@ let translate (globals, functions) =
     else
       raise (Failure ("Unknown cast to int"))
     in
-  
+ 
+  (* Define each function (arguments and return type) so we can call it *)
+  let function_decls =
+    let function_decl m fdecl =
+      let name = fdecl.A.fname
+      and formal_types =
+  Array.of_list (List.map (fun (t, _, _) -> ltype_of_typ t) fdecl.A.formals)
+      in let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
+      StringMap.add name (L.define_function name ftype the_module, fdecl) m in
+    List.fold_left function_decl StringMap.empty functions in
+ 
   (* Fill in the body of the given function *)
   let build_function_body fdecl =
     let (the_function, _) = StringMap.find fdecl.A.fname function_decls in
@@ -220,19 +219,26 @@ let translate (globals, functions) =
        value, if appropriate, and remember their values in the "locals" map *)
 
     let local_vars =
-      let add_formal m (t, n) p = L.set_value_name n p;
+      let add_formal m (t, n, _) p = L.set_value_name n p;
       let local = L.build_alloca (ltype_of_typ t) n builder in
         ignore (L.build_store p local builder);
     StringMap.add n local m in
 
-
-      let add_local m (t, n) =
-        let local_var = L.build_alloca (ltype_of_typ t) n builder
-        in StringMap.add n local_var m in
+      let add_local m (t, n, _) =
+        let local_var = L.build_alloca (ltype_of_typ t) n builder in
+        (*let inst = match e with
+            Some e' -> *)
+              (*let A.expr tmp = A.expr(Assign(n, e')) in
+              ignore (expr builder (A.Assign (n, e')));*)
+              ignore (L.build_store (L.const_int i32_t 7) local_var builder);
+          (*| None -> ();
+        in*)
+        StringMap.add n local_var m in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
           (Array.to_list (L.params the_function)) in
-      List.fold_left add_local formals fdecl.A.locals in
+      List.fold_left add_local formals fdecl.A.locals 
+    in
 
     (* Return the value (usually a memory address) for a variable or formal argument *)
     let lookup n = try StringMap.find n local_vars

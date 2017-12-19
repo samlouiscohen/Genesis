@@ -14,17 +14,17 @@ let check (globals, functions) =
   (* Raise an exception if the given list has a duplicate *)
   let report_duplicate exceptf list =
     let rec helper = function
-  n1 :: n2 :: _ when n1 = n2 -> raise (Failure (exceptf n1))
+        n1 :: n2 :: _ when n1 = n2 -> raise (Failure (exceptf n1))
       | _ :: t -> helper t
       | [] -> ()
-    in helper (List.sort compare list)
+    in helper (List.sort compare list) 
   in
 
   let isNum varType = if (varType = Int || varType = Float) then true else false in 
 
   (* Raise an exception if a given binding is to a void type *)
   let check_not_void exceptf = function
-      (Void, n) -> raise (Failure (exceptf n))
+      (Void, n, _) -> raise (Failure (exceptf n))
     | _ -> ()
   in
   
@@ -43,8 +43,9 @@ let check (globals, functions) =
   (**** Checking Global Variables ****)
 
   List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
-   
-  report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd globals);
+  
+  let tup3_2(_, x, _) = x in
+  report_duplicate (fun n -> "duplicate global " ^ n) (List.map (tup3_2 globals));
 
   (**** Checking Functions ****)
 
@@ -56,56 +57,52 @@ let check (globals, functions) =
 
   (* Function declaration for a named function *)
   let built_in_decls =  StringMap.add "print"
-     { typ = Void; fname = "print"; formals = [(Int, "x")];
+     { typ = Void; fname = "print"; formals = [(Int, "x", None)];
        locals = []; body = [] } 
        
        (StringMap.add "printb"
-     { typ = Void; fname = "printb"; formals = [(Bool, "x")];
+     { typ = Void; fname = "printb"; formals = [(Bool, "x", None)];
        locals = []; body = [] } 
 
        (StringMap.add "printfl"
-     { typ = Void; fname = "printfl"; formals = [(Float, "x")];
+     { typ = Void; fname = "printfl"; formals = [(Float, "x", None)];
        locals = []; body = [] } 
 
        (StringMap.add "keyDown"
-     { typ = Bool; fname = "keyDown"; formals = [(String, "keyName")];
+     { typ = Bool; fname = "keyDown"; formals = [(String, "keyName", None)];
        locals = []; body = [] } 
        
        (StringMap.add "keyUp"
-     { typ = Bool; fname = "keyUp"; formals = [(String, "keyName")];
+     { typ = Bool; fname = "keyUp"; formals = [(String, "keyName", None)];
        locals = []; body = [] } 
 
        (StringMap.add "keyHeld"
-     { typ = Bool; fname = "keyHeld"; formals = [(String, "keyName")];
+     { typ = Bool; fname = "keyHeld"; formals = [(String, "keyName", None)];
        locals = []; body = [] } 
 
        (StringMap.add "initScreen"
-     { typ = Int; fname = "initScreen"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
+     { typ = Int; fname = "initScreen"; formals = [(Int, "width", None); (Int, "height", None); (Color, "c", None)];
        locals = []; body = [] } 
 
        (StringMap.add "startGame"
-     { typ = Void; fname = "startGame"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
-       locals = []; body = [] } 
-
-      (StringMap.add "quit"
-     { typ = Void; fname = "quit"; formals = [];
+     { typ = Void; fname = "startGame"; formals = [(Int, "width", None); (Int, "height", None); (Color, "c", None)];
        locals = []; body = [] } 
 
        (StringMap.add "delete"
-     { typ = Void; fname = "delete"; formals = [(Cluster, "c")];
+     { typ = Void; fname = "delete"; formals = [(Cluster, "c", None)];
        locals = []; body = [] } 
 
        (StringMap.add "random"
-     { typ = Int; fname = "random"; formals = [(Int, "max")];
+     { typ = Int; fname = "random"; formals = [(Int, "max", None)];
        locals = []; body = [] }        
 
        (StringMap.add "prints"
-     { typ = Void; fname = "prints"; formals = [(String, "x")];
+     { typ = Void; fname = "prints"; formals = [(String, "x", None)];
        locals = []; body = [] }
 
        (StringMap.singleton "printbig"
-     { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] }))))))))))))
+     { typ = Void; fname = "printbig"; formals = [(Int, "x", None)];
+       locals = []; body = [] })))))))))))
    in
 
   (*Add the built-in functions to the function declaration list*)
@@ -207,20 +204,21 @@ let check (globals, functions) =
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier_array s
-      | ArrayInit(t, _) -> ArrayType(t)
-      | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
-    in 
-
-    (match op with
-        Add | Sub | Mult | Div | Mod when t1 = Int && t2 = Int -> Int
-      | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
-      | Equal | Neq when t1 = t2 -> Bool
-      | Less | Leq | Greater | Geq when isNum t1 && isNum t2 -> Bool
-      | And | Or when t1 = Bool && t2 = Bool -> Bool
-      | _ -> raise (Failure ("illegal binary operator " ^
-            string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-            string_of_typ t2 ^ " in " ^ string_of_expr e))
-      )
+(*
+      | ArrayInit(s, typ, expr) -> raise (Failure ("Ya no you can't do that with arrays"))
+      | ArrayAssign(s, lhs, rhs) -> raise (Failure ("Ya no you can't do that with arrays"))
+*)
+      | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in 
+        (match op with
+          Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+        | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
+        | Equal | Neq when t1 = t2 -> Bool
+        | Less | Leq | Greater | Geq when isNum t1 && isNum t2 -> Bool
+        | And | Or when t1 = Bool && t2 = Bool -> Bool
+        | _ -> raise (Failure ("illegal binary operator " ^
+              string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+              string_of_typ t2 ^ " in " ^ string_of_expr e))
+        )
       | Unop(op, e) as ex -> let t = expr e in
         (match op with
           Neg when t = Int -> Int
@@ -229,6 +227,9 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
           string_of_typ t ^ " in " ^ string_of_expr ex)))
         | Noexpr -> Void
+        | ArrayInit(s, typ, _) -> let lt = type_of_identifier_array s and rt = typ in
+            if string_of_typ lt = string_of_typ rt then lt else 
+            raise (Failure ("Thou shall not initialize mismatched array types"))
         | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
             check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
         | Assign(var, e) as ex -> let lt = type_of_identifier var

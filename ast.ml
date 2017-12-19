@@ -14,9 +14,6 @@ type typ =
         | Cluster
         | ArrayType of typ
 
-
-type bind = typ * string
-
 type expr =
     Literal of int
   | StringLit of string
@@ -45,6 +42,8 @@ type stmt =
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
+
+type bind = typ * string * expr option
 
 type func_decl = {
     typ : typ;
@@ -127,11 +126,16 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+let string_of_vdecl (t, id, e) = string_of_typ t ^ " " ^ id ^ 
+  match e with 
+      Some e' -> " = " ^ string_of_expr e' ^ ";\n"
+    | None -> ";\n"
+
+let tup3_2(_, x, _) = x
 
 let string_of_fdecl fdecl =
   string_of_typ fdecl.typ ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
+  fdecl.fname ^ "(" ^ String.concat ", " (List.map tup3_2 fdecl.formals) ^
   ")\n{\n" ^
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^

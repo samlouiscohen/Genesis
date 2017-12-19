@@ -3,7 +3,7 @@
 %{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
-%token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
+%token PLUS MINUS TIMES DIVIDE MOD ASSIGN INITIALIZE NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
 %token LBRACKET RBRACKET COLOR CLUSTER NEW DOLLAR DOT POUND
@@ -18,6 +18,7 @@
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
+%right INITIALIZE
 %left OR
 %left AND
 %left EQ NEQ
@@ -75,7 +76,8 @@ vdecl_list:
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
-    typ ID SEMI { ($1, $2) }
+    typ ID SEMI { ($1, $2, None) }
+  | typ ID INITIALIZE expr SEMI { ($1, $2, Some $4) }
 
 stmt_list:
     /* nothing */  { [] }
