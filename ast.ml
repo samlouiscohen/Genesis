@@ -32,7 +32,9 @@ type expr =
   | Call of string * expr list
   | PropertyAccess of expr * string
   | PropertyAssign of expr * string * expr
+(*
   | ArrayInit of string * typ * expr
+*)
   | ArrayAssign of string * expr * expr
   | ArrayAccess of string * expr
   | Noexpr
@@ -44,18 +46,17 @@ type stmt =
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
+  | Declare of bind
+  | DeclareAssign of bind * expr
 
 type func_decl = {
     typ : typ;
     fname : string;
     formals : bind list;
-    locals : bind list;
     body : stmt list;
   }
 
-type program = bind list * func_decl list (*Redefine this, and like classes*)
-
-(* Scolkam and another language *)
+type program = bind list * func_decl list
 
 (* Pretty-printing functions *)
 
@@ -85,7 +86,7 @@ let rec string_of_typ = function
   | Float -> "float"
   | Color -> "color"
   | Cluster -> "cluster"
-  | ArrayType(t) -> "ArrayType:" ^ string_of_typ t
+  | ArrayType(t) -> string_of_typ t ^ "[]"
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
@@ -93,10 +94,19 @@ let rec string_of_expr = function
   | StringLit(s) -> s
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
+<<<<<<< Updated upstream
   | ColorLit(r,g,b) -> "<" ^ string_of_expr r ^ "," ^ string_of_expr g ^ "," ^ string_of_expr b ^ ">"
   | ClusterLit(l, w, _, _, _, _, c) -> "Cluster $" ^ string_of_expr l ^ "," ^ string_of_expr w ^ "," ^ string_of_expr c ^  "$"
+=======
+  | ColorLit(r,g,b) -> "<" ^ string_of_expr r ^ "," ^ string_of_expr g ^ 
+      "," ^ string_of_expr b ^ ">"
+  | ClusterLit(l, w, _, _, _, _, c) -> "Cluster $" ^ string_of_expr l ^ 
+      "," ^ string_of_expr w ^ "," ^ string_of_expr c ^  "$"
+  | Collision(c1, c2) -> string_of_expr c1 ^ "@" ^ string_of_expr c2
+>>>>>>> Stashed changes
   | PropertyAccess(e, p) -> string_of_expr e ^ p
-  | PropertyAssign(e1, p, e2) -> string_of_expr e1 ^ "." ^ p ^ "=" ^ string_of_expr e2
+  | PropertyAssign(e1, p, e2) -> string_of_expr e1 ^ "." ^ p ^ "=" ^ 
+      string_of_expr e2
   | Property(s) -> s
   | Id(s) -> s
   | Binop(e1, o, e2) ->
@@ -108,7 +118,8 @@ let rec string_of_expr = function
   | ArrayAccess(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
   | ArrayAssign(s, e1, e2) -> 
       s ^ "[" ^string_of_expr e1 ^"] ="^ string_of_expr e2 
-  | ArrayInit(s, typ, len) -> s ^ " = " ^ string_of_typ typ ^ "[" ^ string_of_expr len ^ "]"
+  | ArrayInit(s, typ, len) -> s ^ " = " ^ string_of_typ typ ^ "[" ^ 
+      string_of_expr len ^ "]"
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -123,16 +134,16 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+  | Declare((t, s)) -> string_of_typ t ^ " " ^ s ^ ";"
+  | DeclareAssign((t, s), e) -> string_of_typ t ^ " " ^ s ^ " = " ^ 
+      string_of_expr e ^ ";"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
   string_of_typ fdecl.typ ^ " " ^
   fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
-  ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
-  String.concat "" (List.map string_of_stmt fdecl.body) ^
-  "}\n"
+  ")\n{\n" ^ String.concat "" (List.map string_of_stmt fdecl.body) ^ "}\n"
 
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^

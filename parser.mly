@@ -41,20 +41,21 @@ decls:
  | decls fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
-     { { typ = $1;
-	 fname = $2;
-	 formals = $4;
-	 locals = List.rev $7;
-	 body = List.rev $8 } }
+   typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+    { { 
+      typ = $1;
+      fname = $2;
+      formals = $4;
+      body = List.rev $7
+    } }
 
 formals_opt:
     /* nothing */ { [] }
   | formal_list   { List.rev $1 }
 
 formal_list:
-    typ ID                   { [($1,$2)] }
-  | formal_list COMMA typ ID { ($3,$4) :: $1 }
+    bind                   { [$1] }
+  | formal_list COMMA bind { $3 :: $1 }
 
 typ:
     INT { Int }
@@ -66,12 +67,12 @@ typ:
   | COLOR { Color } 
   | typ LBRACKET RBRACKET { ArrayType($1) } 
 
-vdecl_list:
-    /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
+bind:
+    typ ID { ($1, $2) }
 
 vdecl:
-    typ ID SEMI { ($1, $2) }
+    bind SEMI { ($1, None) }
+  | bind SEMI ASSIGN expr SEMI { ($1, 4) }
 
 stmt_list:
     /* nothing */  { [] }
@@ -79,6 +80,8 @@ stmt_list:
 
 stmt:
     expr SEMI { Expr $1 }
+  | bind SEMI { Declare $1 }
+  | bind ASSIGN expr SEMI { DeclareAssign($1, $3) }
   | RETURN SEMI { Return Noexpr }
   | RETURN expr SEMI { Return $2 }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
@@ -117,7 +120,9 @@ expr:
   | expr DOT ID ASSIGN expr { PropertyAssign($1, $3, $5) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
+/*
   | ID ASSIGN NEW typ LBRACKET expr RBRACKET { ArrayInit($1, $4, $6) }
+*/
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }

@@ -11,6 +11,9 @@ module StringMap = Map.Make(String)
 
 let check (globals, functions) =
 
+  let locals = [] in
+  let sstmts = [] in
+
   (* Raise an exception if the given list has a duplicate *)
   let report_duplicate exceptf list =
     let rec helper = function
@@ -60,59 +63,53 @@ let check (globals, functions) =
 
   (* Function declaration for a named function *)
   let built_in_decls =  StringMap.add "print"
-     { typ = Void; fname = "print"; formals = [(Int, "x")];
-       locals = []; body = [] } 
+     { typ = Void; fname = "print"; formals = [(Int, "x")]; body = [] } 
        
        (StringMap.add "printb"
-     { typ = Void; fname = "printb"; formals = [(Bool, "x")];
-       locals = []; body = [] } 
+     { typ = Void; fname = "printb"; formals = [(Bool, "x")]; body = [] } 
 
        (StringMap.add "printfl"
-     { typ = Void; fname = "printfl"; formals = [(Float, "x")];
-       locals = []; body = [] } 
+     { typ = Void; fname = "printfl"; formals = [(Float, "x")]; body = [] } 
 
        (StringMap.add "keyDown"
-     { typ = Bool; fname = "keyDown"; formals = [(String, "keyName")];
-       locals = []; body = [] } 
+     { typ = Bool; fname = "keyDown"; formals = [(String, "keyName")]; body = [] } 
        
        (StringMap.add "keyUp"
-     { typ = Bool; fname = "keyUp"; formals = [(String, "keyName")];
-       locals = []; body = [] } 
+     { typ = Bool; fname = "keyUp"; formals = [(String, "keyName")]; body = [] } 
 
        (StringMap.add "keyHeld"
-     { typ = Bool; fname = "keyHeld"; formals = [(String, "keyName")];
-       locals = []; body = [] } 
+     { typ = Bool; fname = "keyHeld"; formals = [(String, "keyName")]; body = [] } 
 
        (StringMap.add "initScreen"
-     { typ = Int; fname = "initScreen"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
-       locals = []; body = [] } 
+     { typ = Int; fname = "initScreen"; formals = [(Int, "width"); (Int, "height"); (Color, "c")]; body = [] } 
 
        (StringMap.add "startGame"
-     { typ = Void; fname = "startGame"; formals = [(Int, "width"); (Int, "height"); (Color, "c")];
-       locals = []; body = [] } 
+     { typ = Void; fname = "startGame"; formals = [(Int, "width"); (Int, "height"); (Color, "c")]; body = [] } 
+
+       (StringMap.add "delete"
+     { typ = Void; fname = "delete"; formals = [(Cluster, "c")]; body = [] } 
 
        (StringMap.add "random"
-     { typ = Int; fname = "random"; formals = [(Int, "max")];
-       locals = []; body = [] }        
+     { typ = Int; fname = "random"; formals = [(Int, "max")]; body = [] }        
 
        (StringMap.add "prints"
-     { typ = Void; fname = "prints"; formals = [(String, "x")];
-       locals = []; body = [] }
+     { typ = Void; fname = "prints"; formals = [(String, "x")]; body = [] }
 
        (StringMap.singleton "printbig"
-     { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] }))))))))))
+     { typ = Void; fname = "printbig"; formals = [(Int, "x")]; body = [] })))))))))))
    in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-                         built_in_decls functions
+    built_in_decls functions
   in
 
   let function_decl s = try StringMap.find s function_decls
-       with Not_found -> raise (Failure ("unrecognized function " ^ s))
+    with Not_found -> raise (Failure ("Must define the function " ^ s))
   in
-
+  
   let _ = function_decl "main" in (* Ensure "main" is defined *)
+  let _ = function_decl "update" in (* Ensure "update" is defined *)
+  let _ = function_decl "init" in (* Ensure "init" is defined *)
 
   let check_function func =
 
@@ -122,23 +119,31 @@ let check (globals, functions) =
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
 
+(*
     List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
       " in " ^ func.fname)) func.locals;
 
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
+*)
 
     (* Type of each variable (global, formal, or local *)
     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-  StringMap.empty (globals @ func.formals @ func.locals )
+      StringMap.empty (globals @ func.formals)
     in
 
     let type_of_identifier s =
       try let id_typ = StringMap.find s symbols in 
-          (match id_typ with
-              ArrayType(t) -> t
-            | _ -> id_typ
-          )
+        id_typ
+      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
+
+    let type_of_identifier_array s =
+      try let id_typ = StringMap.find s symbols in 
+        (match id_typ with
+            ArrayType(t) -> t
+          | _ -> id_typ
+        )
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
 (*
       try StringMap.find s symbols
@@ -172,24 +177,20 @@ let check (globals, functions) =
       | PropertyAssign (_, s, _) -> type_of_property s
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
-      | ArrayAccess(s, _) -> type_of_identifier s
-(*
-      | ArrayInit(s, typ, expr) -> raise (Failure ("Ya no you can't do that with arrays"))
-      | ArrayAssign(s, lhs, rhs) -> raise (Failure ("Ya no you can't do that with arrays"))
-*)
-      | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
-    in 
 
-    (match op with
-        Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-      | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
-      | Equal | Neq when t1 = t2 -> Bool
-      | Less | Leq | Greater | Geq when isNum t1 && isNum t2 -> Bool
-      | And | Or when t1 = Bool && t2 = Bool -> Bool
-      | _ -> raise (Failure ("illegal binary operator " ^
-            string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-            string_of_typ t2 ^ " in " ^ string_of_expr e))
-      )
+      | ArrayAccess(s, _) -> type_of_identifier_array s
+
+      | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in 
+        (match op with
+          Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+        | Add | Sub | Mult | Div when isNum t1 && isNum t2 -> Float
+        | Equal | Neq when t1 = t2 -> Bool
+        | Less | Leq | Greater | Geq when isNum t1 && isNum t2 -> Bool
+        | And | Or when t1 = Bool && t2 = Bool -> Bool
+        | _ -> raise (Failure ("illegal binary operator " ^
+              string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+              string_of_typ t2 ^ " in " ^ string_of_expr e))
+        )
       | Unop(op, e) as ex -> let t = expr e in
      (match op with
           Neg when t = Int -> Int
@@ -198,16 +199,14 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
           string_of_typ t ^ " in " ^ string_of_expr ex)))
         | Noexpr -> Void
-        | ArrayInit(s, typ, _) -> let lt = type_of_identifier s and rt = typ in
-            if string_of_typ lt = string_of_typ rt then lt else 
-            raise (Failure ("Thou shall not initialize mismatched array types"))
-        | ArrayAssign(s, _, e) -> let lt = type_of_identifier s and rt = expr e in
+        | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
             check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
-        | Assign(var, e) as ex -> let lt = type_of_identifier var
-                                and rt = expr e in
-        check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
+
+        | Assign(var, e) as ex -> let lt = type_of_identifier var and rt = expr e in
+            check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
              " = " ^ string_of_typ rt ^ " in " ^ 
              string_of_expr ex))
+
         | Call(fname, actuals) as call -> let fd = function_decl fname in
           if List.length actuals != List.length fd.formals then
             raise (Failure ("expecting " ^ string_of_int
@@ -227,22 +226,30 @@ let check (globals, functions) =
 
     (* Verify a statement or throw an exception *)
     let rec stmt = function
-  Block sl -> let rec check_block = function
-           [Return _ as s] -> stmt s
-         | Return _ :: _ -> raise (Failure "nothing may follow a return")
-         | Block sl :: ss -> check_block (sl @ ss)
-         | s :: ss -> stmt s ; check_block ss
-         | [] -> ()
-        in check_block sl
+        Block sl -> let rec check_block = function
+          [Return _ as s] -> stmt s
+      | Return _ :: _ -> raise (Failure "nothing may follow a return")
+      | Block sl :: ss -> check_block (sl @ ss)
+      | s :: ss -> stmt s ; check_block ss
+      | [] -> () in check_block sl
       | Expr e -> ignore (expr e)
       | Return e -> let t = expr e in if t = func.typ then () else
-         raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
-                         string_of_typ func.typ ^ " in " ^ string_of_expr e))
-           
+          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
+          string_of_typ func.typ ^ " in " ^ string_of_expr e))
       | If(p, b1, b2) -> check_bool_expr p; stmt b1; stmt b2
       | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2;
-                               ignore (expr e3); stmt st
+          ignore (expr e3); stmt st
       | While(p, s) -> check_bool_expr p; stmt s
+      | Declare((t, s) as d) -> ignore (d :: locals)
+      | DeclareAssign((lhs_typ, s) as d, e) -> let rhs_typ = type_of_identifier (expr e) in try
+          (match lhs_typ with
+              ArrayType(_) -> check_assign_array lhs_typ rhs_typ 
+                (Failure ("Thou shall not initialize mismatched array types"))
+            | _ -> check_assign lhs_typ rhs_typ 
+                (Failure ("Thou shall not initialize mismatched types"))
+          )
+          with Not_found -> raise (Failure ("Undeclared identifier " ^ s)) in
+          ignore (d :: locals)
     in
 
     stmt (Block func.body)
