@@ -7,6 +7,11 @@
 CFLAGS = -DSKIP_MAIN
 LDFLAGS = 
 
+UNAME_S = $(shell uname -s)
+ifeq ($(UNAME_S), Darwin)
+	LDFLAGS += -I /Library/Frameworks/SDL2.framework/Headers -F /Library/Frameworks
+endif
+
 .PHONY : all
 all : genesis.native printbig.o genesis.o
 
@@ -54,7 +59,7 @@ printbig.o :
 	cc -c printbig.c -o printbig.o
 
 genesis.o: ccode/genesis.c
-	$(CC) -c $(CFLAGS) $< -o ccode/$@
+	$(CC) -c $(CFLAGS) $< $(LDFLAGS) -o ccode/$@
 
 tests: rtest test 
 
