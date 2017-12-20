@@ -8,6 +8,12 @@ void update(int f){
 	if (keyUp("Space")){
 		prints("Space released");
 	}
+
+
+    if(f == 60){
+        quit();
+    }
+
 }
 
 void init(){}

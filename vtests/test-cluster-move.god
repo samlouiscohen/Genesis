@@ -15,4 +15,8 @@ int main(){
 
 void update(int f){
     cl.x = cl.x + 50;
+
+    if(f == 60){
+        quit();
+    }
 }

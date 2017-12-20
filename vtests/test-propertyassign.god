@@ -1,4 +1,9 @@
-void update(int f){}
+void update(int f){
+
+    if(f == 20){
+        quit();
+    }
+}
 
 void init(){}
 
