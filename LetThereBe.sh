@@ -5,7 +5,7 @@ if [[ $# -eq 1 ]]; then
 	make &> /dev/null
 	basename=`basename $1 .god`
 
-	printf "Let there be... \e[5m\e[47m\e[34m%s\n" $basename
+	printf "Let there be... \e[5m\e[47m\e[34m%s\e[0m\n" $basename
 	./genesis.native $1 | llc > tmp.s
 
 	if [[ `uname -s` == "Darwin" ]]; then
