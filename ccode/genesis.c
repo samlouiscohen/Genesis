@@ -198,6 +198,7 @@ void startGame(color *c, int width, int height) {
 
         // Draws all clusters in hash
         cluster_t *cl;
+
         for (cl = clusters; cl != NULL; cl = cl->hh.next) {
             if (cl->draw == 1) {
                 int x = cl->x + cl->dx; int y = cl->y + cl->dy;
