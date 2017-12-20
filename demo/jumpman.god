@@ -1,3 +1,5 @@
+//Author: Michael Wang
+
 cluster ground;
 cluster player;
 cluster obstacle1;

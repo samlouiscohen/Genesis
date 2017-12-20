@@ -1,4 +1,6 @@
-(* Semantic checking for the Genesis compiler *)
+(* Semantic checking for the Genesis compiler 
+    Authors: Michael Wang
+*)
 
 open Ast
 
