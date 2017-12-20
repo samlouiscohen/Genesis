@@ -145,18 +145,33 @@ let check (globals, functions) =
 
     let type_of_identifier s =
       try let id_typ = StringMap.find s symbols in 
-          id_typ
+        id_typ
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
     let type_of_identifier_array s =
       try let id_typ = StringMap.find s symbols in 
-          (match id_typ with
-              ArrayType(t) -> t
-            | _ -> id_typ
-          )
+        (match id_typ with
+            ArrayType(t) -> t
+          | _ -> id_typ
+        )
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
 
+    let verify_array s = 
+      try let id_typ = StringMap.find s symbols in 
+        (match id_typ with
+            ArrayType(t) -> t
+          | _ -> raise (Failure (s ^ " is not an array!  What are you doing??"))
+        )
+      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
+
+    let verify_array_init t = 
+      (match t with
+          Void -> raise (Failure ("The Lord does not allow void arrays..."))
+        | _ -> t
+      )
     in
 
     let type_of_property s =
@@ -207,7 +222,10 @@ let check (globals, functions) =
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier_array s
-      | ArrayInit(t, _) -> ArrayType(t)
+      | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
+          check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
+      | ArrayInit(t, _) -> ArrayType(verify_array_init t)
+      | ArrayDelete(s) -> verify_array s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
 
@@ -229,8 +247,6 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
           string_of_typ t ^ " in " ^ string_of_expr ex)))
         | Noexpr -> Void
-        | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
-            check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
         | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
