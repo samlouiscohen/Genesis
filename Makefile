@@ -69,7 +69,7 @@ rtest: all
 
 vtest: all
 	@echo "Running Genesis SDL tests..."
-	@./testall.sh vtests/test-*.god
+	@./testall.sh vtests/test-*.god vtests/fail-*.god
 
 test: all
 	@echo "Running Genesis tests..."

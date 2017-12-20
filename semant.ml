@@ -190,7 +190,7 @@ let check (globals, functions) =
         | "width" -> Int
         | "clr" -> Color 
         | "draw" -> Bool
-        | _ -> raise (Failure ("property is not defined"))
+        | _ -> raise (Failure ("property \'" ^ s ^ "\' is not defined"))
       )
     in
 
@@ -224,7 +224,9 @@ let check (globals, functions) =
 
       | Collision _ -> Bool
       | PropertyAccess (_, s) -> type_of_property s
-      | PropertyAssign (_, s, _) -> type_of_property s
+      | PropertyAssign (_, s, e) ->  let eType = expr e and pType = type_of_property s in 
+        if (eType != pType) then raise (Failure ("Incorrect type for assignment to property " ^ s)) else
+        pType
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier_array s
