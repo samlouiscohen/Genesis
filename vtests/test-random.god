@@ -17,7 +17,7 @@ void update(int f){
     cl.x = random(640);
     cl.y = random(480);
 
-    if(f == 60){
+    if(f == 10){
         quit();
     }
 }
