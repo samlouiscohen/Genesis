@@ -55,9 +55,7 @@ type func_decl = {
     body : stmt list;
   }
 
-type program = bind list * func_decl list (*Redefine this, and like classes*)
-
-(* Scolkam and another language *)
+type program = bind list * func_decl list
 
 (* Pretty-printing functions *)
 
