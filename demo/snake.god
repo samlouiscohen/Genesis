@@ -35,7 +35,12 @@ int[] segfault;
 int segger;
 
 
+void gameOver(){
 
+	prints("Congrats! Your score is:");
+	print(snakeLen);
+	quit();
+}
 
 
 
@@ -219,22 +224,25 @@ int[] getNewAppleCoord(){
 	randX = random(screenWidth - segmentSeperation);
 	randY = random(screenHeight - segmentSeperation);
 
-	// while(xNotFound || yNotFound){
-	// 	randX = random(screenWidth - snakeSegSize);
-	// 	randY = random(screenHeight - snakeSegSize);
+	// while(xNotFound && yNotFound){
+	// 	randX = random(screenWidth - blockSize);
+	// 	randY = random(screenHeight - blockSize);
 	// 	xNotFound = false;
 	// 	yNotFound = false;
 
 	// 	//Iterate over snake segments and make sure not spawning on snake
 	// 	for(i = 0; i < snakeLen; i = i + 1){
-	// 		if(snake[i].x - snakeSegSize < randX && randX < snake[i].x + snakeSegSize){
+	// 		if(snake[i].x - blockSize < randX && randX < snake[i].x + blockSize){
 	// 			xNotFound = true;
+	// 			i = snakeLen;
 	// 		}
 	// 	}
 
 	// 	for(i = 0; i < snakeLen; i = i + 1){
-	// 		if(snake[i].y - snakeSegSize < randY && randY < snake[i].y+ snakeSegSize){
+	// 		if(snake[i].y - blockSize < randY && randY < snake[i].y+ blockSize){
 	// 			yNotFound = true;
+	// 			i = snakeLen;
+
 	// 		}
 	// 	}
 	// }
@@ -249,12 +257,7 @@ int[] getNewAppleCoord(){
 
 
 
-void gameOver(){
 
-	prints("Congrats! Your score is:");
-	print(snakeLen);
-	quit();
-}
 
 
 
