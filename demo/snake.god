@@ -55,7 +55,7 @@ void update(int f){
 	if (keyDown("Left")  && currDirection != 3) { currDirection = 2; }
 	if (keyDown("Right") && currDirection != 2) { currDirection = 3; }
 
-	if(f % 5 != 0) { return; }
+	if(f % 10 != 0) { return; }
 
 	int i;
 
@@ -224,28 +224,31 @@ int[] getNewAppleCoord(){
 	randX = random(screenWidth - segmentSeperation);
 	randY = random(screenHeight - segmentSeperation);
 
-	// while(xNotFound && yNotFound){
-	// 	randX = random(screenWidth - blockSize);
-	// 	randY = random(screenHeight - blockSize);
-	// 	xNotFound = false;
-	// 	yNotFound = false;
 
-	// 	//Iterate over snake segments and make sure not spawning on snake
-	// 	for(i = 0; i < snakeLen; i = i + 1){
-	// 		if(snake[i].x - blockSize < randX && randX < snake[i].x + blockSize){
-	// 			xNotFound = true;
-	// 			i = snakeLen;
-	// 		}
-	// 	}
+	 while(xNotFound && yNotFound){
+	 	randX = random(screenWidth - blockSize);
+	 	randY = random(screenHeight - blockSize);
+	 	xNotFound = false;
+	 	yNotFound = false;
 
-	// 	for(i = 0; i < snakeLen; i = i + 1){
-	// 		if(snake[i].y - blockSize < randY && randY < snake[i].y+ blockSize){
-	// 			yNotFound = true;
-	// 			i = snakeLen;
+	 	//Iterate over snake segments and make sure not spawning on snake
+	 	for(i = 0; i < snakeLen; i = i + 1){
+	 		if(snake[i].x - segmentSeperation < randX && randX < snake[i].x + segmentSeperation){
+	 			xNotFound = true;
+	 			i = snakeLen;
+	 			prints("check");
+	 		}
+	 	}
 
-	// 		}
-	// 	}
-	// }
+	 	for(i = 0; i < snakeLen; i = i + 1){
+	 		if(snake[i].y - segmentSeperation < randY && randY < snake[i].y+ segmentSeperation){
+	 			yNotFound = true;
+	 			i = snakeLen;
+				prints("check");
+
+	 		}
+	 	}
+	 }
 
 	coord[0] = (randX/segmentSeperation)*segmentSeperation;
 	coord[1] = (randY/segmentSeperation)*segmentSeperation;
