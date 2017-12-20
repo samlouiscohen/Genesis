@@ -231,7 +231,7 @@ void startGame(color *c, int width, int height){
         //draws all clusters in hash
         for (cl = clusters; cl!=NULL;cl = cl->hh.next){
             if(cl->draw == 1){
-                drawRectangle(cl->x,cl->y,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
+                drawRectangle(cl->x+cl->dx,cl->y+cl->dy,cl->height,cl->width,cl->color.r,cl->color.g,cl->color.b);
                 }
         }
 
