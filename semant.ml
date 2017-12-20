@@ -165,7 +165,7 @@ let check (globals, functions) =
           | _ -> raise (Failure (s ^ " is not an array!  What are you doing??"))
         )
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
-
+    in
 
     let type_of_property s =
       (match s with

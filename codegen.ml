@@ -306,7 +306,7 @@ let translate (globals, functions) =
         )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
       | A.ArrayInit(typ, e) -> let len = (expr builder e) in init_array typ len builder
-      | A.ArrayDelete(s) -> L.build_free (lookup s) builder
+      | A.ArrayDelete(s) -> L.build_free (L.build_load (lookup s) "" builder) builder
       | A.ArrayAssign(s, lhs, rhs) -> set_array_element s (expr builder lhs) (expr builder rhs) builder
       | A.Binop (e1, op, e2) ->
     let e1' = expr builder e1
