@@ -13,7 +13,7 @@ Saahil Jain    ( sj2675  )
 Usage Notes
 
 Dependencies
- - SDL: graphics library, available at:
+ - SDL2: graphics library, available at: https://www.libsdl.org
  - UTHash: hastable library (source included w/ Genesis)
 
 Building
