@@ -214,22 +214,6 @@ let translate (globals, functions) =
       with Not_found -> StringMap.find n global_vars
     in
 
-    (* Compare two colors for equality *)
-(*
-    let color_equality p1 p2 name builder =
-      let cmd_idx i = 
-        let c1 = L.build_load p1 "" builder in
-        let c2 = L.build_load p2 "" builder in
-        let p1' = L.build_struct_gep c1 i "" builder in
-        let p2' = L.build_struct_gep c1 i "" builder in
-        let c1' = L.build_load p1' "" builder in
-        let c2' = L.build_load p2' "" builder in
-        L.build_icmp L.Icmp.Eq c1' c2' "" builder in
-      let cmp = List.map cmd_idx [ 0; 1; 2 ] in
-      List.fold_left (fun x y -> L.build_and x y) true cmp
-    in 
-*)
-
     (* Get array value of name at index i *)
     let get_array_element name i builder = 
       let arr = L.build_load (lookup name) "" builder in
@@ -338,7 +322,7 @@ let translate (globals, functions) =
         | A.Leq     -> L.build_icmp L.Icmp.Sle
         | A.Greater -> L.build_icmp L.Icmp.Sgt
         | A.Geq     -> L.build_icmp L.Icmp.Sge
-      ) e1' e2' "tmp" builder
+      ) (make_int e1' builder) (make_int e2' builder) "tmp" builder
     else if (L.type_of e1' = flt_t || L.type_of e2' = flt_t) then
       (match op with
           A.Add     -> L.build_fadd
@@ -353,14 +337,6 @@ let translate (globals, functions) =
         | A.Geq     -> L.build_fcmp L.Fcmp.Oge
         | _         -> raise (Failure ("incompatible operator-operand for number")) (* Should never be reached *)
       ) (make_float e1' builder) (make_float e2' builder) "tmp" builder
-(*
-    else if (ltype_of_typ e1' = col_ptr_t && ltype_of_typ e2' = col_ptr_t) then
-      (match op with
-          A.Equal   -> color_equality
-        | A.Neq     -> L.build_not color_equality
-        | _         -> raise (Failure ("incompatible operator-operand for color"))
-      ) e1' e2' "" builder
-*)
     else 
       (match op with
           A.And     -> L.build_and
@@ -392,22 +368,15 @@ let translate (globals, functions) =
           "printf" builder
       | A.Call ("printbig", [e]) ->
           L.build_call printbig_func [| (expr builder e) |] "printbig" builder
-(* external function -- for testing *)
       | A.Call ("initScreen", [w; h; c]) -> 
           let width = expr builder w 
           and height = expr builder h
           and color = expr builder c in
-(*             ignore(L.set_alignment 8 color);
- *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
-          ignore(L.build_store color clr_ptr builder) ; *)
           L.build_call initScreen_func [| color; width; height |] "initScreen" builder
       | A.Call ("startGame", [w; h; c]) -> 
           let width = expr builder w 
           and height = expr builder h
           and color = expr builder c in
-(*             ignore(L.set_alignment 8 color);
- *)(*           and clr_ptr = L.build_alloca (L.pointer_type color_t) "colorptr" builder in
-          ignore(L.build_store color clr_ptr builder) ; *)
           L.build_call startGame_func [| color; width; height |] "" builder 
       | A.Call ("quit", []) ->
           L.build_call quitGame_func [||] "" builder
