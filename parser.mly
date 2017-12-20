@@ -1,4 +1,5 @@
 /* Ocamlyacc parser for Genesis */
+/* AUthors: Michael Wang */
 
 %{ open Ast %}
 
@@ -7,7 +8,7 @@
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID STRING
 %token LBRACKET RBRACKET COLOR CLUSTER NEW DOLLAR DOT POUND
-%token AT
+%token AT DELETE
 %token <string> PROPERTY
 %token <int> LITERAL
 %token <string> ID
@@ -63,7 +64,7 @@ primitive:
   | BOOL { Bool }
   | VOID { Void }
   | STRING { String }
-  | CLUSTER {Cluster}
+  | CLUSTER { Cluster }
   | COLOR { Color } 
 
 typ:
@@ -71,9 +72,9 @@ typ:
   | primitive LBRACKET RBRACKET { ArrayType($1) } 
 
 decl_list:
-   /* nothing */ { [], [] }
- | decl_list vdecl { ($2 :: fst $1), snd $1 }
- | decl_list stmt { fst $1, ($2 :: snd $1) }
+    /* nothing */ { [], [] }
+  | decl_list vdecl { ($2 :: fst $1), snd $1 }
+  | decl_list stmt { fst $1, ($2 :: snd $1) }
 
 vdecl:
     typ ID SEMI { ($1, $2) }
@@ -99,14 +100,17 @@ expr_opt:
 
 expr:
     LITERAL          { Literal($1) }
+  | FLOATLIT         { FloatLit($1) }
   | STRINGLIT        { StringLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | POUND expr COMMA expr COMMA expr POUND { ColorLit($2, $4, $6) }
-  | DOLLAR expr COMMA expr COMMA expr COMMA expr COMMA expr COMMA expr COMMA expr DOLLAR { ClusterLit($2, $4, $6, $8, $10, $12, $14)}
+  | DOLLAR 
+      expr COMMA expr COMMA expr COMMA expr COMMA 
+      expr COMMA expr COMMA expr 
+    DOLLAR           { ClusterLit($2, $4, $6, $8, $10, $12, $14)}
   | ID               { Id($1) }
-  | FLOATLIT         { FloatLit($1) }  /* Float is expression which handles negatives*/
-  | expr AT expr { Collision($1, $3) }
+  | expr AT     expr { Collision($1, $3) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -120,16 +124,17 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
-  | expr DOT ID { PropertyAccess($1, $3) }
+  | expr DOT ID             { PropertyAccess($1, $3) }
   | expr DOT ID ASSIGN expr { PropertyAssign($1, $3, $5) }
-  | MINUS expr %prec NEG { Unop(Neg, $2) }
-  | NOT expr         { Unop(Not, $2) }
-  | NEW primitive LBRACKET expr RBRACKET { ArrayInit($2, $4) }
-  | ID ASSIGN expr   { Assign($1, $3) }
+  | MINUS expr %prec NEG    { Unop(Neg, $2) }
+  | NOT expr                     { Unop(Not, $2) }
+  | ID ASSIGN expr               { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | LPAREN expr RPAREN { $2 }
+  | LPAREN expr RPAREN                    { $2 }
+  | NEW primitive LBRACKET expr RBRACKET  { ArrayInit($2, $4) }
+  | DELETE ID                             { ArrayDelete($2) }
   | ID LBRACKET expr RBRACKET ASSIGN expr { ArrayAssign($1, $3, $6) }
-  | ID LBRACKET expr RBRACKET { ArrayAccess($1, $3) }
+  | ID LBRACKET expr RBRACKET             { ArrayAccess($1, $3) }
 
 
 actuals_opt:

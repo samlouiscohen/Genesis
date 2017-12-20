@@ -13,7 +13,7 @@ Saahil Jain    ( sj2675  )
 Usage Notes
 
 Dependencies
- - SDL: graphics library, available at:
+ - SDL2: graphics library, available at: https://www.libsdl.org
  - UTHash: hastable library (source included w/ Genesis)
 
 Building
@@ -22,15 +22,23 @@ Building
 Sanity Tests
  - Download an updated testall.sh here (only if cloning from github):
 
-     https://gist.github.com/zhaosjason/8725d965bfb890c1778927ef05b462c2
+     https://gist.githubusercontent.com/zhaosjason/638181e44823610bd21aa0a6915db99c/raw
+
+ - Don't forget to make the file executable: "chmod +x testall.sh"
 
  - Type "make rtest" to run MicroC-specific tests
  - Type "make test" to run Genesis-specific tests
  - Type "make vtest" to run Genesis-specific visual tests
- - Type "make tests" to run all available tests
+ - Type "make tests" to run all non-graphics tests
+
+ - You can also type "./testall.sh <path_to_test>" to run a single test
 
 Usage
- - Please refer to our Language reference manual for documentation, 
+ - Included is the bash script "LetThereBe.sh" which compiles a .god file
+   to an executable. This file should be used as a standalone compiler.  For
+   running tests, please refer to the previous section.
+
+ - Please refer to our Language reference manual for further documentation, 
    available here:
 
      http://www.cs.columbia.edu/~sedwards/classes/2017/4115-fall/lrms/Genesis.pdf
@@ -149,7 +157,7 @@ Installation under OS X
 
 7. Install the OCaml llvm library:
 
-   opam install llvm.3.6 
+   opam install llvm.5.0.0
 
    Ensure that the version of llvm you install here matches the
    version you installed via brew. Brew installed llvm version 3.6.2,
@@ -180,7 +188,15 @@ Installation under OS X
    Where the number at the end of both commands is a version different 
    from the one your system currently has.
 
-8. Create a symbolic link to the lli command:
+8. Update your PATH environment variable for the lli command:
+
+   echo "export PATH=$PATH:/usr/local/opt/llvm/bin" >> ~/.bashrc
+
+   If you're using a different shell than bash, make sure you update
+   your shell's respective configuration file (eg. for zsh: ~/.zshrc)
+
+   Alternatively, you can try adding a symlink to lli, but we don't
+   recommend this for OS X users after Sierra.
 
    sudo ln -s /usr/local/opt/llvm/bin/lli /usr/bin/lli
 
@@ -213,10 +229,6 @@ Installation under OS X
 
    csrutil enable
    reboot
-
-   Another solution is to update your path, e.g.,
-
-   export PATH=$PATH:/usr/local/opt/llvm/bin
 
    A third solution is to modify the definition of LLI in testall.sh to
    point to the absolute path, e.g., LLI="/usr/local/opt/llvm/bin/lli"

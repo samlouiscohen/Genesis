@@ -1,4 +1,6 @@
-(* Semantic checking for the Genesis compiler *)
+(* Semantic checking for the Genesis compiler 
+    Authors: Michael Wang
+*)
 
 open Ast
 
@@ -91,6 +93,10 @@ let check (globals, functions) =
      { typ = Void; fname = "quit"; formals = [];
        locals = []; body = [] } 
 
+      (StringMap.add "setFPS"
+     { typ = Void; fname = "setFPS"; formals = [(Int, "fps")];
+       locals = []; body = [] }        
+
        (StringMap.add "delete"
      { typ = Void; fname = "delete"; formals = [(Cluster, "c")];
        locals = []; body = [] } 
@@ -105,7 +111,7 @@ let check (globals, functions) =
 
        (StringMap.singleton "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] }))))))))))))
+       locals = []; body = [] })))))))))))))
    in
 
   (*Add the built-in functions to the function declaration list*)
@@ -140,23 +146,38 @@ let check (globals, functions) =
 
     (* Type of each variable (global, formal, or local *)
     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-  StringMap.empty (globals @ func.formals @ func.locals )
+      StringMap.empty (globals @ func.formals @ func.locals )
     in
 
     let type_of_identifier s =
       try let id_typ = StringMap.find s symbols in 
-          id_typ
+        id_typ
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
     let type_of_identifier_array s =
       try let id_typ = StringMap.find s symbols in 
-          (match id_typ with
-              ArrayType(t) -> t
-            | _ -> id_typ
-          )
+        (match id_typ with
+            ArrayType(t) -> t
+          | _ -> id_typ
+        )
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
 
+    let verify_array s = 
+      try let id_typ = StringMap.find s symbols in 
+        (match id_typ with
+            ArrayType(t) -> t
+          | _ -> raise (Failure (s ^ " is not an array!  What are you doing??"))
+        )
+      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
+
+    let verify_array_init t = 
+      (match t with
+          Void -> raise (Failure ("The Lord does not allow void arrays..."))
+        | _ -> t
+      )
     in
 
     let type_of_property s =
@@ -167,7 +188,7 @@ let check (globals, functions) =
         | "dy" -> Int
         | "height" -> Int
         | "width" -> Int
-        | "color" -> Color 
+        | "clr" -> Color 
         | "draw" -> Bool
         | _ -> raise (Failure ("property is not defined"))
       )
@@ -207,7 +228,10 @@ let check (globals, functions) =
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, _) -> type_of_identifier_array s
-      | ArrayInit(t, _) -> ArrayType(t)
+      | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
+          check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
+      | ArrayInit(t, _) -> ArrayType(verify_array_init t)
+      | ArrayDelete(s) -> verify_array s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
 
@@ -229,8 +253,6 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
           string_of_typ t ^ " in " ^ string_of_expr ex)))
         | Noexpr -> Void
-        | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
-            check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
         | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
@@ -259,8 +281,8 @@ let check (globals, functions) =
 
     (* Verify a statement or throw an exception *)
     let rec stmt = function
-  Block sl -> let rec check_block = function
-           [Return _ as s] -> stmt s
+           Block sl -> let rec check_block = function
+             [Return _ as s] -> stmt s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | Block sl :: ss -> check_block (sl @ ss)
          | s :: ss -> stmt s ; check_block ss

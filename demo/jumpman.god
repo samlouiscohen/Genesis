@@ -1,9 +1,12 @@
+//Author: Michael Wang
+
 cluster ground;
 cluster player;
 cluster obstacle1;
 cluster obstacle2;
 bool jumping;
 int score;
+int dy;
 
 void init(){
     ground.draw = true;
@@ -12,6 +15,7 @@ void init(){
     obstacle2.draw = true;
     jumping = false;
     score = 0;
+    dy = 0;
 }
 
 void update(int f){
@@ -22,16 +26,15 @@ void update(int f){
     } 
 
     if (jumping){
-        player.dy = player.dy + 2;
+        dy = dy + 2;
     }
     if (keyDown("Space") && !jumping){
-        player.dy = -25;
+        dy = -25;
         jumping = true;
     }
-
-    player.y = player.y + player.dy;
+    player.y = player.y + dy;
     if (player @ ground){
-        player.dy = 0;
+        dy = 0;
         player.y = 190;
         jumping = false;
     }
@@ -44,9 +47,9 @@ void update(int f){
         obstacle2.x = obstacle1.x + 225 + random(75);
         score = score + 1;
     }
+
     obstacle1.x = obstacle1.x - 5;
     obstacle2.x = obstacle2.x - 5;
-
 }
 
 int main(){

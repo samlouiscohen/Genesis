@@ -1,14 +1,7 @@
 (* Code generation: translate takes a semantically checked AST and
-produces LLVM IR
+    produces LLVM IR
 
-LLVM tutorial: Make sure to read the OCaml version of the tutorial
-
-http://llvm.org/docs/tutorial/index.html
-
-Detailed documentation on the OCaml LLVM library:
-
-http://llvm.moe/
-http://llvm.moe/ocaml/
+    Authors: Michael Wang
 *)
 
 module L = Llvm
@@ -30,25 +23,11 @@ let translate (globals, functions) =
   let pointer_t = L.pointer_type in
   let void_t = L.void_type context in
 
-(*   let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in 
-  let ut_hash_table_t = L.named_struct_type context "UT_hash_table" in
-  let ut_hash_bucket_t = L.named_struct_type context "UT_hash_bucket" in
-    L.struct_set_body ut_hash_handle_t [|L.pointer_type ut_hash_table_t; L.pointer_type i8_t; L.pointer_type i8_t; L.pointer_type ut_hash_handle_t; L.pointer_type ut_hash_handle_t; L.pointer_type i8_t; i32_t; i32_t|] false; 
-    L.struct_set_body ut_hash_table_t  [|L.pointer_type ut_hash_bucket_t; i32_t; i32_t; i32_t; L.pointer_type ut_hash_handle_t; i64_t; i32_t; i32_t; i32_t; i32_t; i32_t|] false;
-    L.struct_set_body ut_hash_bucket_t [|L.pointer_type ut_hash_handle_t; i32_t; i32_t|] false;
- *)
   let color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
   let col_ptr_t = pointer_t color_t in
   let cluster_t = i32_t in
-(*   let position_t = L.named_struct_type context "position" in
-    L.struct_set_body position_t [| i32_t ; i32_t |] false;
 
-  let cluster_t = L.named_struct_type context "cluster" in
-    L.struct_set_body cluster_t [| position_t ; color_t ; i32_t ; i32_t ; L.pointer_type i8_t ; L.pointer_type cluster_t ; ut_hash_handle_t|] false;
-  let board_t = L.named_struct_type context "board" in
-    L.struct_set_body board_t [| L.pointer_type i8_t ; color_t ; i32_t ; i32_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
- *)
   let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
@@ -61,21 +40,6 @@ let translate (globals, functions) =
 
   in
 
-  (* Declare each global variable; remember its value in a map *)
-  let global_vars =
-    let global_var m (t, n) =
-      let init = match t with 
-          A.ArrayType(_) -> L.const_pointer_null (ltype_of_typ t)
-        | A.Color -> L.const_pointer_null (ltype_of_typ t)
-        | A.String -> L.const_pointer_null (ltype_of_typ t)
-        | _ -> L.const_int (ltype_of_typ t) 0
-      in StringMap.add n (L.define_global n init the_module) m in
-(*
-      StringMap.add n (L.declare_global (ltype_of_typ t) the_module) m in
-*)
-    List.fold_left global_var StringMap.empty globals in
-
-
   (* Declare printf(), which the print built-in function will call *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
@@ -84,15 +48,8 @@ let translate (globals, functions) =
   let printbig_t = L.function_type i32_t [| i32_t |] in
   let printbig_func = L.declare_function "printbig" printbig_t the_module in
 
-  (* Declare function for making a new board *)
-  (*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
-  let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
-
   let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t |] in
   let initScreen_func = L.declare_function "initScreen" initScreen_t the_module in
-
-  (*let add_cluster_t = L.function_type (L.void_type context) [| L.pointer_type gb_t] in
-  let add_cluster = L.declare_function "addCluster" add_cluster_t the_module in*)
 
   let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t |] in
   let startGame_func = L.declare_function "startGame" startGame_t the_module in
@@ -121,6 +78,9 @@ let translate (globals, functions) =
   let quitGame_t = L.function_type void_t [| |] in
   let quitGame_func = L.declare_function "quitGame" quitGame_t the_module in
 
+  let setFPS_t = L.function_type void_t [|i32_t|] in
+  let setFPS_func = L.declare_function "setFPS" setFPS_t the_module in
+
   (* Getters *)
   let getX_t = L.function_type i32_t [|i32_t|] in
   let getX_func = L.declare_function "getX" getX_t the_module in
@@ -146,7 +106,7 @@ let translate (globals, functions) =
   let getDraw_t = L.function_type i1_t [|i32_t|] in
   let getDraw_func = L.declare_function "getDraw" getDraw_t the_module in
 
- (* Setters *)
+  (* Setters *)
   let setX_t = L.function_type i32_t [|i32_t; i32_t|] in
   let setX_func = L.declare_function "setX" setX_t the_module in
 
@@ -205,6 +165,17 @@ let translate (globals, functions) =
     else
       raise (Failure ("Unknown cast to int"))
     in
+
+  (* Declare each global variable; remember its value in a map *)
+  let global_vars =
+    let global_var m (t, n) =
+      let init = match t with
+          A.ArrayType(_) -> L.const_pointer_null (ltype_of_typ t)
+        | A.Color -> L.const_pointer_null (ltype_of_typ t)
+        | A.String -> L.const_pointer_null (ltype_of_typ t)
+        | _ -> L.const_int (ltype_of_typ t) 0
+      in StringMap.add n (L.define_global n init the_module) m in
+    List.fold_left global_var StringMap.empty globals in
   
   (* Fill in the body of the given function *)
   let build_function_body fdecl =
@@ -225,7 +196,6 @@ let translate (globals, functions) =
         ignore (L.build_store p local builder);
     StringMap.add n local m in
 
-
       let add_local m (t, n) =
         let local_var = L.build_alloca (ltype_of_typ t) n builder
         in StringMap.add n local_var m in
@@ -238,6 +208,22 @@ let translate (globals, functions) =
     let lookup n = try StringMap.find n local_vars
       with Not_found -> StringMap.find n global_vars
     in
+
+    (* Compare two colors for equality *)
+(*
+    let color_equality p1 p2 name builder =
+      let cmd_idx i = 
+        let c1 = L.build_load p1 "" builder in
+        let c2 = L.build_load p2 "" builder in
+        let p1' = L.build_struct_gep c1 i "" builder in
+        let p2' = L.build_struct_gep c1 i "" builder in
+        let c1' = L.build_load p1' "" builder in
+        let c2' = L.build_load p2' "" builder in
+        L.build_icmp L.Icmp.Eq c1' c2' "" builder in
+      let cmp = List.map cmd_idx [ 0; 1; 2 ] in
+      List.fold_left (fun x y -> L.build_and x y) true cmp
+    in 
+*)
 
     (* Get array value of name at index i *)
     let get_array_element name i builder = 
@@ -307,7 +293,7 @@ let translate (globals, functions) =
         | "dy" -> L.build_call getDY_func [|cluster|] "dyVal" builder  
         | "height" -> L.build_call getHeight_func [|cluster|] "hVal" builder
         | "width" -> L.build_call getWidth_func [|cluster|] "wVal" builder              
-        | "color" -> L.build_call getColor_func [|cluster|] "colVal" builder 
+        | "clr" -> L.build_call getColor_func [|cluster|] "colVal" builder 
         | "draw" -> L.build_call getDraw_func [|cluster|] "drawVal" builder             
         | _ -> raise (Failure ("Property does not exist"))
         )
@@ -321,15 +307,14 @@ let translate (globals, functions) =
         | "dy" -> L.build_call setDY_func [|cluster; e'|] "" builder  
         | "height" -> L.build_call setHeight_func [|cluster; e'|] "" builder
         | "width" -> L.build_call setWidth_func [|cluster; e'|] "" builder              
-        | "color" -> L.build_call setColor_func [|cluster; e'|] "" builder
+        | "clr" -> L.build_call setColor_func [|cluster; e'|] "" builder
         | "draw" -> L.build_call setDraw_func [|cluster; e'|] "" builder              
         | _ -> raise (Failure ("Property does not exist"))
         )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
-      | A.ArrayInit(typ, e) -> let len = (expr builder e) in 
-          init_array typ len builder
-      | A.ArrayAssign(s, lhs, rhs) -> 
-          set_array_element s (expr builder lhs) (expr builder rhs) builder
+      | A.ArrayInit(typ, e) -> let len = (expr builder e) in init_array typ len builder
+      | A.ArrayDelete(s) -> L.build_free (L.build_load (lookup s) "" builder) builder
+      | A.ArrayAssign(s, lhs, rhs) -> set_array_element s (expr builder lhs) (expr builder rhs) builder
       | A.Binop (e1, op, e2) ->
     let e1' = expr builder e1
     and e2' = expr builder e2 in
@@ -363,6 +348,14 @@ let translate (globals, functions) =
         | A.Geq     -> L.build_fcmp L.Fcmp.Oge
         | _         -> raise (Failure ("incompatible operator-operand for number")) (* Should never be reached *)
       ) (make_float e1' builder) (make_float e2' builder) "tmp" builder
+(*
+    else if (ltype_of_typ e1' = col_ptr_t && ltype_of_typ e2' = col_ptr_t) then
+      (match op with
+          A.Equal   -> color_equality
+        | A.Neq     -> L.build_not color_equality
+        | _         -> raise (Failure ("incompatible operator-operand for color"))
+      ) e1' e2' "" builder
+*)
     else 
       (match op with
           A.And     -> L.build_and
@@ -372,10 +365,10 @@ let translate (globals, functions) =
 
     | A.Unop(op, e) ->
     let e' = expr builder e in
-
-    (match op with
-        A.Neg     -> L.build_neg
-      | A.Not     -> L.build_not) e' "tmp" builder
+      (match op with
+          A.Neg     -> L.build_neg
+        | A.Not     -> L.build_not
+      ) e' "tmp" builder
 
       | A.Assign (s, e) -> let e' = expr builder e in
         if L.type_of (lookup s) = (L.pointer_type i32_t) then
@@ -413,7 +406,10 @@ let translate (globals, functions) =
           L.build_call startGame_func [| color; width; height |] "" builder 
       | A.Call ("quit", []) ->
           L.build_call quitGame_func [||] "" builder
-      | A.Call ("delete", [c]) ->
+      | A.Call ("setFPS", [e]) ->
+          let fps = expr builder e in
+          L.build_call setFPS_func [| fps |] "" builder
+      | A.Call ("remove", [c]) ->
           let cluster = expr builder c in
           L.build_call deleteCluster_func [|cluster|] "" builder
       | A.Call ("keyDown", [s]) ->
@@ -448,11 +444,11 @@ let translate (globals, functions) =
     (* Build the code for the given statement; return the builder for
        the statement's successor *)
     let rec stmt builder = function
-  A.Block sl -> List.fold_left stmt builder sl
+        A.Block sl -> List.fold_left stmt builder sl
       | A.Expr e -> ignore (expr builder e); builder
       | A.Return e -> ignore (match fdecl.A.typ with
-    A.Void -> L.build_ret_void builder
-  | _ -> L.build_ret (expr builder e) builder); builder
+        A.Void -> L.build_ret_void builder
+      | _ -> L.build_ret (expr builder e) builder); builder
       | A.If (predicate, then_stmt, else_stmt) ->
          let bool_val = expr builder predicate in
    let merge_bb = L.append_block context "merge" the_function in
