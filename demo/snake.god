@@ -1,3 +1,8 @@
+/**
+ * Authors:
+ *  - Leon Stilwell
+ *  - Sam Cohen
+**/
 
 // Some globals
 cluster head;

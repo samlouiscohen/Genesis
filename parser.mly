@@ -1,5 +1,10 @@
 /* Ocamlyacc parser for Genesis */
-/* AUthors: Michael Wang */
+/* 
+  Authors: 
+  - Michael Wang
+  - Jason Zhao
+  - Sam Cohen
+*/
 
 %{ open Ast %}
 

@@ -1,5 +1,13 @@
 (* Ocamllex scanner for Genesis *)
 
+(* 
+  Authors: 
+   - Leon Stilwell
+   - Michael Wang
+   - Jason Zhao
+   - Sam Cohen
+ *)
+
 { open Parser }
 
 rule token = parse

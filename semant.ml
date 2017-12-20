@@ -1,5 +1,9 @@
 (* Semantic checking for the Genesis compiler 
-    Authors: Michael Wang
+  Authors: 
+   - Michael Wang
+   - Jason Zhao
+   - Sam Cohen
+   - Saahil Jain
 *)
 
 open Ast

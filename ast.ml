@@ -1,5 +1,10 @@
 (* Abstract Syntax Tree and functions for printing it 
-    Authors: Michael Wang
+  Authors: 
+   - Michael Wang
+   - Jason Zhao
+   - Sam Cohen
+   - Saahil Jain
+   - Leon Stilwell
 *)
 
 type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Geq | And | Or

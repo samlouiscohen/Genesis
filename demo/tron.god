@@ -1,3 +1,8 @@
+/**
+ * Author: Jason Zhao
+**/
+
+
 // Some globals
 
 cluster[] snake1;

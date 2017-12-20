@@ -1,7 +1,12 @@
 (* Code generation: translate takes a semantically checked AST and
     produces LLVM IR
 
-    Authors: Michael Wang
+  Authors: 
+   - Michael Wang
+   - Jason Zhao
+   - Sam Cohen
+   - Saahil Jain
+   - Leon Stilwell
 *)
 
 module L = Llvm

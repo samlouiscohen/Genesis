@@ -1,3 +1,7 @@
+/**
+ * Author: Jason Zhao
+**/
+
 // Global variables
 color white;
 color light;

@@ -1,5 +1,8 @@
 /*
-    Authors: Michael Wang
+    Authors: 
+     - Leon Stilwell
+     - Michael Wang
+     - Jason Zhao
 */
 
 #include <SDL2/SDL.h>
