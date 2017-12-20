@@ -244,7 +244,9 @@ int newCluster(int length, int width, int x, int y, int dx, int dy, color *color
     unsigned int numClusters;
     numClusters = HASH_COUNT(clusters);
 
+#ifdef DEBUG
     printf("There are %u clusters\n", numClusters);
+#endif
 
     return cluster->id;
 }
@@ -331,7 +333,6 @@ int main(int argc, char* args[]){
     c->id = 0;
     
     HASH_ADD_INT(clusters,id,c);
-    printf("%d\n", c->x);
     struct color *colptr = &col;
     startGame(colptr, 640, 480);
 }

@@ -1,5 +1,5 @@
 
-//Some globals
+// Some globals
 cluster head;
 cluster tail;
 cluster[] snake;
@@ -33,10 +33,6 @@ int segmentSeperation;
 
 int[] segfault;
 int segger;
-
-
-
-
 
 
 void gameOver(){
@@ -89,17 +85,14 @@ int[] getNewAppleCoord(){
 
 void update(int f){
 
+	// Change direction of snake, don't allow snake
+	// to go back on itself
+	if (keyDown("Up")    && currDirection != 1) { currDirection = 0; }
+	if (keyDown("Down")  && currDirection != 0) { currDirection = 1; }
+	if (keyDown("Left")  && currDirection != 3) { currDirection = 2; }
+	if (keyDown("Right") && currDirection != 2) { currDirection = 3; }
 
-	//Enforce constant movement on snake
-	if (keyDown("Up"))   { currDirection = 0; }
-	if (keyDown("Down")) { currDirection = 1; }
-	if (keyDown("Left")) { currDirection = 2; }
-	if (keyDown("Right")){ currDirection = 3; }
-	if (keyHeld("Space")){ prints("held bo"); }
-
-	if(f%5 != 0){return;}
-
-
+	if(f % 5 != 0) { return; }
 
 	int i;
 
@@ -254,7 +247,6 @@ int main(){
 
 
 	startGame(screenWidth, screenHeight, white);
-    print(1);
     return 0;
 }
 
