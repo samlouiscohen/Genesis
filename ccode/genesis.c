@@ -293,8 +293,9 @@ bool detectCollision(int id1, int id2){
         const SDL_Rect *r3 = &r1;
         const SDL_Rect *r4 = &r2;
 
+        SDL_Rect res;
         SDL_bool ans;
-        ans = SDL_IntersectRect(r3, r4, NULL);
+        ans = SDL_IntersectRect(r3, r4, &res);
 
         if(ans == SDL_TRUE){
             return 1;
