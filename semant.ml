@@ -235,15 +235,15 @@ let check (globals, functions) =
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
       | ArrayAccess(s, idx) -> let nameType = type_of_identifier_array s and i = expr idx in 
-        is_array_num i (Failure ("Thou shall not index an array with a non-number type (array access)"));
+        ignore(is_array_num i (Failure ("Thou shall not index an array with a non-number type (array access)")));
         nameType
 
       | ArrayAssign(s, idx, e) -> let lt = type_of_identifier_array s and rt = expr e and i = expr idx in
-        is_array_num i (Failure ("Thou shall not index an array with a non-number type (array assign)"));
+        ignore(is_array_num i (Failure ("Thou shall not index an array with a non-number type (array assign)")));
         check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
 
       | ArrayInit(t, size) -> let typ = ArrayType(verify_array_init t) and len = expr size in
-        is_array_num len (Failure ("Thou must use a num-type for size when initializing an array"));
+        ignore(is_array_num len (Failure ("Thou must use a num-type for size when initializing an array")));
         typ
 
       | ArrayDelete(s) -> verify_array s
