@@ -204,6 +204,8 @@ void startGame(color *c, int width, int height) {
                 int x = cl->x + cl->dx; int y = cl->y + cl->dy;
                 int h = cl->height; int w = cl->width;
                 int r = cl->color.r; int g = cl->color.g; int b = cl->color.b;
+                //update cluster x,y
+                cl->x = x; cl->y = y;
                 drawRectangle(x, y, h, w, r, g, b);
             }
         }
