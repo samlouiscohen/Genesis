@@ -192,7 +192,10 @@ void startGame(color *c, int width, int height) {
         cluster_t *cl;
         for (cl = clusters; cl != NULL; cl = cl->hh.next) {
             if (cl->draw == 1) {
-                drawRectangle(cl->x, cl->y, cl->height, cl->width, cl->color.r, cl->color.g, cl->color.b);
+                int x = cl->x + cl->dx; int y = cl->y + cl->dy;
+                int h = cl->height; int w = cl->width;
+                int r = cl->color.r; int g = cl->color.g; int b = cl->color.b;
+                drawRectangle(x, y, h, w, r, g, b);
             }
         }
 
