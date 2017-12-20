@@ -8,7 +8,7 @@ extern void init();
 //extern board_t *curBoard;
 //extern cluster_t *toRemove;
 
-const int framesPerSec = 2;
+const int framesPerSec = 60;
 char *additionalKeynames[] = {"Up", "Down", "Left", "Right", "Space", "Escape"};
 
 //Global values used during runtime
@@ -20,18 +20,27 @@ int backgroundB = 0xFF;
 int quit = 0;
 int cluster_id = 0;
 cluster_t *clusters = NULL;
-uint64_t downState = 0;
-uint64_t heldState = 0;
-uint64_t upState = 0;
+int keyStateLen;
+Uint8 *prevKeyStates = NULL;
 const Uint8 *keyStates = NULL;
 int frameNum = 0;
 
 int initScreen(color *c, int width, int height);
+void quitGame();
 void clearScreen();
 void static close();
 void showDisplay();
-int keyToInt(const char *keyName);
-uint64_t keyMask(int number);
+
+void quitGame(){
+    quit = 1;
+}
+
+void copyArray(const Uint8 *src, Uint8 *dest, int len){
+    int i;
+    for (i = 0; i < len; i += 1){
+        dest[i] = src[i];
+    }
+}
 
 //Create screen
 int initScreen(color *c, int width, int height){
@@ -130,6 +139,8 @@ void static close(){
 
     SDL_Quit();
 
+    free(prevKeyStates);
+
     cluster_t *temp,*currentCluster;
     HASH_ITER(hh,clusters,currentCluster,temp){
         HASH_DEL(clusters,currentCluster);
@@ -139,73 +150,28 @@ void static close(){
 
 void pollEvents(){
     SDL_Event event;
-    downState = 0;
-    upState = 0;
-    heldState = 0;
+    copyArray(keyStates, prevKeyStates, keyStateLen);
+
     while(SDL_PollEvent(&event)){
         if (event.type == SDL_QUIT){
             quit = 1;
-        } else if (event.type == SDL_KEYDOWN){
-            const char* keyName = SDL_GetKeyName(event.key.keysym.sym);
-            uint64_t mask = keyMask(keyToInt(keyName));
-            if (event.key.repeat){
-                heldState |= mask;
-            } else {
-                downState |= mask;
-            }
-        } else if (event.type == SDL_KEYUP){
-            const char* keyName = SDL_GetKeyName(event.key.keysym.sym);
-            uint64_t mask = keyMask(keyToInt(keyName));
-            upState |= mask;
-        }
+        } 
     }
-    keyStates = SDL_GetKeyboardState(NULL);
-}
-
-int keyInBitmask(uint64_t bitmask, char *keyName){
-    int keyInt = keyToInt(keyName);
-    return (bitmask & keyMask(keyInt)) != 0;
 }
 
 bool isKeyHeld(char *key){
-    return keyInBitmask( heldState, key);
+    SDL_Scancode code = SDL_GetScancodeFromName(key);
+    return keyStates[code] && prevKeyStates[code];
 }
 
 bool isKeyDown(char *key){
-    return keyInBitmask( downState, key);
+    SDL_Scancode code = SDL_GetScancodeFromName(key);
+    return keyStates[code] && (!prevKeyStates[code]);
 }
 
 bool isKeyUp(char *key){
-    return keyInBitmask( upState, key);
-}
-
-int keyToInt(const char *keyName){
-    int numChars = 26;
-    int numInts = 10;
-    if (strlen(keyName) == 1){
-        //Check values for alphabet and number chars
-        char keyChar = keyName[0];
-        if(isalpha(keyChar)){
-            keyChar = toupper(keyChar);
-            return keyChar - 'A';
-        } else if (isdigit(keyChar)){
-            return numChars + keyChar - '0';
-        }
-    } else {
-        int i;
-        int numAdditionalKeys = sizeof(additionalKeynames) / sizeof(additionalKeynames[0]);
-        for(i = 0; i < numAdditionalKeys; i = i + 1){
-            if (strcmp(additionalKeynames[i], keyName) == 0){
-                return numChars + numInts + i;
-            }
-        }
-    }
-    return -1; //Key does not have an int representation
-}
-
-uint64_t keyMask(int number){
-    uint64_t mask = 1;
-    return mask << number;
+    SDL_Scancode code = SDL_GetScancodeFromName(key);
+    return (!keyStates[code]) && prevKeyStates[code];
 }
 
 void startGame(color *c, int width, int height){
@@ -216,11 +182,15 @@ void startGame(color *c, int width, int height){
 
     //update screen
     showDisplay();
-   
+    keyStates = SDL_GetKeyboardState(&keyStateLen);
+    prevKeyStates = malloc(keyStateLen * sizeof(Uint8));
+
     init();
 
     //main loop
     while (!quit){
+        //Load current keystate into prev
+
         clearScreen();
 
         frameNum += 1;
@@ -242,6 +212,7 @@ void startGame(color *c, int width, int height){
         }
         showDisplay();
     }
+    close();
 }
 
 //called from newCluster. DO NOT CALL OTHERWISE
