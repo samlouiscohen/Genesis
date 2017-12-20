@@ -35,52 +35,10 @@ int[] segfault;
 int segger;
 
 
-void gameOver(){
-
-	prints("Congrats! You're score is:");
-	print(snakeLen);
-	quit();
-}
 
 
-int[] getNewAppleCoord(){
-	/* Method to find free location to drop food */
-	int[] coord; coord = new int[2];
-	int randX;
-	int randY;
-	bool xNotFound; xNotFound = true;
-	bool yNotFound; yNotFound = true;
-	int i;
-	randX = random(screenWidth - segmentSeperation);
-	randY = random(screenHeight - segmentSeperation);
-
-	// while(xNotFound || yNotFound){
-	// 	randX = random(screenWidth - snakeSegSize);
-	// 	randY = random(screenHeight - snakeSegSize);
-	// 	xNotFound = false;
-	// 	yNotFound = false;
-
-	// 	//Iterate over snake segments and make sure not spawning on snake
-	// 	for(i = 0; i < snakeLen; i = i + 1){
-	// 		if(snake[i].x - snakeSegSize < randX && randX < snake[i].x + snakeSegSize){
-	// 			xNotFound = true;
-	// 		}
-	// 	}
-
-	// 	for(i = 0; i < snakeLen; i = i + 1){
-	// 		if(snake[i].y - snakeSegSize < randY && randY < snake[i].y+ snakeSegSize){
-	// 			yNotFound = true;
-	// 		}
-	// 	}
-	// }
 
 
-	coord[0] = (randX/segmentSeperation)*segmentSeperation;
-	coord[1] = (randY/segmentSeperation)*segmentSeperation;
-
-	return coord;
-
-}
 
 
 void update(int f){
@@ -240,15 +198,66 @@ int main(){
 	appleCoord = new int[2];
 	appleCoord = getNewAppleCoord();
 
-
-
-	// screenWidth = 640;
-	// screenHeight = 480;
-
-
 	startGame(screenWidth, screenHeight, white);
     return 0;
 }
+
+
+
+//Some helper functions
+
+
+
+int[] getNewAppleCoord(){
+	/* Method to find free location to drop food */
+	int[] coord; coord = new int[2];
+	int randX;
+	int randY;
+	bool xNotFound; xNotFound = true;
+	bool yNotFound; yNotFound = true;
+	int i;
+	randX = random(screenWidth - segmentSeperation);
+	randY = random(screenHeight - segmentSeperation);
+
+	// while(xNotFound || yNotFound){
+	// 	randX = random(screenWidth - snakeSegSize);
+	// 	randY = random(screenHeight - snakeSegSize);
+	// 	xNotFound = false;
+	// 	yNotFound = false;
+
+	// 	//Iterate over snake segments and make sure not spawning on snake
+	// 	for(i = 0; i < snakeLen; i = i + 1){
+	// 		if(snake[i].x - snakeSegSize < randX && randX < snake[i].x + snakeSegSize){
+	// 			xNotFound = true;
+	// 		}
+	// 	}
+
+	// 	for(i = 0; i < snakeLen; i = i + 1){
+	// 		if(snake[i].y - snakeSegSize < randY && randY < snake[i].y+ snakeSegSize){
+	// 			yNotFound = true;
+	// 		}
+	// 	}
+	// }
+
+	coord[0] = (randX/segmentSeperation)*segmentSeperation;
+	coord[1] = (randY/segmentSeperation)*segmentSeperation;
+
+	return coord;
+
+}
+
+
+
+
+void gameOver(){
+
+	prints("Congrats! Your score is:");
+	print(snakeLen);
+	quit();
+}
+
+
+
 
 
 
