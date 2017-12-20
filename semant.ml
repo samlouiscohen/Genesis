@@ -140,7 +140,7 @@ let check (globals, functions) =
 
     (* Type of each variable (global, formal, or local *)
     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-  StringMap.empty (globals @ func.formals @ func.locals )
+      StringMap.empty (globals @ func.formals @ func.locals )
     in
 
     let type_of_identifier s =
@@ -275,8 +275,8 @@ let check (globals, functions) =
 
     (* Verify a statement or throw an exception *)
     let rec stmt = function
-  Block sl -> let rec check_block = function
-           [Return _ as s] -> stmt s
+           Block sl -> let rec check_block = function
+             [Return _ as s] -> stmt s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | Block sl :: ss -> check_block (sl @ ss)
          | s :: ss -> stmt s ; check_block ss

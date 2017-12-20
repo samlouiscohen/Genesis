@@ -47,21 +47,6 @@ let translate (globals, functions) =
 
   in
 
-  (* Declare each global variable; remember its value in a map *)
-  let global_vars =
-    let global_var m (t, n) =
-      let init = match t with 
-          A.ArrayType(_) -> L.const_pointer_null (ltype_of_typ t)
-        | A.Color -> L.const_pointer_null (ltype_of_typ t)
-        | A.String -> L.const_pointer_null (ltype_of_typ t)
-        | _ -> L.const_int (ltype_of_typ t) 0
-      in StringMap.add n (L.define_global n init the_module) m in
-(*
-      StringMap.add n (L.declare_global (ltype_of_typ t) the_module) m in
-*)
-    List.fold_left global_var StringMap.empty globals in
-
-
   (* Declare printf(), which the print built-in function will call *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
@@ -184,6 +169,17 @@ let translate (globals, functions) =
     else
       raise (Failure ("Unknown cast to int"))
     in
+
+  (* Declare each global variable; remember its value in a map *)
+  let global_vars =
+    let global_var m (t, n) =
+      let init = match t with
+          A.ArrayType(_) -> L.const_pointer_null (ltype_of_typ t)
+        | A.Color -> L.const_pointer_null (ltype_of_typ t)
+        | A.String -> L.const_pointer_null (ltype_of_typ t)
+        | _ -> L.const_int (ltype_of_typ t) 0
+      in StringMap.add n (L.define_global n init the_module) m in
+    List.fold_left global_var StringMap.empty globals in
   
   (* Fill in the body of the given function *)
   let build_function_body fdecl =
@@ -203,7 +199,6 @@ let translate (globals, functions) =
       let local = L.build_alloca (ltype_of_typ t) n builder in
         ignore (L.build_store p local builder);
     StringMap.add n local m in
-
 
       let add_local m (t, n) =
         let local_var = L.build_alloca (ltype_of_typ t) n builder
@@ -426,11 +421,11 @@ let translate (globals, functions) =
     (* Build the code for the given statement; return the builder for
        the statement's successor *)
     let rec stmt builder = function
-  A.Block sl -> List.fold_left stmt builder sl
+        A.Block sl -> List.fold_left stmt builder sl
       | A.Expr e -> ignore (expr builder e); builder
       | A.Return e -> ignore (match fdecl.A.typ with
-    A.Void -> L.build_ret_void builder
-  | _ -> L.build_ret (expr builder e) builder); builder
+        A.Void -> L.build_ret_void builder
+      | _ -> L.build_ret (expr builder e) builder); builder
       | A.If (predicate, then_stmt, else_stmt) ->
          let bool_val = expr builder predicate in
    let merge_bb = L.append_block context "merge" the_function in
