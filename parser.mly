@@ -131,6 +131,7 @@ expr:
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN                    { $2 }
   | NEW primitive LBRACKET expr RBRACKET  { ArrayInit($2, $4) }
+  | DELETE ID                             { ArrayDelete($2) }
   | ID LBRACKET expr RBRACKET ASSIGN expr { ArrayAssign($1, $3, $6) }
   | ID LBRACKET expr RBRACKET             { ArrayAccess($1, $3) }
 
