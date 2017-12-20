@@ -174,7 +174,7 @@ bool isKeyUp(char *key) {
 
 void startGame(color *c, int width, int height) {
     quit = 0;
-    int msPerFrame = (int) (1000 / framesPerSec);
+    srand(time(NULL));
     initScreen(c, width, height);
 
     // Update screen
@@ -187,6 +187,8 @@ void startGame(color *c, int width, int height) {
 
     // Main loop - ie. run the game
     while (!quit) {
+        int msPerFrame = (int) (1000 / framesPerSec);        
+
         frameNum += 1;
         unsigned int frameStart = SDL_GetTicks();
 
@@ -231,7 +233,6 @@ int create_id() {
 }
 
 int randomInt(int max) {
-    srand(time(NULL));
     return (rand() % max);
 }
 
