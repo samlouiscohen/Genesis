@@ -1,5 +1,5 @@
 cluster cl;
-
+int frames;
 void init(){}
 
 int main(){
@@ -8,6 +8,7 @@ int main(){
     c = #0,0,255#;
     cl = $ 50, 50, 100, 100, 0, 0, c $ ;
     c2 = #0, 255, 0#;
+    frames = 0;
     setFPS(10);
     startGame(640, 480, c2);
     print(1);
@@ -17,4 +18,9 @@ int main(){
 void update(int f){
     cl.x = random(640);
     cl.y = random(480);
+    frames = frames + 1;
+
+    if(frames == 20){
+        quit();
+    }
 }
