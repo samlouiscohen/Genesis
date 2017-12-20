@@ -35,7 +35,12 @@ int[] segfault;
 int segger;
 
 
+void gameOver(){
 
+	prints("Congrats! Your score is:");
+	print(snakeLen);
+	quit();
+}
 
 
 
@@ -219,6 +224,7 @@ int[] getNewAppleCoord(){
 	randX = random(screenWidth - segmentSeperation);
 	randY = random(screenHeight - segmentSeperation);
 
+
 	 while(xNotFound && yNotFound){
 	 	randX = random(screenWidth - blockSize);
 	 	randY = random(screenHeight - blockSize);
@@ -254,12 +260,7 @@ int[] getNewAppleCoord(){
 
 
 
-void gameOver(){
 
-	prints("Congrats! Your score is:");
-	print(snakeLen);
-	quit();
-}
 
 
 

@@ -42,6 +42,11 @@ let check (globals, functions) =
     if lval = rval then lval else raise err
   in
 
+
+  let is_array_num theType err = 
+    if(isNum theType) then theType else raise err
+  in
+
   (**** Checking Global Variables ****)
 
   List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
@@ -229,10 +234,18 @@ let check (globals, functions) =
         pType
       | Property _ -> raise (Failure ("Properties must be associated with an object"))
       | Id s -> type_of_identifier s
-      | ArrayAccess(s, _) -> type_of_identifier_array s
-      | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
-          check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
-      | ArrayInit(t, _) -> ArrayType(verify_array_init t)
+      | ArrayAccess(s, idx) -> let nameType = type_of_identifier_array s and i = expr idx in 
+        ignore(is_array_num i (Failure ("Thou shall not index an array with a non-number type (array access)")));
+        nameType
+
+      | ArrayAssign(s, idx, e) -> let lt = type_of_identifier_array s and rt = expr e and i = expr idx in
+        ignore(is_array_num i (Failure ("Thou shall not index an array with a non-number type (array assign)")));
+        check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
+
+      | ArrayInit(t, size) -> let typ = ArrayType(verify_array_init t) and len = expr size in
+        ignore(is_array_num len (Failure ("Thou must use a num-type for size when initializing an array")));
+        typ
+
       | ArrayDelete(s) -> verify_array s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
