@@ -182,7 +182,7 @@ let check (globals, functions) =
         | "dy" -> Int
         | "height" -> Int
         | "width" -> Int
-        | "color" -> Color 
+        | "clr" -> Color 
         | "draw" -> Bool
         | _ -> raise (Failure ("property is not defined"))
       )
