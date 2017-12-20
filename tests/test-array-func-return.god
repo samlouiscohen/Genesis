@@ -6,7 +6,7 @@ int[] ones(int len){
 
 	int i;
     int[] a;
-    a = new int[5];
+    a = new int[len];
 
 	for(i=0;i<len;i=i+1){
 		a[i] = 1;

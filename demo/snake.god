@@ -37,10 +37,20 @@ int segger;
 
 int start;
 
+
 bool go;
 
-void run(int f){
+
 // Change direction of snake, don't allow snake
+
+void gameOver(){
+
+	prints("Congrats! Your score is:");
+	print(snakeLen);
+	quit();
+
+}
+void run(int f){
 	// to go back on itself
 	if (keyDown("Up")    && currDirection != 1) { currDirection = 0; }
 	if (keyDown("Down")  && currDirection != 0) { currDirection = 1; }
@@ -230,7 +240,10 @@ int[] getNewAppleCoord(){
 	randX = random(screenWidth - segmentSeperation);
 	randY = random(screenHeight - segmentSeperation);
 
+
 	 while(notFound){
+
+
 	 	randX = random(screenWidth - blockSize);
 	 	randY = random(screenHeight - blockSize);
 	 	notFound = false;
@@ -255,12 +268,7 @@ int[] getNewAppleCoord(){
 
 
 
-void gameOver(){
 
-	prints("Congrats! Your score is:");
-	print(snakeLen);
-	quit();
-}
 
 
 
