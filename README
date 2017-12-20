@@ -13,7 +13,7 @@ Saahil Jain    ( sj2675  )
 Usage Notes
 
 Dependencies
- - SDL: graphics library, available at:
+ - SDL2: graphics library, available at: https://www.libsdl.org
  - UTHash: hastable library (source included w/ Genesis)
 
 Building
@@ -24,13 +24,21 @@ Sanity Tests
 
      https://gist.githubusercontent.com/zhaosjason/638181e44823610bd21aa0a6915db99c/raw
 
+ - Don't forget to make the file executable: "chmod +x testall.sh"
+
  - Type "make rtest" to run MicroC-specific tests
  - Type "make test" to run Genesis-specific tests
  - Type "make vtest" to run Genesis-specific visual tests
- - Type "make tests" to run all available tests
+ - Type "make tests" to run all non-graphics tests
+
+ - You can also type "./testall.sh <path_to_test>" to run a single test
 
 Usage
- - Please refer to our Language reference manual for documentation, 
+ - Included is the bash script "LetThereBe.sh" which compiles a .god file
+   to an executable. This file should be used as a standalone compiler.  For
+   running tests, please refer to the previous section.
+
+ - Please refer to our Language reference manual for further documentation, 
    available here:
 
      http://www.cs.columbia.edu/~sedwards/classes/2017/4115-fall/lrms/Genesis.pdf
