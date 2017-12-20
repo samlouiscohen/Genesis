@@ -15,7 +15,7 @@ void clearScreen();
 void showDisplay();
 
 // Global vars
-const int framesPerSec = 60;
+int framesPerSec = 60;
 const Uint8 *keyStates = NULL;
 
 Uint8 *prevKeyStates = NULL;
@@ -35,6 +35,10 @@ int backgroundB = 0xFF;
 int cluster_id = 0;
 int frameNum = 0;
 int quit = 0;
+
+void setFPS(int fps){
+    framesPerSec = fps;
+}
 
 void quitGame(){
     quit = 1;

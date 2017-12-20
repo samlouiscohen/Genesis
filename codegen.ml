@@ -100,6 +100,9 @@ let translate (globals, functions) =
   let quitGame_t = L.function_type void_t [| |] in
   let quitGame_func = L.declare_function "quitGame" quitGame_t the_module in
 
+  let setFPS_t = L.function_type void_t [|i32_t|] in
+  let setFPS_func = L.declare_function "setFPS" setFPS_t the_module in
+
   (* Getters *)
   let getX_t = L.function_type i32_t [|i32_t|] in
   let getX_func = L.declare_function "getX" getX_t the_module in
@@ -391,6 +394,9 @@ let translate (globals, functions) =
           L.build_call startGame_func [| color; width; height |] "" builder 
       | A.Call ("quit", []) ->
           L.build_call quitGame_func [||] "" builder
+      | A.Call ("setFPS", [e]) ->
+          let fps = expr builder e in
+          L.build_call setFPS_func [| fps |] "" builder
       | A.Call ("remove", [c]) ->
           let cluster = expr builder c in
           L.build_call deleteCluster_func [|cluster|] "" builder
