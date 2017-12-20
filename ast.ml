@@ -34,6 +34,7 @@ type expr =
   | PropertyAccess of expr * string
   | PropertyAssign of expr * string * expr
   | ArrayInit of typ * expr
+  | ArrayDelete of string
   | ArrayAssign of string * expr * expr
   | ArrayAccess of string * expr
   | Noexpr
@@ -112,6 +113,7 @@ let rec string_of_expr = function
   | ArrayAssign(s, e1, e2) -> 
       s ^ "[" ^string_of_expr e1 ^"] ="^ string_of_expr e2 
   | ArrayInit(typ, len) -> string_of_typ typ ^ "[" ^ string_of_expr len ^ "]"
+  | ArrayDelete(s) -> "delete " ^ s
   | Noexpr -> ""
 
 let rec string_of_stmt = function

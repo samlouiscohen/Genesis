@@ -30,25 +30,11 @@ let translate (globals, functions) =
   let pointer_t = L.pointer_type in
   let void_t = L.void_type context in
 
-(*   let ut_hash_handle_t = L.named_struct_type context "UT_hash_handle" in 
-  let ut_hash_table_t = L.named_struct_type context "UT_hash_table" in
-  let ut_hash_bucket_t = L.named_struct_type context "UT_hash_bucket" in
-    L.struct_set_body ut_hash_handle_t [|L.pointer_type ut_hash_table_t; L.pointer_type i8_t; L.pointer_type i8_t; L.pointer_type ut_hash_handle_t; L.pointer_type ut_hash_handle_t; L.pointer_type i8_t; i32_t; i32_t|] false; 
-    L.struct_set_body ut_hash_table_t  [|L.pointer_type ut_hash_bucket_t; i32_t; i32_t; i32_t; L.pointer_type ut_hash_handle_t; i64_t; i32_t; i32_t; i32_t; i32_t; i32_t|] false;
-    L.struct_set_body ut_hash_bucket_t [|L.pointer_type ut_hash_handle_t; i32_t; i32_t|] false;
- *)
   let color_t = L.named_struct_type context "color" in
     L.struct_set_body color_t [| i32_t ; i32_t ; i32_t |] false; (* need to change here if source file changes *)
   let col_ptr_t = pointer_t color_t in
   let cluster_t = i32_t in
-(*   let position_t = L.named_struct_type context "position" in
-    L.struct_set_body position_t [| i32_t ; i32_t |] false;
 
-  let cluster_t = L.named_struct_type context "cluster" in
-    L.struct_set_body cluster_t [| position_t ; color_t ; i32_t ; i32_t ; L.pointer_type i8_t ; L.pointer_type cluster_t ; ut_hash_handle_t|] false;
-  let board_t = L.named_struct_type context "board" in
-    L.struct_set_body board_t [| L.pointer_type i8_t ; color_t ; i32_t ; i32_t ; L.pointer_type cluster_t ; ut_hash_handle_t |] false;
- *)
   let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> flt_t
@@ -84,15 +70,8 @@ let translate (globals, functions) =
   let printbig_t = L.function_type i32_t [| i32_t |] in
   let printbig_func = L.declare_function "printbig" printbig_t the_module in
 
-  (* Declare function for making a new board *)
-  (*   let initScreen_t = L.function_type i32_t [| i32_t; i32_t ; color_t |] in
-  let initScreen = L.declare_function "initScreen" initScreen_t the_module in *)
-
   let initScreen_t = L.function_type i32_t [| L.pointer_type color_t; i32_t; i32_t |] in
   let initScreen_func = L.declare_function "initScreen" initScreen_t the_module in
-
-  (*let add_cluster_t = L.function_type (L.void_type context) [| L.pointer_type gb_t] in
-  let add_cluster = L.declare_function "addCluster" add_cluster_t the_module in*)
 
   let startGame_t = L.function_type void_t [| L.pointer_type color_t; i32_t; i32_t |] in
   let startGame_func = L.declare_function "startGame" startGame_t the_module in
@@ -146,7 +125,7 @@ let translate (globals, functions) =
   let getDraw_t = L.function_type i1_t [|i32_t|] in
   let getDraw_func = L.declare_function "getDraw" getDraw_t the_module in
 
- (* Setters *)
+  (* Setters *)
   let setX_t = L.function_type i32_t [|i32_t; i32_t|] in
   let setX_func = L.declare_function "setX" setX_t the_module in
 
@@ -326,10 +305,9 @@ let translate (globals, functions) =
         | _ -> raise (Failure ("Property does not exist"))
         )
       | A.ArrayAccess(s, e) -> get_array_element s (expr builder e) builder
-      | A.ArrayInit(typ, e) -> let len = (expr builder e) in 
-          init_array typ len builder
-      | A.ArrayAssign(s, lhs, rhs) -> 
-          set_array_element s (expr builder lhs) (expr builder rhs) builder
+      | A.ArrayInit(typ, e) -> let len = (expr builder e) in init_array typ len builder
+      | A.ArrayDelete(s) -> L.build_free (lookup s) builder
+      | A.ArrayAssign(s, lhs, rhs) -> set_array_element s (expr builder lhs) (expr builder rhs) builder
       | A.Binop (e1, op, e2) ->
     let e1' = expr builder e1
     and e2' = expr builder e2 in
@@ -413,7 +391,7 @@ let translate (globals, functions) =
           L.build_call startGame_func [| color; width; height |] "" builder 
       | A.Call ("quit", []) ->
           L.build_call quitGame_func [||] "" builder
-      | A.Call ("delete", [c]) ->
+      | A.Call ("remove", [c]) ->
           let cluster = expr builder c in
           L.build_call deleteCluster_func [|cluster|] "" builder
       | A.Call ("keyDown", [s]) ->
