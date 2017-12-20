@@ -3,8 +3,7 @@
 cluster head;
 cluster tail;
 cluster[] snake;
-int headSpeed;
-int snakeSegSize;
+int blockSize;
 
 cluster apple;
 cluster stem;
@@ -27,7 +26,6 @@ color blue;
 color lightBlue;
 color brown;
 
-
 int diffX;
 int diffY;
 
@@ -38,7 +36,7 @@ int segger;
 
 
 
-void init(){}
+
 
 
 void gameOver(){
@@ -81,8 +79,6 @@ int[] getNewAppleCoord(){
 	// }
 
 
-
-
 	coord[0] = (randX/segmentSeperation)*segmentSeperation;
 	coord[1] = (randY/segmentSeperation)*segmentSeperation;
 
@@ -120,9 +116,9 @@ void update(int f){
 
 
 	//Bound checking
-	if (head.x > screenWidth - snakeSegSize) { gameOver(); }
+	if (head.x > screenWidth - blockSize) { gameOver(); }
 	if (head.x < 0 )		  { gameOver(); }
-	if (head.y > screenHeight - snakeSegSize){ gameOver(); }
+	if (head.y > screenHeight - blockSize){ gameOver(); }
 	if (head.y < 0)			  { gameOver(); }
 
 
@@ -138,23 +134,10 @@ void update(int f){
 
 	if(head @ apple){
 
-
-		//Grow snake if it eats an apple
-
-		//Set the tail to the opposite of movement
-		// tailX = snake[snakeLen-1].x;
-		// tailY = snake[snakeLen-1].y;
-
-		//Determine the appending side by comparing the last two segement positions
-		// lastSegX = snake[snakeLen - 1].x; lastSegY = snake[snakeLen - 1].y; 
-		// secondLastSegX = snake[snakeLen - 2].x;	secondLastSegY = snake[snakeLen - 2].y;
-
-
 		//Determine side to append tail to by comparing the last two segments
 		if(snakeLen > 1){
 			tailChangeX = snake[snakeLen - 1].x - snake[snakeLen - 2].x;
 			tailChangeY = snake[snakeLen - 1].y - snake[snakeLen - 2].y;
-
 
 			if(tailChangeX < 0){ //Append tail to left
 				tailX = snake[snakeLen-1].x - segmentSeperation;
@@ -174,7 +157,6 @@ void update(int f){
 			}
 		}else{
 			//If a single segment, append to side opposite of head motion
-
 			if(currDirection == 0){ //Moving Up
 				tailX = snake[0].x;
 				tailY = snake[0].y + segmentSeperation;
@@ -191,24 +173,14 @@ void update(int f){
 				tailX = snake[0].x - segmentSeperation;
 				tailY = snake[0].y;
 			}
-
-
 		}
 
-		randR = random(80);
-		randG = random(55) + 200;
-		randB = random(80);
-
-
+		//Build new tail cluster and update
+		randR = random(80); randG = random(55) + 200; randB = random(80);
 		newColor = #randR, randG, randB#;
-		tail = $ snakeSegSize, snakeSegSize, tailX, tailY, 0, 0, newColor $;
+		tail = $ blockSize, blockSize, tailX, tailY, 0, 0, newColor $;
 		snake[snakeLen] = tail;
 		snakeLen = snakeLen + 1;
-
-
-
-
-
 
 		//"Spawn" a new apple when last one is eaten
 		appleCoord = getNewAppleCoord();
@@ -219,31 +191,29 @@ void update(int f){
 		stem.x = apple.x + stemOffsetX;
 		stem.y = apple.y - 10;
 
-
-
-
-
-
 	}
 	//Kill off snake if it collides with self
 	int j;
-
-	if(snakeLen > 1){
-		for(j = 1; j < snakeLen; j = j + 1){
-			if(head @ snake[j]){
-				gameOver();
-			}
+	for(j = 1; j < snakeLen; j = j + 1){
+		if(head @ snake[j]){
+			gameOver();
 		}
 	}
 
 
-
-
 }
+
+
+void init(){
+	//Randomize snake starting direction (0, 1, 2, 3)
+	//currDirection = random(4);
+	currDirection = 3;
+}
+
 
 int main(){
 
-
+	//Define some colors
 	green = #0, 255, 0#;
 	bodGreen = #15,90, 30#;
 	red   = #255, 0, 0#;
@@ -253,17 +223,19 @@ int main(){
 	lightBlue = #60,194,209#;
 	brown = #114,80,44#;
 
-	//Start direction of snake movement
-	currDirection = 3;
+	//Set the block size of the grid & associated "offset blocks"
+	blockSize = 50;
+	segmentSeperation = (blockSize + (blockSize/10));
 
-	snakeSegSize= 50;
-	segmentSeperation = (snakeSegSize + (snakeSegSize/10));
+	screenWidth = segmentSeperation*15;
+	screenHeight = segmentSeperation*12;
+	//Build apple and stem cluster
+	apple = $blockSize, blockSize, segmentSeperation, segmentSeperation*3,0,0,red$;
+	stemOffsetX = blockSize/2 - 5;
+	stem = $10, 20, (apple.x + stemOffsetX), apple.y - 10, 0, 0, brown$;
 
-
-	head = $ snakeSegSize, snakeSegSize, segmentSeperation*2, segmentSeperation*2, 0, 0, bodGreen $ ;
-	// tail = $ snakeSegSize, snakeSegSize, 100-snakeSegSize, 100, 0, 0, bodGreen $ ;
-
-	headSpeed = 2;
+	//Build the starting snake head cluster
+	head = $ blockSize, blockSize, segmentSeperation*2, segmentSeperation*2, 0, 0, bodGreen $ ;
 
 	//Construct the snake body
 	maxSnakeLen = 50;
@@ -276,15 +248,10 @@ int main(){
 	appleCoord = getNewAppleCoord();
 
 
-	apple = $snakeSegSize, snakeSegSize, segmentSeperation, segmentSeperation*3,0,0,red$;
-
-	stemOffsetX = snakeSegSize/2 - 5;
-	stem = $10, 20, (apple.x + stemOffsetX), apple.y - 10, 0, 0, brown$;
 
 	// screenWidth = 640;
 	// screenHeight = 480;
-	screenWidth = segmentSeperation*15;
-	screenHeight = segmentSeperation*12;
+
 
 	startGame(screenWidth, screenHeight, white);
     print(1);
