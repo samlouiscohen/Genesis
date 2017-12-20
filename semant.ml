@@ -140,7 +140,7 @@ let check (globals, functions) =
 
     (* Type of each variable (global, formal, or local *)
     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-  StringMap.empty (globals @ func.formals @ func.locals )
+      StringMap.empty (globals @ func.formals @ func.locals )
     in
 
     let type_of_identifier s =
@@ -165,6 +165,13 @@ let check (globals, functions) =
           | _ -> raise (Failure (s ^ " is not an array!  What are you doing??"))
         )
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
+
+    let verify_array_init t = 
+      (match t with
+          Void -> raise (Failure ("The Lord does not allow void arrays..."))
+        | _ -> t
+      )
     in
 
     let type_of_property s =
@@ -217,7 +224,7 @@ let check (globals, functions) =
       | ArrayAccess(s, _) -> type_of_identifier_array s
       | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
           check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
-      | ArrayInit(t, _) -> ArrayType(t)
+      | ArrayInit(t, _) -> ArrayType(verify_array_init t)
       | ArrayDelete(s) -> verify_array s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
@@ -268,14 +275,15 @@ let check (globals, functions) =
 
     (* Verify a statement or throw an exception *)
     let rec stmt = function
-  Block sl -> let rec check_block = function
-           [Return _ as s] -> stmt s
+           Block sl -> let rec check_block = function
+             [Return _ as s] -> stmt s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | Block sl :: ss -> check_block (sl @ ss)
          | s :: ss -> stmt s ; check_block ss
          | [] -> ()
         in check_block sl
       | Expr e -> ignore (expr e)
+      | Declare (t, s) -> ()
       | Return e -> let t = expr e in if t = func.typ then () else
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                          string_of_typ func.typ ^ " in " ^ string_of_expr e))
