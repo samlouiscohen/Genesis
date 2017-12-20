@@ -7,6 +7,7 @@ int blockSize;
 
 cluster apple;
 cluster stem;
+cluster temp;
 int stemOffsetX;
 int[] appleCoord;
 
@@ -34,21 +35,19 @@ int segmentSeperation;
 int[] segfault;
 int segger;
 
+int start;
 
+bool go;
 
-
-
-
-
-
-void update(int f){
-
-	// Change direction of snake, don't allow snake
+void run(int f){
+// Change direction of snake, don't allow snake
 	// to go back on itself
 	if (keyDown("Up")    && currDirection != 1) { currDirection = 0; }
 	if (keyDown("Down")  && currDirection != 0) { currDirection = 1; }
 	if (keyDown("Left")  && currDirection != 3) { currDirection = 2; }
 	if (keyDown("Right") && currDirection != 2) { currDirection = 3; }
+
+
 
 	if(f % 10 != 0) { return; }
 
@@ -150,6 +149,18 @@ void update(int f){
 			gameOver();
 		}
 	}
+}
+
+
+void update(int f){
+
+	if(keyDown("Space")){
+		go = true;
+	}
+	if(go){
+		run(f);
+	}
+	
 
 
 }
@@ -213,33 +224,23 @@ int[] getNewAppleCoord(){
 	int[] coord; coord = new int[2];
 	int randX;
 	int randY;
-	bool xNotFound; xNotFound = true;
-	bool yNotFound; yNotFound = true;
+	bool notFound; notFound = true;
+	
 	int i;
 	randX = random(screenWidth - segmentSeperation);
 	randY = random(screenHeight - segmentSeperation);
 
-	 while(xNotFound && yNotFound){
+	 while(notFound){
 	 	randX = random(screenWidth - blockSize);
 	 	randY = random(screenHeight - blockSize);
-	 	xNotFound = false;
-	 	yNotFound = false;
-
-	 	//Iterate over snake segments and make sure not spawning on snake
+	 	notFound = false;
+	 	
+	 	
+	 	temp = $blockSize, blockSize, randX, randY, 0,0,bodGreen$;
+	 	temp.draw = false; 
 	 	for(i = 0; i < snakeLen; i = i + 1){
-	 		if(snake[i].x - segmentSeperation < randX && randX < snake[i].x + segmentSeperation){
-	 			xNotFound = true;
-	 			i = snakeLen;
-	 			prints("check");
-	 		}
-	 	}
-
-	 	for(i = 0; i < snakeLen; i = i + 1){
-	 		if(snake[i].y - segmentSeperation < randY && randY < snake[i].y+ segmentSeperation){
-	 			yNotFound = true;
-	 			i = snakeLen;
-				prints("check");
-
+	 		if(temp @ snake[i]){
+	 			notFound = true;
 	 		}
 	 	}
 	 }
