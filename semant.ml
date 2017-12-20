@@ -283,7 +283,6 @@ let check (globals, functions) =
          | [] -> ()
         in check_block sl
       | Expr e -> ignore (expr e)
-      | Declare (t, s) -> ()
       | Return e -> let t = expr e in if t = func.typ then () else
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                          string_of_typ func.typ ^ " in " ^ string_of_expr e))
