@@ -44,7 +44,7 @@ void quitGame(){
 int initScreen(color *c, int width, int height){
     // Initialize SDL
     if (SDL_Init( SDL_INIT_VIDEO ) < 0) {
-        char *err = SDL_GetError();
+        const char *err = SDL_GetError();
         fprintf(stderr, "SDL could not initialize! SDL Error: %s\n", err);
         return -1;
     }
@@ -59,7 +59,7 @@ int initScreen(color *c, int width, int height){
                                SDL_WINDOWPOS_UNDEFINED, width, 
                                height, SDL_WINDOW_SHOWN);
     if (!gWindow) {
-        char *err = SDL_GetError();
+        const char *err = SDL_GetError();
         fprintf(stderr, "Window could not be created! SDL Error: %s\n", err);
         return -1;
     }
@@ -67,7 +67,7 @@ int initScreen(color *c, int width, int height){
     // Create renderer for window
     gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
     if (!gRenderer) {
-        char *err = SDL_GetError();
+        const char *err = SDL_GetError();
         fprintf(stderr, "Renderer could not be created! SDL Error: %s\n", err);
         return -1;
     }
@@ -262,7 +262,7 @@ void setX(int id, int x)     { cluster_t *c = getCluster(id); if(c) { c->x = x; 
 void setY(int id, int y)     { cluster_t *c = getCluster(id); if(c) { c->y = y; } }
 void setDX(int id, int dx)   { cluster_t *c = getCluster(id); if(c) { c->dx = dx; } }
 void setDY(int id, int dy)   { cluster_t *c = getCluster(id); if(c) { c->dy = dy; } }
-void setColor(int id, struct color *clr) { cluster_t *c = getCluster(id); if(c) { c->color = clr; } }
+void setColor(int id, struct color *clr) { cluster_t *c = getCluster(id); if(c) { c->color = *clr; } }
 
 int getDraw(int id)    { cluster_t *c = getCluster(id); if (c) { return c->draw; }   else { return -1; } }
 int getX(int id)       { cluster_t *c = getCluster(id); if (c) { return c->x; }      else { return -1; } }
@@ -271,7 +271,7 @@ int getDX(int id)      { cluster_t *c = getCluster(id); if (c) { return c->dx; }
 int getDY(int id)      { cluster_t *c = getCluster(id); if (c) { return c->dy; }     else { return 0; } }
 int getHeight(int id)  { cluster_t *c = getCluster(id); if (c) { return c->height; } else { return -1; } }
 int getWidth(int id)   { cluster_t *c = getCluster(id); if (c) { return c->width; }  else { return -1; } }
-color getColor(int id) { cluster_t *c = getCluster(id); if (c) { return c->color; }  else { return -1; } }
+color * getColor(int id) { cluster_t *c = getCluster(id); if (c) { return &(c->color); }  else { return NULL; } }
 
 
 void deleteCluster(int id){
@@ -293,8 +293,8 @@ bool detectCollision(int id1, int id2){
         const SDL_Rect *r3 = &r1;
         const SDL_Rect *r4 = &r2;
 
-        SDL_Rect res, ans;
-        ans = SDL_IntersectRect(r3, r4, &res);
+        SDL_bool ans;
+        ans = SDL_IntersectRect(r3, r4, NULL);
 
         if(ans == SDL_TRUE){
             return 1;
