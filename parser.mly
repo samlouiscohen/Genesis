@@ -63,7 +63,7 @@ primitive:
   | BOOL { Bool }
   | VOID { Void }
   | STRING { String }
-  | CLUSTER {Cluster}
+  | CLUSTER { Cluster }
   | COLOR { Color } 
 
 typ:

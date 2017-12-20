@@ -167,6 +167,13 @@ let check (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
+    let verify_array_init t = 
+      (match t with
+          Void -> raise (Failure ("The Lord does not allow void arrays..."))
+        | _ -> t
+      )
+    in
+
     let type_of_property s =
       (match s with
         | "x" -> Int
@@ -217,7 +224,7 @@ let check (globals, functions) =
       | ArrayAccess(s, _) -> type_of_identifier_array s
       | ArrayAssign(s, _, e) -> let lt = type_of_identifier_array s and rt = expr e in
           check_assign_array lt rt (Failure ("Thou shall not assign mismatched array types"))
-      | ArrayInit(t, _) -> ArrayType(t)
+      | ArrayInit(t, _) -> ArrayType(verify_array_init t)
       | ArrayDelete(s) -> verify_array s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2
     in 
