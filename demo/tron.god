@@ -45,8 +45,7 @@ int scaley(int y) {
 int s1dir() {
 	if (snake1[s1len - 1].x == snake1[0].x - scalex(1)) { return 4; }
 	if (snake1[s1len - 1].x == snake1[0].x + scalex(1)) { return 3; }
-	if (snake1[s1len - 1].y == snake1[0].y + scaley(1)) { return 2; }
-	
+	if (snake1[s1len - 1].y == snake1[0].y - scaley(1)) { return 2; }
 	return 1;
 }
 
@@ -54,8 +53,7 @@ int s1dir() {
 int s2dir() {
 	if (snake2[s2len - 1].x == snake2[0].x - scalex(1)) { return 4; }
 	if (snake2[s2len - 1].x == snake2[0].x + scalex(1)) { return 3; }
-	if (snake2[s2len - 1].y == snake2[0].y + scaley(1)) { return 2; }
-	
+	if (snake2[s2len - 1].y == snake2[0].y - scaley(1)) { return 2; }
 	return 1;
 }
 
@@ -63,10 +61,10 @@ void pollKeys() {
 	// Snake #1 keys
 	int dir; dir = s1dir();
 
-	if (keyDown("w") && dir != 2)  { s1dx = 0;  s1dy = -1; } else
-	if (keyDown("s") && dir != 1)    { s1dx = 0;  s1dy = 1;  } else
+	if (keyDown("w") && dir != 2) { s1dx = 0;  s1dy = -1; } else
+	if (keyDown("s") && dir != 1) { s1dx = 0;  s1dy = 1;  } else
 	if (keyDown("a") && dir != 4) { s1dx = -1; s1dy = 0;  } else
-	if (keyDown("d") && dir != 3)  { s1dx = 1;  s1dy = 0;  }
+	if (keyDown("d") && dir != 3) { s1dx = 1;  s1dy = 0;  }
 	if (keyHeld("Left Shift")) { 
 		s1boost = true;
 	}
